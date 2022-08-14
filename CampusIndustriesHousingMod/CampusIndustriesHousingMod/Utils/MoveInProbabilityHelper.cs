@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace CampusIndustriesHousingMod {
     public class MoveInProbabilityHelper {
-        private static readonly bool LOG_CHANCES = false;
+        private static readonly bool LOG_CHANCES = true;
 
         private static readonly float BASE_CHANCE_VALUE = 0f;
         private static readonly float DISTANCE_MAX_CHANCE_VALUE = 100f;
@@ -112,7 +112,7 @@ namespace CampusIndustriesHousingMod {
             {
                 switch (wealth) {
                     case Citizen.Wealth.High:
-                        chance = QUALITY_MAX_CHANCE_VALUE * -2f; // no chance
+                        chance = QUALITY_MAX_CHANCE_VALUE * 0.25f; // low chance
                         break;
                     case Citizen.Wealth.Medium:
                         chance = QUALITY_MAX_CHANCE_VALUE * 1f; // normal chance 
@@ -137,7 +137,7 @@ namespace CampusIndustriesHousingMod {
                 }
             }
            
-            Logger.logInfo(LOG_CHANCES, "MoveInProbabilityHelper.getQualityLevelChanceValue -- Wealth Chance Value: {0} -- Family Wealth: {1}", chance, wealth);
+            Logger.logInfo(LOG_CHANCES, "MoveInProbabilityHelper.getQualityLevelChanceValue -- Wealth Chance Value: {0} -- Family Wealth: {1} -- type: {2}", chance, wealth, type);
             return chance;
         }
 

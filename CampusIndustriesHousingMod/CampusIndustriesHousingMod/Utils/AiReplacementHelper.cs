@@ -28,6 +28,7 @@ namespace CampusIndustriesHousingMod
         private static void ChangeBuildingAI(BuildingInfo b, Type AIType) {
             //Delete old AI
             var oldAI = b.gameObject.GetComponent<PrefabAI>();
+            b.DestroyPrefab();
             UnityEngine.Object.DestroyImmediate(oldAI);
 
             //Add new AI
