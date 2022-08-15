@@ -688,7 +688,7 @@ namespace CampusIndustriesHousingMod
             incomeAccumulation = productionRate * incomeAccumulation;
         }
 
-        private void getOccupancyDetails(ref Building data, out int numResidents, out int numApartmentsOccupied) 
+        public void getOccupancyDetails(ref Building data, out int numResidents, out int numApartmentsOccupied) 
         {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitIndex = data.m_citizenUnits;
@@ -739,7 +739,7 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        private int getModifiedCapacity() {
+        public int getModifiedCapacity() {
             return (capacityModifier > 0 ? (int) (numApartments * capacityModifier) : numApartments);
         }
 
