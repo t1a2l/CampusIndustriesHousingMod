@@ -51,7 +51,7 @@ namespace CampusIndustriesHousingMod
                 }
             }
 
-            var dorms_capacity = StringUtils.SafeFormat("Dorms Apartment Capacity: {0} / {1}", total_ocuppied_apartment_num, total_apartment_num);
+            var dorms_capacity = StringUtils.SafeFormat("Dorms Capacity: {0} / {1}", total_ocuppied_apartment_num, total_apartment_num);
 
             Logger.logInfo(LOG_CAMPUS, "Dorms Apartment Capacity: {0} / {1}", total_ocuppied_apartment_num, total_apartment_num);
 

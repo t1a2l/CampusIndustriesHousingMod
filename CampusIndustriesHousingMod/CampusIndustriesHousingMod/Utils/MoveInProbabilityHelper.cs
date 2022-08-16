@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace CampusIndustriesHousingMod {
     public class MoveInProbabilityHelper {
-        private static readonly bool LOG_CHANCES = true;
+        private static readonly bool LOG_CHANCES = false;
 
         private static readonly float BASE_CHANCE_VALUE = 0f;
         private static readonly float DISTANCE_MAX_CHANCE_VALUE = 100f;
@@ -41,7 +41,7 @@ namespace CampusIndustriesHousingMod {
             WorkerManager workerManager = WorkerManager.getInstance();
             StudentManager studentManager = StudentManager.getInstance();
             // Get the home for the family
-            ushort homeBuildingId = MoveInProbabilityHelper.getHomeBuildingIdForFamily(family);
+            ushort homeBuildingId = getHomeBuildingIdForFamily(family);
 
             if (homeBuildingId == 0) {
                 // homeBuilding should never be 0, but if it is return NO_CHANCE to prevent this family from being chosen 
@@ -54,12 +54,12 @@ namespace CampusIndustriesHousingMod {
             {
                 if (type == "worker" && workerManager.isIndustryAreaWorker(familyMember, buildingData))
                 {
-                    workBuildingId = MoveInProbabilityHelper.getWorkBuildingId(familyMember);
+                    workBuildingId = getWorkBuildingId(familyMember);
                     break;
                 }
                 else if (type == "student" && studentManager.isCampusStudent(familyMember, buildingData))
                 {
-                    workBuildingId = MoveInProbabilityHelper.getWorkBuildingId(familyMember);
+                    workBuildingId = getWorkBuildingId(familyMember);
                     break;
                 }
             }

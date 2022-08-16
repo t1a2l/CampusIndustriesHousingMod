@@ -10,8 +10,8 @@ namespace CampusIndustriesHousingMod
 {
     public class DormsAI : CampusBuildingAI {
 
-        private const bool LOG_PRODUCTION = true;
-        private const bool LOG_SIMULATION = true;
+        private const bool LOG_PRODUCTION = false;
+        private const bool LOG_SIMULATION = false;
 
         private Randomizer randomizer = new Randomizer(97);
 

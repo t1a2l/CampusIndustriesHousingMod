@@ -50,7 +50,7 @@ namespace CampusIndustriesHousingMod
                 }
             }
 
-            var barracks_capacity = StringUtils.SafeFormat("Barracks Apartment Capacity: {0} / {1}", total_ocuppied_apartment_num, total_apartment_num);
+            var barracks_capacity = StringUtils.SafeFormat("{0} / {1} barracks capacity: ", total_ocuppied_apartment_num, total_apartment_num);
 
             Logger.logInfo(LOG_INDUSTRY, "Barracks Apartment Capacity: {0} / {1}", total_ocuppied_apartment_num, total_apartment_num);
 
