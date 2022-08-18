@@ -88,7 +88,8 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        private Color handleOtherColors(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode) {
+        private Color handleOtherColors(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode) 
+        {
             switch (infoMode) 
             {
                 case InfoManager.InfoMode.Happiness:
@@ -178,29 +179,39 @@ namespace CampusIndustriesHousingMod
 
             // Handle Heating
             int heatingConsumption = 0;
-            if (modifiedElectricityConsumption != 0 && districtManager.IsPolicyLoaded(DistrictPolicies.Policies.ExtraInsulation)) {
-                if ((policies & DistrictPolicies.Services.ExtraInsulation) != DistrictPolicies.Services.None) {
+            if (modifiedElectricityConsumption != 0 && districtManager.IsPolicyLoaded(DistrictPolicies.Policies.ExtraInsulation)) 
+            {
+                if ((policies & DistrictPolicies.Services.ExtraInsulation) != DistrictPolicies.Services.None) 
+                {
                     heatingConsumption = Mathf.Max(1, modifiedElectricityConsumption * 3 + 8 >> 4);
-                } else
+                } 
+                else
                     heatingConsumption = Mathf.Max(1, modifiedElectricityConsumption + 2 >> 2);
             }
 
             // Handle Recylcing and Pets
-            if (garbageAccumulation != 0) {
-                if ((policies & DistrictPolicies.Services.Recycling) != DistrictPolicies.Services.None) {
+            if (garbageAccumulation != 0) 
+            {
+                if ((policies & DistrictPolicies.Services.Recycling) != DistrictPolicies.Services.None) 
+                {
                     garbageAccumulation = (policies & DistrictPolicies.Services.PetBan) == DistrictPolicies.Services.None ? Mathf.Max(1, garbageAccumulation * 85 / 100) : Mathf.Max(1, garbageAccumulation * 7650 / 10000);
                     modifiedIncomeAccumulation = modifiedIncomeAccumulation * 95 / 100;
-                } else if ((policies & DistrictPolicies.Services.PetBan) != DistrictPolicies.Services.None) {
+                } 
+                else if ((policies & DistrictPolicies.Services.PetBan) != DistrictPolicies.Services.None) 
+                {
                     garbageAccumulation = Mathf.Max(1, garbageAccumulation * 90 / 100);
                 }
             }
 
-            if ((int) buildingData.m_fireIntensity == 0) {
+            if ((int) buildingData.m_fireIntensity == 0) 
+            {
                 int maxMail = 100;
                 int mailAccumulation = 1;
                 int commonConsumptionValue = this.HandleCommonConsumption(buildingID, ref buildingData, ref frameData, ref modifiedElectricityConsumption, ref heatingConsumption, ref waterConsumption, ref modifiedSewageAccumulation, ref garbageAccumulation, ref mailAccumulation, maxMail, policies);
                 buildingData.m_flags |= Building.Flags.Active;
-            } else {
+            } 
+            else 
+            {
                 // Handle on fire
                 modifiedElectricityConsumption = 0;
                 heatingConsumption = 0;
@@ -215,8 +226,10 @@ namespace CampusIndustriesHousingMod
             buildingData.m_customBuffer1 = (ushort)aliveCount;
             int health = 0;
             float radius = (float) (buildingData.Width + buildingData.Length) * 2.5f;
-            if (behaviour.m_healthAccumulation != 0) {
-                if (aliveCount != 0) {
+            if (behaviour.m_healthAccumulation != 0) 
+            {
+                if (aliveCount != 0) 
+                {
                     health = (behaviour.m_healthAccumulation + (aliveCount >> 1)) / aliveCount;
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.ElderCare, behaviour.m_healthAccumulation, buildingData.m_position, radius);
@@ -226,23 +239,29 @@ namespace CampusIndustriesHousingMod
 
             // Get the Wellbeing
             int wellbeing = 0;
-            if (behaviour.m_wellbeingAccumulation != 0) {
-                if (aliveCount != 0) {
+            if (behaviour.m_wellbeingAccumulation != 0) 
+            {
+                if (aliveCount != 0) 
+                {
                     wellbeing = (behaviour.m_wellbeingAccumulation + (aliveCount >> 1)) / aliveCount;
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Wellbeing, behaviour.m_wellbeingAccumulation, buildingData.m_position, radius);
             }
             Logger.logInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
 
-            if (aliveCount != 0) {
+            if (aliveCount != 0) 
+            {
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Density, aliveCount, buildingData.m_position, radius);
             }
 
             // Calculate Happiness
             int happiness = Citizen.GetHappiness(health, wellbeing);
-            if ((buildingData.m_problems & Notification.Problem.MajorProblem) != Notification.Problem.None) {
+            if ((buildingData.m_problems & Notification.Problem.MajorProblem) != Notification.Problem.None) 
+            {
                 happiness -= happiness >> 1;
-            } else if (buildingData.m_problems != Notification.Problem.None) {
+            } 
+            else if (buildingData.m_problems != Notification.Problem.None) 
+            {
                 happiness -= happiness >> 2;
             }
             Logger.logInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- happiness: {0}", happiness);
@@ -263,26 +282,35 @@ namespace CampusIndustriesHousingMod
 
             // Handle Crime and Fire Factors
             int crimeAccumulation = behaviour.m_crimeAccumulation / (3 * getModifiedCapacity());
-            if ((policies & DistrictPolicies.Services.RecreationalUse) != DistrictPolicies.Services.None) {
+            if ((policies & DistrictPolicies.Services.RecreationalUse) != DistrictPolicies.Services.None) 
+            {
                 crimeAccumulation = crimeAccumulation * 3 + 3 >> 2;
             }
             this.HandleCrime(buildingID, ref buildingData, crimeAccumulation, aliveCount);
             int crimeBuffer = (int) buildingData.m_crimeBuffer;
             int crimeRate;
-            if (aliveCount != 0) {
+            if (aliveCount != 0) 
+            {
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Density, aliveCount, buildingData.m_position, radius);
                 // num1
                 int fireFactor = (behaviour.m_educated0Count * 30 + behaviour.m_educated1Count * 15 + behaviour.m_educated2Count * 10) / aliveCount + 50;
-                if ((int) buildingData.m_crimeBuffer > aliveCount * 40) {
+                if ((int) buildingData.m_crimeBuffer > aliveCount * 40) 
+                {
                     fireFactor += 30;
-                } else if ((int) buildingData.m_crimeBuffer > aliveCount * 15) {
+                } 
+                else if ((int) buildingData.m_crimeBuffer > aliveCount * 15) 
+                {
                     fireFactor += 15;
-                } else if ((int) buildingData.m_crimeBuffer > aliveCount * 5) {
+                } 
+                else if ((int) buildingData.m_crimeBuffer > aliveCount * 5) 
+                {
                     fireFactor += 10;
                 }
                 buildingData.m_fireHazard = (byte) fireFactor;
                 crimeRate = (crimeBuffer + (aliveCount >> 1)) / aliveCount;
-            } else {
+            } 
+            else 
+            {
                 buildingData.m_fireHazard = (byte) 0;
                 crimeRate = 0;
             }
@@ -296,7 +324,8 @@ namespace CampusIndustriesHousingMod
             HandleFire(buildingID, ref buildingData, ref frameData, policies);
 	    }
         
-        protected override void ProduceGoods(ushort buildingID, ref Building buildingData, ref Building.Frame frameData, int productionRate, int finalProductionRate, ref Citizen.BehaviourData behaviour, int aliveWorkerCount, int totalWorkerCount, int workPlaceCount, int aliveVisitorCount, int totalVisitorCount, int visitPlaceCount) {
+        protected override void ProduceGoods(ushort buildingID, ref Building buildingData, ref Building.Frame frameData, int productionRate, int finalProductionRate, ref Citizen.BehaviourData behaviour, int aliveWorkerCount, int totalWorkerCount, int workPlaceCount, int aliveVisitorCount, int totalVisitorCount, int visitPlaceCount)
+        {
             base.ProduceGoods(buildingID, ref buildingData, ref frameData, productionRate, finalProductionRate, ref behaviour, aliveWorkerCount, totalWorkerCount, workPlaceCount, aliveVisitorCount, totalVisitorCount, visitPlaceCount);    
             if (finalProductionRate == 0)
 		    {
@@ -314,8 +343,8 @@ namespace CampusIndustriesHousingMod
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 
             // Fetch a Worker and family that wants to move in 
-            uint[] familyWithWorkerMovingIn = workerManager.getFamilyWithWorker(buildingData, "In");
-            if (familyWithWorkerMovingIn != null) 
+            uint[] familyWithWorkers = workerManager.getFamilyWithWorkers(buildingData);
+            if (familyWithWorkers != null) 
             {
                 // Make sure there are empty apartments available
                 uint emptyApartment = getEmptyCitizenUnit(ref buildingData);
@@ -325,15 +354,15 @@ namespace CampusIndustriesHousingMod
                 }
 
                 Logger.logInfo(LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Family: {0}", string.Join(", ", Array.ConvertAll(familyWithWorkerMovingIn, item => item.ToString())));
+                Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Worker Family: {0}", string.Join(", ", Array.ConvertAll(familyWithWorkers, item => item.ToString())));
                 // Check move in chance
-                bool shouldMoveIn = MoveInProbabilityHelper.checkIfShouldMoveIn(familyWithWorkerMovingIn, ref buildingData, ref randomizer, "worker");
+                bool shouldMoveIn = MoveInProbabilityHelper.checkIfShouldMoveIn(familyWithWorkers, ref buildingData, ref randomizer, "worker");
 
                 // Process the worker and his family and move them in if able to, mark the worker as done processing regardless
                 if (shouldMoveIn)
                 {
                     Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- shouldMoveIn");
-                    foreach (uint familyMember in familyWithWorkerMovingIn) 
+                    foreach (uint familyMember in familyWithWorkers) 
                     {
                         Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving In: {0}", familyMember);
                         citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, buildingID, emptyApartment);
@@ -347,16 +376,20 @@ namespace CampusIndustriesHousingMod
             }
 
             // Fetch a barracks family that needs to move out because none of the family members is working in this indastrial area no more
-            uint[] familyWithWorkerMovingOut = workerManager.getFamilyWithWorker(buildingData, "Out");
-            if (familyWithWorkerMovingOut != null) 
+            uint[] BarracksApartmentFamily = workerManager.getBarracksApartmentFamily(buildingData);
+            if (BarracksApartmentFamily != null) 
             {
                 Logger.logInfo(LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Family: {0}", string.Join(", ", Array.ConvertAll(familyWithWorkerMovingOut, item => item.ToString())));
+                Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- BarracksApartmentFamily: {0}", string.Join(", ", Array.ConvertAll(BarracksApartmentFamily, item => item.ToString())));
 
-                foreach (uint familyMember in familyWithWorkerMovingOut) 
+                foreach (uint familyMember in BarracksApartmentFamily) 
                 {
                     Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving Out: {0}", familyMember);
-                    citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, 0, 0);
+                    if(familyMember != 0)
+                    {
+                        citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, 0, 0);
+                    }
+                    
                 }
             }
 
@@ -370,7 +403,7 @@ namespace CampusIndustriesHousingMod
             int aliveWorkerCount = 0;
             int totalWorkerCount = 0;
             GetWorkBehaviour(buildingID, ref data, ref workerBehaviourData, ref aliveWorkerCount, ref totalWorkerCount);
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
             DistrictManager instance = Singleton<DistrictManager>.instance;
 		    byte b = instance.GetPark(data.m_position);
 		    if (b != 0)
@@ -679,7 +712,8 @@ namespace CampusIndustriesHousingMod
                 waterConsumption = Mathf.Max(100, productionRate * waterConsumption + waterAndSewageConsumptionModifier) / 100;
                 if (sewageAccumulation != 0)
                     sewageAccumulation = Mathf.Max(100, productionRate * sewageAccumulation + waterAndSewageConsumptionModifier) / 100;
-            } else if (sewageAccumulation != 0)
+            } 
+            else if (sewageAccumulation != 0)
                 sewageAccumulation = Mathf.Max(100, productionRate * sewageAccumulation + randomizer.Int32(70U)) / 100;
             if (garbageAccumulation != 0)
                 garbageAccumulation = Mathf.Max(100, productionRate * garbageAccumulation + randomizer.Int32(70U)) / 100;
@@ -739,7 +773,8 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        public int getModifiedCapacity() {
+        public int getModifiedCapacity() 
+        {
             return (capacityModifier > 0 ? (int) (numApartments * capacityModifier) : numApartments);
         }
 

@@ -18,11 +18,11 @@ namespace CampusIndustriesHousingMod
         private readonly BuildingManager buildingManager;
         private readonly CitizenManager citizenManager;
 
-        private readonly uint[] familiesWithWorkersMovingIn;
-        private readonly uint[] familiesWithWorkersMovingOut;
+        private readonly uint[] familiesWithWorkers;
+        private readonly uint[] barracksFamilies;
         private readonly HashSet<uint> workersBeingProcessed;
-        private uint numWorkersFamiliesMoveIn;
-        private uint numWorkersFamiliesMoveOut;
+        private uint numFamiliesWithWorkers;
+        private uint numBarracksFamilies;
 
         private Randomizer randomizer;
 
@@ -40,15 +40,15 @@ namespace CampusIndustriesHousingMod
 
             uint numCitizenUnits = this.citizenManager.m_units.m_size;
 
-            this.familiesWithWorkersMovingIn = new uint[numCitizenUnits];
+            this.familiesWithWorkers = new uint[numCitizenUnits];
 
-            this.familiesWithWorkersMovingOut = new uint[numCitizenUnits];
+            this.barracksFamilies = new uint[numCitizenUnits];
 
             this.workersBeingProcessed = new HashSet<uint>();
 
-            this.numWorkersFamiliesMoveIn = 0;
+            this.numFamiliesWithWorkers = 0;
 
-            this.numWorkersFamiliesMoveOut = 0;
+            this.numBarracksFamilies = 0;
         }
 
         public static WorkerManager getInstance() 
@@ -80,43 +80,50 @@ namespace CampusIndustriesHousingMod
         private void refreshWorkers() 
         {
             CitizenUnit[] citizenUnits = this.citizenManager.m_units.m_buffer;
-            this.numWorkersFamiliesMoveIn = 0;
-            this.numWorkersFamiliesMoveOut = 0;
-            bool move_in = false;
+            this.numFamiliesWithWorkers = 0;
+            this.numBarracksFamilies = 0;
             for (uint i = 0; i < citizenUnits.Length; i++) 
             {
+                CitizenUnit barracks_family = citizenUnits[i];
+                bool move_in = false;
                 for (int j = 0; j < 5; j++) 
                 {
-                    uint citizenId = citizenUnits[i].GetCitizen(j);
+                    uint citizenId = barracks_family.GetCitizen(j);
                     if (this.validateWorker(citizenId)) 
                     {
                         if(this.isMovingIn(citizenId))
                         {
-                            this.familiesWithWorkersMovingIn[this.numWorkersFamiliesMoveIn++] = i;
-                            move_in = true;
+                            this.familiesWithWorkers[this.numFamiliesWithWorkers++] = i;
+                            move_in = true; // moving in, so is not moving out
                             break;
                         }
                     }
                 }
                 if(!move_in)
                 {
-                    if(this.isMovingOut(citizenUnits[i]))
+                    // not moving in -> may move out
+                    if(this.isMovingOut(barracks_family))
                     {
-                        this.familiesWithWorkersMovingOut[this.numWorkersFamiliesMoveOut++] = i;
+                        this.barracksFamilies[this.numBarracksFamilies++] = i;
                     }
                 }
-                move_in = false;
+                
             }
         }
 
-        public uint[] getFamilyWithWorker(Building buildingData, string movingStatus) 
+        public uint[] getFamilyWithWorkers(Building buildingData) 
         {
-            return this.getFamilyWithWorker(DEFAULT_NUM_SEARCH_ATTEMPTS, buildingData, movingStatus);
+            return this.getFamilyWithWorkers(DEFAULT_NUM_SEARCH_ATTEMPTS, buildingData);
         }
 
-        public uint[] getFamilyWithWorker(int numAttempts, Building buildingData, string movingStatus) 
+        public uint[] getBarracksApartmentFamily(Building buildingData) 
         {
-            Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorker -- Start");
+            return this.getBarracksApartmentFamily(DEFAULT_NUM_SEARCH_ATTEMPTS, buildingData);
+        }
+
+        public uint[] getFamilyWithWorkers(int numAttempts, Building buildingData) 
+        {
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkers -- Start");
             // Lock to prevent refreshing while running, otherwise bail
             if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) 
             {
@@ -124,10 +131,10 @@ namespace CampusIndustriesHousingMod
             }
 
             // Get random family that contains at least one industry area worker
-            uint[] family = this.getFamilyWithWorkerInternal(numAttempts, buildingData, movingStatus);
+            uint[] family = this.getFamilyWithWorkersInternal(numAttempts, buildingData);
             if (family == null) 
             {
-                Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorker -- No Family");
+                Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkersInternal -- No Family");
                 this.running = 0;
                 return null;
             }
@@ -141,9 +148,41 @@ namespace CampusIndustriesHousingMod
                 }
             }
 
-            Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorker -- Finished: {0}", string.Join(", ", Array.ConvertAll(family, item => item.ToString())));
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkersInternal -- Finished: {0}", string.Join(", ", Array.ConvertAll(family, item => item.ToString())));
             this.running = 0;
             return family;
+        }
+
+        public uint[] getBarracksApartmentFamily(int numAttempts, Building buildingData) 
+        {
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamily -- Start");
+            // Lock to prevent refreshing while running, otherwise bail
+            if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) 
+            {
+                return null;
+            }
+
+            // Get random apartment from the barracks
+            uint[] barracks_apartment = this.getBarracksApartmentFamilyInternal(numAttempts, buildingData);
+            if (barracks_apartment == null) 
+            {
+                Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- No Family");
+                this.running = 0;
+                return null;
+            }
+
+            // Mark worker as being processed
+            foreach (uint familyMember in barracks_apartment) 
+            {
+                if(this.isIndustryAreaWorker(familyMember, buildingData))
+                {
+                    this.workersBeingProcessed.Add(familyMember);
+                }
+            }
+
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Finished: {0}", string.Join(", ", Array.ConvertAll(barracks_apartment, item => item.ToString())));
+            this.running = 0;
+            return barracks_apartment;
         }
 
         public void doneProcessingWorker(uint workerId) 
@@ -151,7 +190,7 @@ namespace CampusIndustriesHousingMod
           this.workersBeingProcessed.Remove(workerId);
         }
 
-        private uint[] getFamilyWithWorkerInternal(int numAttempts, Building buildingData, string movingStatus) 
+        private uint[] getFamilyWithWorkersInternal(int numAttempts, Building buildingData) 
         {
             // Check to see if too many attempts already
             if (numAttempts <= 0) 
@@ -159,102 +198,105 @@ namespace CampusIndustriesHousingMod
                 return null;
             }
 
-            if(movingStatus == "In")
-            {
-                // Get a random family with worker
-                uint familyId = this.fetchRandomFamilyWithWorker();
+            // Get a random family with workers
+            uint familyId = this.fetchRandomFamilyWithWorkers();
                 
-                Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal moving in -- Family Id: {0}", familyId);
-                if (familyId == 0) 
-                {
-                    // No Family with Workers to be located
-                    return null;
-                }
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkersInternal moving in -- Family Id: {0}", familyId);
+            if (familyId == 0) 
+            {
+                // No Family with workers to be located
+                return null;
+            }
 
-                // Validate all workers in the family and build an array of family members
-                CitizenUnit familyWithWorkers = this.citizenManager.m_units.m_buffer[familyId];
-                uint[] family = new uint[5];
-                bool workerPresent = false;
-                for (int i = 0; i < 5; i++) 
+            // Validate all workers in the family and build an array of family members
+            CitizenUnit familyWithWorkers = this.citizenManager.m_units.m_buffer[familyId];
+            uint[] family = new uint[5];
+            bool workerPresent = false;
+            for (int i = 0; i < 5; i++) 
+            {
+                uint familyMember = familyWithWorkers.GetCitizen(i);
+                if (this.isIndustryAreaWorker(familyMember, buildingData)) 
                 {
-                    uint familyMember = familyWithWorkers.GetCitizen(i);
-                    if (this.isIndustryAreaWorker(familyMember, buildingData)) 
+                    Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}, is industrial worker you can move in", familyMember);
+                    if (!this.validateWorker(familyMember)) 
                     {
-                        Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}, is industrial worker you can move in", familyMember);
-                        if (!this.validateWorker(familyMember)) 
-                        {
-                            // This particular Worker is no longer valid for some reason, call recursively with one less attempt
-                            return this.getFamilyWithWorkerInternal(--numAttempts, buildingData, movingStatus);
-                        }
-                        workerPresent = true;
+                        // This particular Worker is no longer valid for some reason, call recursively with one less attempt
+                        return this.getFamilyWithWorkersInternal(--numAttempts, buildingData);
                     }
-                    Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}", familyMember);
-                    family[i] = familyMember;
+                    workerPresent = true;
                 }
-
-                if (!workerPresent) 
-                {
-                    // No Worker was found in this family (which is a bit weird), try again
-                    return this.getFamilyWithWorkerInternal(--numAttempts, buildingData, movingStatus);
-                }
-
-                return family;
+                Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}", familyMember);
+                family[i] = familyMember;
             }
-            else if(movingStatus == "Out")
-            {
-                // Get a random family from barracks
-                uint familyId = this.fetchRandomBarracksFamily();  
 
-                Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal moving out -- Family Id: {0}", familyId);
-                if (familyId == 0) 
+            if (!workerPresent) 
+            {
+                // No Worker was found in this family (which is a bit weird), try again
+                return this.getFamilyWithWorkersInternal(--numAttempts, buildingData);
+            }
+
+            return family;
+        }
+
+        private uint[] getBarracksApartmentFamilyInternal(int numAttempts, Building buildingData) 
+        {
+            // Check to see if too many attempts already
+            if (numAttempts <= 0) 
+            {
+                return null;
+            }
+
+            // Get a random barracks apartment
+            uint barracksApartmentId = this.fetchRandomBarracksApartment();  
+
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Id: {0}", barracksApartmentId);
+            if (barracksApartmentId == 0) 
+            {
+                // No barracks apartment to be located
+                return null;
+            }
+
+            // create an array of the barracks family to move out of the apartment
+            CitizenUnit barracksApartment = this.citizenManager.m_units.m_buffer[barracksApartmentId];
+            uint[] barracks_apartment = new uint[] {0, 0, 0, 0, 0};
+            for (int i = 0; i < 5; i++) 
+            {
+                uint familyMember = barracksApartment.GetCitizen(i);
+                Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Member: {0}", familyMember);
+
+                if (familyMember != 0 && this.isIndustryAreaWorker(familyMember, buildingData))
                 {
-                    // No Family with Workers to be located
+                    Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Member: {0}, is a worker", familyMember);
                     return null;
-                }
-
-                // get the family citizen unit
-                CitizenUnit barracksFamily = this.citizenManager.m_units.m_buffer[familyId];
-
-                // find if any is an industrial area worker -> if so return null
-                uint[] family = new uint[5];
-                for (int i = 0; i < 5; i++) 
-                {
-                    uint citizenId = barracksFamily.GetCitizen(i);
-                    if (citizenId != 0 && this.isIndustryAreaWorker(citizenId, buildingData))
-                    {
-                        Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family has a worker dont leave");
-                        return null;
-                    }                    
-                    Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}", citizenId);
-                    family[i] = citizenId;
-                }
-
-                return family;
+                }                    
+                Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Member: {0}", familyMember);
+                barracks_apartment[i] = familyMember;
             }
 
-            return null;
+            return barracks_apartment;
+        
         }
 
-        private uint fetchRandomFamilyWithWorker() 
+        private uint fetchRandomFamilyWithWorkers() 
         {
-            if (this.numWorkersFamiliesMoveIn <= 0) 
+            if (this.numFamiliesWithWorkers <= 0) 
             {
                 return 0;
             }
 
-            int index = this.randomizer.Int32(this.numWorkersFamiliesMoveIn);
-            return this.familiesWithWorkersMovingIn[index];
+            int index = this.randomizer.Int32(this.numFamiliesWithWorkers);
+            return this.familiesWithWorkers[index];
         }
 
-        private uint fetchRandomBarracksFamily() 
+        private uint fetchRandomBarracksApartment() 
         {
-            if (this.numWorkersFamiliesMoveOut <= 0) 
+            if (this.numBarracksFamilies <= 0) 
             {
                 return 0;
             }
 
-            int index = this.randomizer.Int32(this.numWorkersFamiliesMoveOut);
-            return this.familiesWithWorkersMovingOut[index];
+            int index = this.randomizer.Int32(this.numBarracksFamilies);
+            return this.barracksFamilies[index];
         }
 
         public bool isIndustryAreaWorker(uint workerId, Building buildingData) 
@@ -270,7 +312,7 @@ namespace CampusIndustriesHousingMod
                 return false;
             }
 
-            // Validate working in an industrial park
+            // Validate working in the industrial area and living in a barracks that is located at the same industrial area
             if(!this.checkIndestryArea(workerId, buildingData)) 
             {
                 return false;
@@ -286,13 +328,12 @@ namespace CampusIndustriesHousingMod
 
             DistrictManager districtManager = Singleton<DistrictManager>.instance;
 
-            var barrack_park = districtManager.GetPark(buildingData.m_position); // barracks industry park according to barracks position
+            var barracks_park = districtManager.GetPark(buildingData.m_position); // barracks industry park according to barracks position
             var workplace_park = districtManager.GetPark(workBuilding.m_position); // workplace industry park according to workplace position
 
-            // same industry park
-            if(buildingData.Info.m_buildingAI is BarracksAI barracks && barrack_park == workplace_park)
+            // woker is working in the same industrial area that he lives in -- position and insudtry type
+            if(buildingData.Info.m_buildingAI is BarracksAI barracks && barracks_park == workplace_park)
             {
-                // same industrial area 
                 if(workBuilding.Info.m_buildingAI is IndustryBuildingAI industryBuilding && barracks.m_industryType == industryBuilding.m_industryType)
                 {
                     return true;

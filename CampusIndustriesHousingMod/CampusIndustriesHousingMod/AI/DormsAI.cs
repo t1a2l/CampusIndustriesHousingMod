@@ -89,7 +89,8 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        private Color handleOtherColors(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode) {
+        private Color handleOtherColors(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode) 
+        {
             switch (infoMode) 
             {
                 case InfoManager.InfoMode.Happiness:
@@ -179,15 +180,19 @@ namespace CampusIndustriesHousingMod
 
             // Handle Heating
             int heatingConsumption = 0;
-            if (modifiedElectricityConsumption != 0 && districtManager.IsPolicyLoaded(DistrictPolicies.Policies.ExtraInsulation)) {
-                if ((policies & DistrictPolicies.Services.ExtraInsulation) != DistrictPolicies.Services.None) {
+            if (modifiedElectricityConsumption != 0 && districtManager.IsPolicyLoaded(DistrictPolicies.Policies.ExtraInsulation)) 
+            {
+                if ((policies & DistrictPolicies.Services.ExtraInsulation) != DistrictPolicies.Services.None) 
+                {
                     heatingConsumption = Mathf.Max(1, modifiedElectricityConsumption * 3 + 8 >> 4);
-                } else
+                } 
+                else
                     heatingConsumption = Mathf.Max(1, modifiedElectricityConsumption + 2 >> 2);
             }
 
             // Handle Recylcing and Pets
-            if (garbageAccumulation != 0) {
+            if (garbageAccumulation != 0) 
+            {
                 if ((policies & DistrictPolicies.Services.Recycling) != DistrictPolicies.Services.None) {
                     garbageAccumulation = (policies & DistrictPolicies.Services.PetBan) == DistrictPolicies.Services.None ? Mathf.Max(1, garbageAccumulation * 85 / 100) : Mathf.Max(1, garbageAccumulation * 7650 / 10000);
                     modifiedIncomeAccumulation = modifiedIncomeAccumulation * 95 / 100;
@@ -196,12 +201,15 @@ namespace CampusIndustriesHousingMod
                 }
             }
 
-            if ((int) buildingData.m_fireIntensity == 0) {
+            if ((int) buildingData.m_fireIntensity == 0) 
+            {
                 int maxMail = 100;
                 int mailAccumulation = 1;
                 int commonConsumptionValue = this.HandleCommonConsumption(buildingID, ref buildingData, ref frameData, ref modifiedElectricityConsumption, ref heatingConsumption, ref waterConsumption, ref modifiedSewageAccumulation, ref garbageAccumulation, ref mailAccumulation, maxMail, policies);
                 buildingData.m_flags |= Building.Flags.Active;
-            } else {
+            } 
+            else 
+            {
                 // Handle on fire
                 modifiedElectricityConsumption = 0;
                 heatingConsumption = 0;
@@ -216,8 +224,10 @@ namespace CampusIndustriesHousingMod
             buildingData.m_customBuffer1 = (ushort)aliveCount;
             int health = 0;
             float radius = (float) (buildingData.Width + buildingData.Length) * 2.5f;
-            if (behaviour.m_healthAccumulation != 0) {
-                if (aliveCount != 0) {
+            if (behaviour.m_healthAccumulation != 0) 
+            {
+                if (aliveCount != 0) 
+                {
                     health = (behaviour.m_healthAccumulation + (aliveCount >> 1)) / aliveCount;
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.ElderCare, behaviour.m_healthAccumulation, buildingData.m_position, radius);
@@ -227,23 +237,29 @@ namespace CampusIndustriesHousingMod
 
             // Get the Wellbeing
             int wellbeing = 0;
-            if (behaviour.m_wellbeingAccumulation != 0) {
-                if (aliveCount != 0) {
+            if (behaviour.m_wellbeingAccumulation != 0) 
+            {
+                if (aliveCount != 0) 
+                {
                     wellbeing = (behaviour.m_wellbeingAccumulation + (aliveCount >> 1)) / aliveCount;
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Wellbeing, behaviour.m_wellbeingAccumulation, buildingData.m_position, radius);
             }
             Logger.logInfo(LOG_SIMULATION, "DormsAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
 
-            if (aliveCount != 0) {
+            if (aliveCount != 0) 
+            {
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Density, aliveCount, buildingData.m_position, radius);
             }
 
             // Calculate Happiness
             int happiness = Citizen.GetHappiness(health, wellbeing);
-            if ((buildingData.m_problems & Notification.Problem.MajorProblem) != Notification.Problem.None) {
+            if ((buildingData.m_problems & Notification.Problem.MajorProblem) != Notification.Problem.None) 
+            {
                 happiness -= happiness >> 1;
-            } else if (buildingData.m_problems != Notification.Problem.None) {
+            } 
+            else if (buildingData.m_problems != Notification.Problem.None) 
+            {
                 happiness -= happiness >> 2;
             }
             Logger.logInfo(LOG_SIMULATION, "DormsAI.SimulationStepActive -- happiness: {0}", happiness);
@@ -264,26 +280,35 @@ namespace CampusIndustriesHousingMod
 
             // Handle Crime and Fire Factors
             int crimeAccumulation = behaviour.m_crimeAccumulation / (3 * getModifiedCapacity());
-            if ((policies & DistrictPolicies.Services.RecreationalUse) != DistrictPolicies.Services.None) {
+            if ((policies & DistrictPolicies.Services.RecreationalUse) != DistrictPolicies.Services.None) 
+            {
                 crimeAccumulation = crimeAccumulation * 3 + 3 >> 2;
             }
             this.HandleCrime(buildingID, ref buildingData, crimeAccumulation, aliveCount);
             int crimeBuffer = (int) buildingData.m_crimeBuffer;
             int crimeRate;
-            if (aliveCount != 0) {
+            if (aliveCount != 0) 
+            {
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Density, aliveCount, buildingData.m_position, radius);
                 // num1
                 int fireFactor = (behaviour.m_educated0Count * 30 + behaviour.m_educated1Count * 15 + behaviour.m_educated2Count * 10) / aliveCount + 50;
-                if ((int) buildingData.m_crimeBuffer > aliveCount * 40) {
+                if ((int) buildingData.m_crimeBuffer > aliveCount * 40) 
+                {
                     fireFactor += 30;
-                } else if ((int) buildingData.m_crimeBuffer > aliveCount * 15) {
+                } 
+                else if ((int) buildingData.m_crimeBuffer > aliveCount * 15) 
+                {
                     fireFactor += 15;
-                } else if ((int) buildingData.m_crimeBuffer > aliveCount * 5) {
+                } 
+                else if ((int) buildingData.m_crimeBuffer > aliveCount * 5) 
+                {
                     fireFactor += 10;
                 }
                 buildingData.m_fireHazard = (byte) fireFactor;
                 crimeRate = (crimeBuffer + (aliveCount >> 1)) / aliveCount;
-            } else {
+            } 
+            else 
+            {
                 buildingData.m_fireHazard = (byte) 0;
                 crimeRate = 0;
             }
@@ -297,7 +322,8 @@ namespace CampusIndustriesHousingMod
             HandleFire(buildingID, ref buildingData, ref frameData, policies);
 	    }
         
-        protected override void ProduceGoods(ushort buildingID, ref Building buildingData, ref Building.Frame frameData, int productionRate, int finalProductionRate, ref Citizen.BehaviourData behaviour, int aliveWorkerCount, int totalWorkerCount, int workPlaceCount, int aliveVisitorCount, int totalVisitorCount, int visitPlaceCount) {
+        protected override void ProduceGoods(ushort buildingID, ref Building buildingData, ref Building.Frame frameData, int productionRate, int finalProductionRate, ref Citizen.BehaviourData behaviour, int aliveWorkerCount, int totalWorkerCount, int workPlaceCount, int aliveVisitorCount, int totalVisitorCount, int visitPlaceCount) 
+        {
             base.ProduceGoods(buildingID, ref buildingData, ref frameData, productionRate, finalProductionRate, ref behaviour, aliveWorkerCount, totalWorkerCount, workPlaceCount, aliveVisitorCount, totalVisitorCount, visitPlaceCount);    
             if (finalProductionRate == 0)
 		    {
@@ -354,13 +380,13 @@ namespace CampusIndustriesHousingMod
             }
 
             // Fetch Students who needs to move out of the apartment dorm
-            uint[] DormApartmentStudentsMovingOut = studentManager.getDormApartmentStudents(buildingData);
-            if (DormApartmentStudentsMovingOut != null) 
+            uint[] DormApartmentStudents = studentManager.getDormApartmentStudents(buildingData);
+            if (DormApartmentStudents != null) 
             {
                 Logger.logInfo(LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.logInfo(LOG_PRODUCTION, "DormsAI.ProduceGoods -- DormApartmentStudents: {0}", string.Join(", ", Array.ConvertAll(DormApartmentStudentsMovingOut, item => item.ToString())));
+                Logger.logInfo(LOG_PRODUCTION, "DormsAI.ProduceGoods -- DormApartmentStudents: {0}", string.Join(", ", Array.ConvertAll(DormApartmentStudents, item => item.ToString())));
 
-                foreach (uint studentId in DormApartmentStudentsMovingOut) 
+                foreach (uint studentId in DormApartmentStudents)
                 {
                     Logger.logInfo(LOG_PRODUCTION, "DormsAI.ProduceGoods -- Moving Out: {0}", studentId);
                     if(studentId != 0)
@@ -372,16 +398,16 @@ namespace CampusIndustriesHousingMod
 
         }
         
-        public override string GetLocalizedStats(ushort buildingID, ref Building data) {
+        public override string GetLocalizedStats(ushort buildingID, ref Building data) 
+        {
             getOccupancyDetails(ref data, out int numResidents, out int numApartmentsOccupied);
             // Get Worker Data
             Citizen.BehaviourData workerBehaviourData = new Citizen.BehaviourData();
             int aliveWorkerCount = 0;
             int totalWorkerCount = 0;
             GetWorkBehaviour(buildingID, ref data, ref workerBehaviourData, ref aliveWorkerCount, ref totalWorkerCount);
-            string text = string.Empty;
 		    GetStudentCount(buildingID, ref data, out var count, out var capacity, out var global);
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
 		    if (capacity != 0)
 		    {
 			    stringBuilder.Append(LocaleFormatter.FormatGeneric("AIINFO_STUDENTS", count, capacity));
@@ -409,16 +435,19 @@ namespace CampusIndustriesHousingMod
             return stringBuilder.ToString();
         }
 
-        private int getCustomMaintenanceCost(ref Building buildingData) {
+        private int getCustomMaintenanceCost(ref Building buildingData) 
+        {
             int originalAmount = -(this.m_maintenanceCost * 100);
 
             CampusIndustriesHousingMod mod = CampusIndustriesHousingMod.getInstance();
-            if (mod == null) {
+            if (mod == null) 
+            {
                 return 0;
             }
 
             OptionsManager optionsManager = mod.getOptionsManager();
-            if (optionsManager == null) {
+            if (optionsManager == null) 
+            {
                 return 0;
             }
 
@@ -427,7 +456,8 @@ namespace CampusIndustriesHousingMod
             int modifiedAmount = (int) ((float) originalAmount * capacityModifier);
 
             int amount = 0;
-            switch (optionsManager.getDormsIncomeModifier()) {
+            switch (optionsManager.getDormsIncomeModifier()) 
+            {
                 case OptionsManager.IncomeValues.FULL_MAINTENANCE:
                     return 0;
                 case OptionsManager.IncomeValues.HALF_MAINTENANCE:
@@ -447,7 +477,8 @@ namespace CampusIndustriesHousingMod
                     break;
             }
 
-            if(amount == 0) {
+            if(amount == 0) 
+            {
                 return 0;
             }
             
@@ -457,9 +488,11 @@ namespace CampusIndustriesHousingMod
             return amount;
         }
 
-        public void handleAdditionalMaintenanceCost(ref Building buildingData) {
+        public void handleAdditionalMaintenanceCost(ref Building buildingData) 
+        {
             int amount = getCustomMaintenanceCost(ref buildingData);
-            if (amount == 0) {
+            if (amount == 0) 
+            {
                 return;
             }
 
@@ -469,7 +502,8 @@ namespace CampusIndustriesHousingMod
             amount = productionRate * budget / 100 * amount / 100;
             Logger.logInfo(Logger.LOG_INCOME, "getCustomMaintenanceCost - building: {0} - adjusted maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
-            if ((buildingData.m_flags & Building.Flags.Original) == Building.Flags.None && amount != 0) {
+            if ((buildingData.m_flags & Building.Flags.Original) == Building.Flags.None && amount != 0) 
+            {
                 int result = Singleton<EconomyManager>.instance.FetchResource(EconomyManager.Resource.Maintenance, amount, this.m_info.m_class);
             }
         }
@@ -477,9 +511,11 @@ namespace CampusIndustriesHousingMod
         private uint getCitizenUnit(ref Building data) {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitIndex = data.m_citizenUnits;
-            while ((int) citizenUnitIndex != 0) {
+            while ((int) citizenUnitIndex != 0) 
+            {
                 uint nextCitizenUnitIndex = citizenManager.m_units.m_buffer[citizenUnitIndex].m_nextUnit;
-                if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) {
+                if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) 
+                {
                     for (int i = 0; i < 5; i++)
                     {
                         uint citizenId = citizenManager.m_units.m_buffer[citizenUnitIndex].GetCitizen(i);
@@ -495,35 +531,44 @@ namespace CampusIndustriesHousingMod
             return 0;
         }
 
-        private int GetAverageResidentRequirement(ushort buildingID, ref Building data, ImmaterialResourceManager.Resource resource) {
+        private int GetAverageResidentRequirement(ushort buildingID, ref Building data, ImmaterialResourceManager.Resource resource) 
+        {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnit = data.m_citizenUnits;
             uint numCitizenUnits = citizenManager.m_units.m_size;
             int counter = 0;
             int requirement1 = 0;
             int requirement2 = 0;
-            while ((int) citizenUnit != 0) {
+            while ((int) citizenUnit != 0) 
+            {
                 uint num5 = citizenManager.m_units.m_buffer[citizenUnit].m_nextUnit;
-                if ((citizenManager.m_units.m_buffer[citizenUnit].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) {
+                if ((citizenManager.m_units.m_buffer[citizenUnit].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) 
+                {
                     int residentRequirement1 = 0;
                     int residentRequirement2 = 0;
-                    for (int index = 0; index < 5; ++index) {
+                    for (int index = 0; index < 5; ++index) 
+                    {
                         uint citizen = citizenManager.m_units.m_buffer[citizenUnit].GetCitizen(index);
-                        if ((int) citizen != 0 && !citizenManager.m_citizens.m_buffer[citizen].Dead) {
+                        if ((int) citizen != 0 && !citizenManager.m_citizens.m_buffer[citizen].Dead) 
+                        {
                             residentRequirement1 += GetResidentRequirement(resource, ref citizenManager.m_citizens.m_buffer[citizen]);
                             ++residentRequirement2;
                         }
                     }
-                    if (residentRequirement2 == 0) {
+                    if (residentRequirement2 == 0) 
+                    {
                         requirement1 += 100;
                         ++requirement2;
-                    } else {
+                    } 
+                    else 
+                    {
                         requirement1 += residentRequirement1;
                         requirement2 += residentRequirement2;
                     }
                 }
                 citizenUnit = num5;
-                if (++counter > numCitizenUnits) {
+                if (++counter > numCitizenUnits) 
+                {
                     CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + System.Environment.StackTrace);
                     break;
                 }
@@ -533,8 +578,10 @@ namespace CampusIndustriesHousingMod
             return 0;
         }
 
-        private int GetResidentRequirement(ImmaterialResourceManager.Resource resource, ref Citizen citizen) {
-            switch (resource) {
+        private int GetResidentRequirement(ImmaterialResourceManager.Resource resource, ref Citizen citizen) 
+        {
+            switch (resource) 
+            {
                 case ImmaterialResourceManager.Resource.HealthCare:
                     return Citizen.GetHealthCareRequirement(Citizen.GetAgePhase(citizen.EducationLevel, citizen.Age));
                 case ImmaterialResourceManager.Resource.FireDepartment:
@@ -567,10 +614,12 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        public override float GetEventImpact(ushort buildingID, ref Building data, ImmaterialResourceManager.Resource resource, float amount) {
+        public override float GetEventImpact(ushort buildingID, ref Building data, ImmaterialResourceManager.Resource resource, float amount) 
+        {
             if ((data.m_flags & (Building.Flags.Abandoned | Building.Flags.BurnedDown)) != Building.Flags.None)
                 return 0.0f;
-            switch (resource) {
+            switch (resource) 
+            {
                 case ImmaterialResourceManager.Resource.HealthCare:
                     int residentRequirement1 = GetAverageResidentRequirement(buildingID, ref data, resource);
                     int local1;
@@ -630,7 +679,8 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        public override float GetEventImpact(ushort buildingID, ref Building data, NaturalResourceManager.Resource resource, float amount) {
+        public override float GetEventImpact(ushort buildingID, ref Building data, NaturalResourceManager.Resource resource, float amount) 
+        {
             if ((data.m_flags & (Building.Flags.Abandoned | Building.Flags.BurnedDown)) != Building.Flags.None)
                 return 0.0f;
             if (resource != NaturalResourceManager.Resource.Pollution)
@@ -641,7 +691,8 @@ namespace CampusIndustriesHousingMod
             return Mathf.Clamp((float) (Mathf.Clamp((int) groundPollution + Mathf.RoundToInt(amount), 0, (int) byte.MaxValue) * 100 / (int) byte.MaxValue - num) / 50f, -1f, 1f);
         }
 
-        public void GetConsumptionRates(Randomizer randomizer, int productionRate, out int electricityConsumption, out int waterConsumption, out int sewageAccumulation, out int garbageAccumulation, out int incomeAccumulation) {
+        public void GetConsumptionRates(Randomizer randomizer, int productionRate, out int electricityConsumption, out int waterConsumption, out int sewageAccumulation, out int garbageAccumulation, out int incomeAccumulation) 
+        {
             electricityConsumption = 16;
             waterConsumption = 35;
             sewageAccumulation = 35;
@@ -649,12 +700,14 @@ namespace CampusIndustriesHousingMod
             incomeAccumulation = 0;
             if (electricityConsumption != 0)
                 electricityConsumption = Mathf.Max(100, productionRate * electricityConsumption + randomizer.Int32(70U)) / 100;
-            if (waterConsumption != 0) {
+            if (waterConsumption != 0) 
+            {
                 int waterAndSewageConsumptionModifier = randomizer.Int32(70U);
                 waterConsumption = Mathf.Max(100, productionRate * waterConsumption + waterAndSewageConsumptionModifier) / 100;
                 if (sewageAccumulation != 0)
                     sewageAccumulation = Mathf.Max(100, productionRate * sewageAccumulation + waterAndSewageConsumptionModifier) / 100;
-            } else if (sewageAccumulation != 0)
+            } 
+            else if (sewageAccumulation != 0)
                 sewageAccumulation = Mathf.Max(100, productionRate * sewageAccumulation + randomizer.Int32(70U)) / 100;
             if (garbageAccumulation != 0)
                 garbageAccumulation = Mathf.Max(100, productionRate * garbageAccumulation + randomizer.Int32(70U)) / 100;
@@ -663,7 +716,8 @@ namespace CampusIndustriesHousingMod
             incomeAccumulation = productionRate * incomeAccumulation;
         }
 
-        public void getOccupancyDetails(ref Building data, out int numResidents, out int numApartmentsOccupied) {
+        public void getOccupancyDetails(ref Building data, out int numResidents, out int numApartmentsOccupied) 
+        {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitIndex = data.m_citizenUnits;
             uint numCitizenUnits = citizenManager.m_units.m_size;
@@ -672,44 +726,54 @@ namespace CampusIndustriesHousingMod
             int counter = 0;
 
             // Calculate number of occupied apartments and total number of residents
-            while ((int) citizenUnitIndex != 0) {
+            while ((int) citizenUnitIndex != 0) 
+            {
                 uint nextCitizenUnitIndex = citizenManager.m_units.m_buffer[citizenUnitIndex].m_nextUnit;
-                if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) {
+                if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) 
+                {
                     bool occupied = false;
-                    for (int index = 0; index < 5; ++index) {
+                    for (int index = 0; index < 5; ++index) 
+                    {
                         uint citizenId = citizenManager.m_units.m_buffer[citizenUnitIndex].GetCitizen(index);
-                        if (citizenId != 0) {
+                        if (citizenId != 0) 
+                        {
                             occupied = true;
                             numResidents++;
                         }
                     }
-                    if (occupied) {
+                    if (occupied) 
+                    {
                         numApartmentsOccupied++;
                     }
                 }
                 citizenUnitIndex = nextCitizenUnitIndex;
-                if (++counter > numCitizenUnits) {
+                if (++counter > numCitizenUnits) 
+                {
                     CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
                     break;
                 }
             }
         }
 
-        public void updateCapacity(float newCapacityModifier) {
+        public void updateCapacity(float newCapacityModifier) 
+        {
             Logger.logInfo(Logger.LOG_OPTIONS, "DormsAI.updateCapacity -- Updating capacity with modifier: {0}", newCapacityModifier);
             // Set the capcityModifier and check to see if the value actually changes
-            if (Interlocked.Exchange(ref capacityModifier, newCapacityModifier) == newCapacityModifier) {
+            if (Interlocked.Exchange(ref capacityModifier, newCapacityModifier) == newCapacityModifier) 
+            {
                 // Capcity has already been set to this value, nothing to do
                 Logger.logInfo(Logger.LOG_OPTIONS, "DormsAI.updateCapacity -- Skipping capacity change because the value was already set");
                 return;
             }
         }
 
-        public int getModifiedCapacity() {
+        public int getModifiedCapacity() 
+        {
             return (capacityModifier > 0 ? (int) (numApartments * capacityModifier) : numApartments);
         }
 
-        public void validateCapacity(ushort buildingId, ref Building data, bool shouldCreateApartments) {
+        public void validateCapacity(ushort buildingId, ref Building data, bool shouldCreateApartments) 
+        {
             int numApartmentsExpected = getModifiedCapacity();
             
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
@@ -718,9 +782,11 @@ namespace CampusIndustriesHousingMod
             int numApartmentsFound = 0;
 
             // Count the number of apartments
-            while ((int) citizenUnitIndex != 0) {
+            while ((int) citizenUnitIndex != 0) 
+            {
                 uint nextCitizenUnitIndex = citizenManager.m_units.m_buffer[citizenUnitIndex].m_nextUnit;
-                if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) {
+                if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) 
+                {
                     numApartmentsFound++;
                 }
                 lastCitizenUnitIndex = citizenUnitIndex;
@@ -729,28 +795,34 @@ namespace CampusIndustriesHousingMod
 
             Logger.logInfo(Logger.LOG_CAPACITY_MANAGEMENT, "DormsAI.validateCapacity -- Checking Expected Capacity {0} vs Current Capacity {1} for Building {2}", numApartmentsExpected, numApartmentsFound, buildingId);
             // Check to see if the correct amount of apartments are present, otherwise adjust accordingly
-            if (numApartmentsFound == numApartmentsExpected) {
+            if (numApartmentsFound == numApartmentsExpected) 
+            {
                 return;
-            } else if (numApartmentsFound < numApartmentsExpected) {
-                if (shouldCreateApartments) {
+            } 
+            else if (numApartmentsFound < numApartmentsExpected) 
+            {
+                if (shouldCreateApartments) 
+                {
                     // Only create apartments after a building is already loaded, otherwise let EnsureCitizenUnits to create them
                     createApartments((numApartmentsExpected - numApartmentsFound), buildingId, ref data, lastCitizenUnitIndex);
                 }
-            } else {
+            } 
+            else 
+            {
                 deleteApartments((numApartmentsFound - numApartmentsExpected), buildingId, ref data);
             }
         }
 
-        private void createApartments(int numApartmentsToCreate, ushort buildingId, ref Building data, uint lastCitizenUnitIndex) {
+        private void createApartments(int numApartmentsToCreate, ushort buildingId, ref Building data, uint lastCitizenUnitIndex) 
+        {
             Logger.logInfo(Logger.LOG_CAPACITY_MANAGEMENT, "DormsAI.createApartments -- Creating {0} Apartments", numApartmentsToCreate);
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
-
-            uint firstUnit = 0;
-            citizenManager.CreateUnits(out firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingId, (ushort) 0, numApartmentsToCreate, 0, 0, 0, 0);
+            citizenManager.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingId, (ushort) 0, numApartmentsToCreate, 0, 0, 0, 0);
             citizenManager.m_units.m_buffer[lastCitizenUnitIndex].m_nextUnit = firstUnit;
         }
 
-        private void deleteApartments(int numApartmentsToDelete, ushort buildingId, ref Building data) {
+        private void deleteApartments(int numApartmentsToDelete, ushort buildingId, ref Building data) 
+        {
             Logger.logInfo(Logger.LOG_CAPACITY_MANAGEMENT, "DormsAI.deleteApartments -- Deleting {0} Apartments", numApartmentsToDelete);
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             
@@ -759,24 +831,29 @@ namespace CampusIndustriesHousingMod
             uint citizenUnitIndex = citizenManager.m_units.m_buffer[data.m_citizenUnits].m_nextUnit;
 
             // First try to delete empty apartments
-            while (numApartmentsToDelete > 0 && (int) citizenUnitIndex != 0) {
+            while (numApartmentsToDelete > 0 && (int) citizenUnitIndex != 0) 
+            {
                 bool deleted = false;
                 uint nextCitizenUnitIndex = citizenManager.m_units.m_buffer[citizenUnitIndex].m_nextUnit;
-                if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) {
-                    if (citizenManager.m_units.m_buffer[citizenUnitIndex].Empty()) {
+                if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) 
+                {
+                    if (citizenManager.m_units.m_buffer[citizenUnitIndex].Empty()) 
+                    {
                         deleteApartment(citizenUnitIndex, ref citizenManager.m_units.m_buffer[citizenUnitIndex], prevUnit);
                         numApartmentsToDelete--;
                         deleted = true;
                     }
                 }
-                if(!deleted) {
+                if(!deleted) 
+                {
                     prevUnit = citizenUnitIndex;
                 }
                 citizenUnitIndex = nextCitizenUnitIndex;
             }
 
             // Check to see if enough apartments were deleted
-            if(numApartmentsToDelete == 0) {
+            if(numApartmentsToDelete == 0) 
+            {
                 return;
             }
 
@@ -787,22 +864,26 @@ namespace CampusIndustriesHousingMod
             citizenUnitIndex = citizenManager.m_units.m_buffer[data.m_citizenUnits].m_nextUnit;
 
             // Delete any apartments still available until the correct number is acheived
-            while (numApartmentsToDelete > 0 && (int) citizenUnitIndex != 0) {
+            while (numApartmentsToDelete > 0 && (int) citizenUnitIndex != 0)
+            {
                 bool deleted = false;
                 uint nextCitizenUnitIndex = citizenManager.m_units.m_buffer[citizenUnitIndex].m_nextUnit;
-                if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) {
+                if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) 
+                {
                     deleteApartment(citizenUnitIndex, ref citizenManager.m_units.m_buffer[citizenUnitIndex], prevUnit);
                     numApartmentsToDelete--;
                     deleted = true;
                 }
-                if (!deleted) {
+                if (!deleted) 
+                {
                     prevUnit = citizenUnitIndex;
                 }
                 citizenUnitIndex = nextCitizenUnitIndex;
             }
         }
 
-        private void deleteApartment(uint unit, ref CitizenUnit data, uint prevUnit) {
+        private void deleteApartment(uint unit, ref CitizenUnit data, uint prevUnit) 
+        {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 
             // Update the pointer to bypass this unit
@@ -820,22 +901,28 @@ namespace CampusIndustriesHousingMod
             citizenManager.m_units.ReleaseItem(unit);
         }
 
-        private void releaseUnitCitizen(uint citizen, ref CitizenUnit data) {
+        private void releaseUnitCitizen(uint citizen, ref CitizenUnit data) 
+        {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 
-            if ((int) citizen == 0) {
+            if ((int) citizen == 0) 
+            {
                 return;
             }
-            if ((data.m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) {
+            if ((data.m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) 
+            {
                 citizenManager.m_citizens.m_buffer[citizen].m_homeBuilding = 0;
             }
-            if ((data.m_flags & (CitizenUnit.Flags.Work | CitizenUnit.Flags.Student)) != CitizenUnit.Flags.None) {
+            if ((data.m_flags & (CitizenUnit.Flags.Work | CitizenUnit.Flags.Student)) != CitizenUnit.Flags.None) 
+            {
                 citizenManager.m_citizens.m_buffer[citizen].m_workBuilding = 0;
             }
-            if ((data.m_flags & CitizenUnit.Flags.Visit) != CitizenUnit.Flags.None) {
+            if ((data.m_flags & CitizenUnit.Flags.Visit) != CitizenUnit.Flags.None) 
+            {
                 citizenManager.m_citizens.m_buffer[citizen].m_visitBuilding = 0;
             }
-            if ((data.m_flags & CitizenUnit.Flags.Vehicle) == CitizenUnit.Flags.None) {
+            if ((data.m_flags & CitizenUnit.Flags.Vehicle) == CitizenUnit.Flags.None) 
+            {
                 return;
             }
             citizenManager.m_citizens.m_buffer[citizen].m_vehicle = 0;

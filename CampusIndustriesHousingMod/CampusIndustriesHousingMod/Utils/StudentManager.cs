@@ -7,7 +7,8 @@ using ICities;
 
 namespace CampusIndustriesHousingMod 
 {
-    public class StudentManager : ThreadingExtensionBase {
+    public class StudentManager : ThreadingExtensionBase 
+    {
         private const bool LOG_STUDENTS = true;
 
         private const int DEFAULT_NUM_SEARCH_ATTEMPTS = 3;
@@ -28,7 +29,8 @@ namespace CampusIndustriesHousingMod
         private int refreshTimer;
         private int running;
 
-        public StudentManager() {
+        public StudentManager() 
+        {
             Logger.logInfo(LOG_STUDENTS, "StudentManager Created");
             instance = this;
 
@@ -49,15 +51,19 @@ namespace CampusIndustriesHousingMod
             this.numStudentsMoveOut = 0;
         }
 
-        public static StudentManager getInstance() {
+        public static StudentManager getInstance() 
+        {
             return instance;
         }
 
-        public override void OnBeforeSimulationTick() {
+        public override void OnBeforeSimulationTick() 
+        {
             // Refresh every every so often
-            if (this.refreshTimer++ % 600 == 0) {
+            if (this.refreshTimer++ % 600 == 0) 
+            {
                 // Make sure refresh can occur, otherwise set the timer so it will trigger again next try
-                if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) {
+                if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) 
+                {
                     this.refreshTimer = 0;
                     return;
                 }
@@ -71,14 +77,18 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        private void refreshStudents() {
+        private void refreshStudents() 
+        {
             CitizenUnit[] citizenUnits = this.citizenManager.m_units.m_buffer;
             this.numFamiliesWithStudents = 0;
             this.numStudentsMoveOut = 0;
-            for (uint i = 0; i < citizenUnits.Length; i++) {
-                for (int j = 0; j < 5; j++) {
+            for (uint i = 0; i < citizenUnits.Length; i++) 
+            {
+                for (int j = 0; j < 5; j++) 
+                {
                     uint citizenId = citizenUnits[i].GetCitizen(j);
-                    if (this.validateStudent(citizenId)) {
+                    if (this.validateStudent(citizenId)) 
+                    {
                         if(this.isMovingIn(citizenId))
                         {
                             this.familiesWithStudents[this.numFamiliesWithStudents++] = i;
@@ -94,43 +104,50 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        public uint[] getFamilyWithStudents(Building buildingData) {
+        public uint[] getFamilyWithStudents(Building buildingData) 
+        {
             return this.getFamilyWithStudents(DEFAULT_NUM_SEARCH_ATTEMPTS, buildingData);
         }
 
-        public uint[] getDormApartmentStudents(Building buildingData) {
+        public uint[] getDormApartmentStudents(Building buildingData) 
+        {
             return this.getDormApartmentStudents(DEFAULT_NUM_SEARCH_ATTEMPTS, buildingData);
         }
 
-        public uint[] getFamilyWithStudents(int numAttempts, Building buildingData) {
+        public uint[] getFamilyWithStudents(int numAttempts, Building buildingData) 
+        {
             Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudents -- Start");
             // Lock to prevent refreshing while running, otherwise bail
-            if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) {
+            if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) 
+            {
                 return null;
             }
 
             // Get random family that contains at least one campus area student
             uint[] family = this.getFamilyWithStudentsInternal(numAttempts, buildingData);
-            if (family == null) {
-                Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudent -- No Family");
+            if (family == null) 
+            {
+                Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- No Family");
                 this.running = 0;
                 return null;
             }
 
             // Mark student as being processed
-            foreach (uint familyMember in family) {
+            foreach (uint familyMember in family) 
+            {
                 if(this.isCampusStudent(familyMember, buildingData))
                 {
                     this.studentsBeingProcessed.Add(familyMember);
                 }
             }
 
-            Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudent -- Finished: {0}", string.Join(", ", Array.ConvertAll(family, item => item.ToString())));
+            Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudents -- Finished: {0}", string.Join(", ", Array.ConvertAll(family, item => item.ToString())));
             this.running = 0;
             return family;
         }
 
-        public uint[] getDormApartmentStudents(int numAttempts, Building buildingData) {
+        public uint[] getDormApartmentStudents(int numAttempts, Building buildingData) 
+        {
             Logger.logInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudents -- Start");
             // Lock to prevent refreshing while running, otherwise bail
             if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) {
@@ -139,14 +156,16 @@ namespace CampusIndustriesHousingMod
 
             // Get random apartment from the dorms
             uint[] dorms_apartment = this.getDormApartmentStudentsInternal(numAttempts, buildingData);
-            if (dorms_apartment == null) {
-                Logger.logInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentInternal -- No students in this apartment");
+            if (dorms_apartment == null) 
+            {
+                Logger.logInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- No students in this apartment");
                 this.running = 0;
                 return null;
             }
 
             // Mark student as being processed
-            foreach (uint student in dorms_apartment) {
+            foreach (uint student in dorms_apartment) 
+            {
                 if(this.isCampusStudent(student, buildingData))
                 {
                     this.studentsBeingProcessed.Add(student);
@@ -163,7 +182,8 @@ namespace CampusIndustriesHousingMod
           this.studentsBeingProcessed.Remove(studentId);
         }
 
-        private uint[] getFamilyWithStudentsInternal(int numAttempts, Building buildingData) {
+        private uint[] getFamilyWithStudentsInternal(int numAttempts, Building buildingData) 
+        {
             // Check to see if too many attempts already
             if (numAttempts <= 0) 
             {
@@ -184,9 +204,12 @@ namespace CampusIndustriesHousingMod
             CitizenUnit familyWithStudents = this.citizenManager.m_units.m_buffer[familyId];
             uint[] family = new uint[5];
             bool studentPresent = false;
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 5; i++) 
+            {
                 uint familyMember = familyWithStudents.GetCitizen(i);
-                if (this.isCampusStudent(familyMember, buildingData)) {
+                if (this.isCampusStudent(familyMember, buildingData)) 
+                {
+                    Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- Family Member: {0}, is industrial worker you can move in", familyMember);
                     if (!this.validateStudent(familyMember)) {
                         // This particular Student is no longer valid for some reason, call recursively with one less attempt
                         return this.getFamilyWithStudentsInternal(--numAttempts, buildingData);
@@ -197,29 +220,30 @@ namespace CampusIndustriesHousingMod
                 family[i] = familyMember;
             }
 
-            if (!studentPresent) {
+            if (!studentPresent) 
+            {
                 // No Student was found in this family (which is a bit weird), try again
                 return this.getFamilyWithStudentsInternal(--numAttempts, buildingData);
             }
 
             return family;
-           
         }
 
-        private uint[] getDormApartmentStudentsInternal(int numAttempts, Building buildingData) {
+        private uint[] getDormApartmentStudentsInternal(int numAttempts, Building buildingData) 
+        {
             // Check to see if too many attempts already
             if (numAttempts <= 0) 
             {
                 return null;
             }
 
-            // Get a random dorm apartment with students
+            // Get a random dorm apartment
             uint dormApartmentId = this.fetchRandomDormApartment();  
 
             Logger.logInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Id: {0}", dormApartmentId);
             if (dormApartmentId == 0) 
             {
-                // No dorm apartments to be located
+                // No dorm apartment to be located
                 return null;
             }
 
@@ -264,23 +288,28 @@ namespace CampusIndustriesHousingMod
             return this.studentsMovingOut[index];
         }
 
-        public bool isCampusStudent(uint studentId, Building buildingData) {
-            if (studentId == 0) {
+        public bool isCampusStudent(uint studentId, Building buildingData) 
+        {
+            if (studentId == 0) 
+            {
                 return false;
             }
 
             // Validate not dead
-            if (this.citizenManager.m_citizens.m_buffer[studentId].Dead) {
+            if (this.citizenManager.m_citizens.m_buffer[studentId].Dead) 
+            {
                 return false;
             }
 
             // validate is student
-            if ((this.citizenManager.m_citizens.m_buffer[studentId].m_flags & Citizen.Flags.Student) == 0) {
+            if ((this.citizenManager.m_citizens.m_buffer[studentId].m_flags & Citizen.Flags.Student) == 0) 
+            {
                 return false;
             }
 
-            // Validate learning in a campus and the same campus as the dorms building
-            if(!this.checkCampusArea(studentId, buildingData)) {
+            // Validate learning in a campus and living in a dorm that is located at the same campus
+            if(!this.checkCampusArea(studentId, buildingData)) 
+            {
                 return false;
             }
 
@@ -297,10 +326,9 @@ namespace CampusIndustriesHousingMod
             var dorms_park = districtManager.GetPark(buildingData.m_position); // dorms campus park according to dorms position
             var study_park = districtManager.GetPark(studyBuilding.m_position); // student campus park according to workplace position
 
-            // same industry park
+            // student is studying in the same campus area that he lives in -- position and campus type
             if(buildingData.Info.m_buildingAI is DormsAI dorms && dorms_park == study_park)
             {
-                // same industrial area 
                 if(studyBuilding.Info.m_buildingAI is CampusBuildingAI campusBuilding && dorms.m_campusType == campusBuilding.m_campusType)
                 {
                     return true;
@@ -340,11 +368,12 @@ namespace CampusIndustriesHousingMod
             Building studyBuilding = buildingManager.m_buildings.m_buffer[studyBuildingId];
 
             // not a student
-            if ((this.citizenManager.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Student) == 0) {
+            if ((this.citizenManager.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Student) == 0) 
+            {
                 return false;
             }
 
-            // not studying in a campus
+            // not studying in a campus area building
             if(studyBuilding.Info.m_buildingAI is not CampusBuildingAI && studyBuilding.Info.m_buildingAI is not MainCampusBuildingAI)
             {
                 return false;
