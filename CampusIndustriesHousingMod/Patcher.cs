@@ -3,12 +3,14 @@ using HarmonyLib;
 
 namespace CampusIndustriesHousingMod 
 {
-    public static class Patcher {
+    public static class Patcher 
+    {
         private const string HarmonyId = "t1a2l.CampusIndustriesHousingMod";
 
         private static bool patched = false;
 
-        public static void PatchAll() {
+        public static void PatchAll() 
+        {
             if (patched) return;
 
             UnityEngine.Debug.Log("Campus Industries Housing Mod: Patching...");
@@ -21,7 +23,8 @@ namespace CampusIndustriesHousingMod
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
-        public static void UnpatchAll() {
+        public static void UnpatchAll() 
+        {
             if (!patched) return;
 
             var harmony = new Harmony(HarmonyId);
@@ -35,7 +38,8 @@ namespace CampusIndustriesHousingMod
 
     // Random example patch
     [HarmonyPatch(typeof(SimulationManager), "CreateRelay")]
-    public static class SimulationManagerCreateRelayPatch {
+    public static class SimulationManagerCreateRelayPatch 
+    {
         public static void Prefix() {
             UnityEngine.Debug.Log("CreateRelay Prefix");
         }
@@ -43,7 +47,8 @@ namespace CampusIndustriesHousingMod
 
     // Random example patch
     [HarmonyPatch(typeof(LoadingManager), "MetaDataLoaded")]
-    public static class LoadingManagerMetaDataLoadedPatch {
+    public static class LoadingManagerMetaDataLoadedPatch 
+    {
         public static void Prefix() {
             UnityEngine.Debug.Log("MetaDataLoaded Prefix");
         }

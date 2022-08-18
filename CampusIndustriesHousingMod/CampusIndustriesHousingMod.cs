@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace CampusIndustriesHousingMod
 {
-    public class CampusIndustriesHousingMod : LoadingExtensionBase, IUserMod, ISerializableData  {
+    public class CampusIndustriesHousingMod : LoadingExtensionBase, IUserMod, ISerializableData  
+    {
         private const bool LOG_BASE = true;
 
         private GameObject campusIndustriesHousingInitializerObj;
@@ -18,15 +19,18 @@ namespace CampusIndustriesHousingMod
 
         string IUserMod.Description => "Turn the Dorms and Barracks to actual living spaces apart from their other functions";
         
-        public void OnEnabled() {
+        public void OnEnabled() 
+        {
              HarmonyHelper.DoOnHarmonyReady(() => Patcher.PatchAll());
         }
 
-        public void OnDisabled() {
+        public void OnDisabled() 
+        {
             if (HarmonyHelper.IsHarmonyInstalled) Patcher.UnpatchAll();
         }
 
-        public static CampusIndustriesHousingMod getInstance() {
+        public static CampusIndustriesHousingMod getInstance() 
+        {
             return instance;
         }
 
@@ -35,20 +39,24 @@ namespace CampusIndustriesHousingMod
 		    return campusIndustriesHousingInitializer;
 	    }
 
-        public OptionsManager getOptionsManager() {
+        public OptionsManager getOptionsManager() 
+        {
             return this.optionsManager;
         }
 
-        public void OnSettingsUI(UIHelperBase helper) {
+        public void OnSettingsUI(UIHelperBase helper) 
+        {
             this.optionsManager.initialize(helper);
             this.optionsManager.loadOptions();
         }
 
-        public override void OnCreated(ILoading loading) {
+        public override void OnCreated(ILoading loading) 
+        {
             Logger.logInfo(LOG_BASE, "CampusIndustriesHousingMod Created");
             instance = this;
             base.OnCreated(loading);
-            if (!(this.campusIndustriesHousingInitializerObj != null)) {
+            if (!(this.campusIndustriesHousingInitializerObj != null)) 
+            {
                 this.campusIndustriesHousingInitializerObj = new GameObject("CampusIndustriesHousing");
                 this.campusIndustriesHousingInitializer = this.campusIndustriesHousingInitializerObj.AddComponent<CampusIndustriesHousingInitializer>();
             }
@@ -60,7 +68,8 @@ namespace CampusIndustriesHousingMod
 		    campusIndustriesHousingInitializer?.OnLevelUnloading();
 	    }
 
-        public override void OnLevelLoaded(LoadMode mode) {
+        public override void OnLevelLoaded(LoadMode mode) 
+        {
             Logger.logInfo(true, "CampusIndustriesHousingMod Level Loaded: {0}", mode);
 		    base.OnLevelLoaded(mode);
 		    switch (mode)
@@ -76,23 +85,27 @@ namespace CampusIndustriesHousingMod
 		    }
         }
 
-        public override void OnReleased() {
+        public override void OnReleased() 
+        {
             base.OnReleased();
             if (!HarmonyHelper.IsHarmonyInstalled)
             {
                 return;
             }
-            if (this.campusIndustriesHousingInitializerObj != null) {
+            if (this.campusIndustriesHousingInitializerObj != null) 
+            {
                 Object.Destroy(this.campusIndustriesHousingInitializerObj);
             }
         }
 
-        public byte[] LoadData(string id) {
+        public byte[] LoadData(string id) 
+        {
             Logger.logInfo(Logger.LOG_OPTIONS, "Load Data: {0}", id);
             return null;
         }
 
-        public void SaveData(string id, byte[] data) {
+        public void SaveData(string id, byte[] data) 
+        {
             Logger.logInfo(Logger.LOG_OPTIONS, "Save Data: {0} -- {1}", id, data);
         }
 
