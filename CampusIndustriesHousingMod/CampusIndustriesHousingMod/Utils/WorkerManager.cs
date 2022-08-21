@@ -20,7 +20,7 @@ namespace CampusIndustriesHousingMod
 
         private readonly uint[] familiesWithWorkers;
         private readonly uint[] barracksFamilies;
-        private readonly HashSet<uint> workersBeingProcessed;
+        private readonly HashSet<uint[]> familiesBeingProcessed;
         private uint numFamiliesWithWorkers;
         private uint numBarracksFamilies;
 
@@ -44,7 +44,7 @@ namespace CampusIndustriesHousingMod
 
             this.barracksFamilies = new uint[numCitizenUnits];
 
-            this.workersBeingProcessed = new HashSet<uint>();
+            this.familiesBeingProcessed = new HashSet<uint[]>();
 
             this.numFamiliesWithWorkers = 0;
 
@@ -84,30 +84,31 @@ namespace CampusIndustriesHousingMod
             this.numBarracksFamilies = 0;
             for (uint i = 0; i < citizenUnits.Length; i++) 
             {
-                CitizenUnit barracks_family = citizenUnits[i];
-                bool move_in = false;
-                for (int j = 0; j < 5; j++) 
+                CitizenUnit citizenUnit = citizenUnits[i];
+                uint[] family = new uint[5];
+                for (int j = 0; j < 5; j++)
                 {
-                    uint citizenId = barracks_family.GetCitizen(j);
-                    if (this.validateWorker(citizenId)) 
+                    uint citizenId = citizenUnit.GetCitizen(j);
+                    family[j] = citizenId;
+                }
+
+                bool move_in = false;
+                if(this.validateFamily(family))
+                {
+                    for (int k = 0; k < family.Length; k++) 
                     {
-                        if(this.isMovingIn(citizenId))
+                        if (family[k] != 0 && this.isMovingIn(family[k])) 
                         {
                             this.familiesWithWorkers[this.numFamiliesWithWorkers++] = i;
-                            move_in = true; // moving in, so is not moving out
-                            break;
+                            move_in = true; // moving in, so not moving out
+                            break;  
                         }
                     }
-                }
-                if(!move_in)
-                {
-                    // not moving in -> may move out
-                    if(this.isMovingOut(barracks_family))
+                    if(!move_in && this.isMovingOut(family))
                     {
                         this.barracksFamilies[this.numBarracksFamilies++] = i;
                     }
                 }
-                
             }
         }
 
@@ -139,15 +140,6 @@ namespace CampusIndustriesHousingMod
                 return null;
             }
 
-            // Mark worker as being processed
-            foreach (uint familyMember in family) 
-            {
-                if(this.isIndustryAreaWorker(familyMember, buildingData))
-                {
-                    this.workersBeingProcessed.Add(familyMember);
-                }
-            }
-
             Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkersInternal -- Finished: {0}", string.Join(", ", Array.ConvertAll(family, item => item.ToString())));
             this.running = 0;
             return family;
@@ -163,31 +155,22 @@ namespace CampusIndustriesHousingMod
             }
 
             // Get random apartment from the barracks
-            uint[] barracks_apartment = this.getBarracksApartmentFamilyInternal(numAttempts, buildingData);
-            if (barracks_apartment == null) 
+            uint[] barracks_family = this.getBarracksApartmentFamilyInternal(numAttempts, buildingData);
+            if (barracks_family == null) 
             {
-                Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- No Family");
+                Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamily -- No Barracks Family");
                 this.running = 0;
                 return null;
             }
 
-            // Mark worker as being processed
-            foreach (uint familyMember in barracks_apartment) 
-            {
-                if(this.isIndustryAreaWorker(familyMember, buildingData))
-                {
-                    this.workersBeingProcessed.Add(familyMember);
-                }
-            }
-
-            Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Finished: {0}", string.Join(", ", Array.ConvertAll(barracks_apartment, item => item.ToString())));
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamily -- Finished: {0}", string.Join(", ", Array.ConvertAll(barracks_family, item => item.ToString())));
             this.running = 0;
-            return barracks_apartment;
+            return barracks_family;
         }
 
-        public void doneProcessingWorker(uint workerId) 
+        public void doneProcessingFamily(uint[] family) 
         {
-          this.workersBeingProcessed.Remove(workerId);
+          this.familiesBeingProcessed.Remove(family);
         }
 
         private uint[] getFamilyWithWorkersInternal(int numAttempts, Building buildingData) 
@@ -208,9 +191,8 @@ namespace CampusIndustriesHousingMod
                 return null;
             }
 
-            // Validate all workers in the family and build an array of family members
-            CitizenUnit familyWithWorkers = this.citizenManager.m_units.m_buffer[familyId];
             uint[] family = new uint[5];
+            CitizenUnit familyWithWorkers = this.citizenManager.m_units.m_buffer[familyId];
             bool workerPresent = false;
             for (int i = 0; i < 5; i++) 
             {
@@ -218,15 +200,16 @@ namespace CampusIndustriesHousingMod
                 if (this.isIndustryAreaWorker(familyMember, buildingData)) 
                 {
                     Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}, is industrial worker you can move in", familyMember);
-                    if (!this.validateWorker(familyMember)) 
-                    {
-                        // This particular Worker is no longer valid for some reason, call recursively with one less attempt
-                        return this.getFamilyWithWorkersInternal(--numAttempts, buildingData);
-                    }
                     workerPresent = true;
                 }
                 Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}", familyMember);
                 family[i] = familyMember;
+            }
+
+            if (!this.validateFamily(family)) 
+            {
+                // This particular family is already being proccesed 
+                return this.getFamilyWithWorkersInternal(--numAttempts, buildingData);
             }
 
             if (!workerPresent) 
@@ -234,6 +217,8 @@ namespace CampusIndustriesHousingMod
                 // No Worker was found in this family (which is a bit weird), try again
                 return this.getFamilyWithWorkersInternal(--numAttempts, buildingData);
             }
+
+            this.familiesBeingProcessed.Add(family);
 
             return family;
         }
@@ -272,6 +257,14 @@ namespace CampusIndustriesHousingMod
                 Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Member: {0}", familyMember);
                 barracks_apartment[i] = familyMember;
             }
+
+            if (!this.validateFamily(barracks_apartment)) 
+            {
+                // This particular family is already being proccesed 
+                return this.getBarracksApartmentFamilyInternal(--numAttempts, buildingData);
+            }
+
+            this.familiesBeingProcessed.Add(barracks_apartment);
 
             return barracks_apartment;
         
@@ -331,9 +324,14 @@ namespace CampusIndustriesHousingMod
             var barracks_park = districtManager.GetPark(buildingData.m_position); // barracks industry park according to barracks position
             var workplace_park = districtManager.GetPark(workBuilding.m_position); // workplace industry park according to workplace position
 
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.checkIndestryArea -- barracks: {0}", buildingData.Info.name);
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.checkIndestryArea -- work place: {0}", workBuilding.Info.name);
+
             // woker is working in the same industrial area that he lives in -- position and insudtry type
             if(buildingData.Info.m_buildingAI is BarracksAI barracks && barracks_park == workplace_park)
             {
+                Logger.logInfo(LOG_WORKERS, "WorkerManager.checkIndestryArea -- same industry park");
+                Logger.logInfo(LOG_WORKERS, "WorkerManager.checkIndestryArea -- industry Type: {0}", barracks.m_industryType.ToString());
                 if(workBuilding.Info.m_buildingAI is IndustryBuildingAI industryBuilding && barracks.m_industryType == industryBuilding.m_industryType)
                 {
                     return true;
@@ -354,15 +352,36 @@ namespace CampusIndustriesHousingMod
                 {
                     return true;
                 }
+                if(workBuilding.Info.m_buildingAI is WarehouseAI warehouseAI)
+                {
+                    if(barracks.m_industryType == DistrictPark.ParkType.Farming && warehouseAI.m_storageType == TransferManager.TransferReason.Grain)
+                    {
+                        return true;
+                    }
+                    if(barracks.m_industryType == DistrictPark.ParkType.Forestry && warehouseAI.m_storageType == TransferManager.TransferReason.Logs)
+                    {
+                        return true;
+                    }
+                    if(barracks.m_industryType == DistrictPark.ParkType.Ore && warehouseAI.m_storageType == TransferManager.TransferReason.Ore)
+                    {
+                        return true;
+                    }
+                    if(barracks.m_industryType == DistrictPark.ParkType.Oil && warehouseAI.m_storageType == TransferManager.TransferReason.Oil)
+                    {
+                        return true;
+                    }
+                }
             }
+
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.checkIndestryArea -- not working in idustry building");
 
             return false;
         }
 
-        private bool validateWorker(uint workerId) 
+        private bool validateFamily(uint[] family)
         {
-            // Validate this Worker is not already being processed
-            if (this.workersBeingProcessed.Contains(workerId)) 
+            // Validate this family is not already being processed
+            if (this.familiesBeingProcessed.Contains(family)) 
             {
                 return false;
             }
@@ -401,19 +420,21 @@ namespace CampusIndustriesHousingMod
             return true;
         }
 
-        private bool isMovingOut(CitizenUnit citizen_family)
+        private bool isMovingOut(uint[] citizen_family)
         {
             // if this family is living in the barracks there are up to moveout
-            for (int i = 0; i < 5; i++) 
+            for (int i = 0; i < citizen_family.Length; i++) 
             {
-                uint citizenId = citizen_family.GetCitizen(i);
-                ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
-                Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-                if(homeBuilding.Info.m_buildingAI is BarracksAI)
+                var citizenId = citizen_family[i];
+                if(citizenId != 0)
                 {
-                    return true;
+                    ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
+                    Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
+                    if(homeBuilding.Info.m_buildingAI is BarracksAI)
+                    {
+                        return true;
+                    }
                 }
-
             }
 
             return false;
