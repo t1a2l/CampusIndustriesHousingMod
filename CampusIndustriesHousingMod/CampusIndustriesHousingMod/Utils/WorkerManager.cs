@@ -332,6 +332,11 @@ namespace CampusIndustriesHousingMod
             {
                 Logger.logInfo(LOG_WORKERS, "WorkerManager.checkIndestryArea -- same industry park");
                 Logger.logInfo(LOG_WORKERS, "WorkerManager.checkIndestryArea -- industry Type: {0}", barracks.m_industryType.ToString());
+
+                if(workBuilding.Info.m_buildingAI is BarracksAI barracksBuilding && barracks.m_industryType == barracksBuilding.m_industryType)
+                {
+                    return true;
+                }
                 if(workBuilding.Info.m_buildingAI is IndustryBuildingAI industryBuilding && barracks.m_industryType == industryBuilding.m_industryType)
                 {
                     return true;
@@ -373,7 +378,7 @@ namespace CampusIndustriesHousingMod
                 }
             }
 
-            Logger.logInfo(LOG_WORKERS, "WorkerManager.checkIndestryArea -- not working in idustry building");
+            Logger.logInfo(LOG_WORKERS, "WorkerManager.checkIndestryArea -- not working in the same industry area or not industry worker");
 
             return false;
         }
