@@ -392,6 +392,7 @@ namespace CampusIndustriesHousingMod
                     if(studentId != 0)
                     {
                         citizenManager.m_citizens.m_buffer[studentId].SetHome(studentId, 0, 0);
+                        studentManager.doneProcessingStudent(studentId);
                     } 
                 }
             }

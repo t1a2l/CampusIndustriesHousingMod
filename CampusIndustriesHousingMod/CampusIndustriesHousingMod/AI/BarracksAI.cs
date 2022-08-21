@@ -364,14 +364,14 @@ namespace CampusIndustriesHousingMod
                     Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- shouldMoveIn");
                     foreach (uint familyMember in familyWithWorkers) 
                     {
-                        Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving In: {0}", familyMember);
-                        citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, buildingID, emptyApartment);
-                        if (workerManager.isIndustryAreaWorker(familyMember, buildingData))
+                        if(familyMember != 0)
                         {
-                            workerManager.doneProcessingWorker(familyMember);
+                            Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving In: {0}", familyMember);
+                            citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, buildingID, emptyApartment);
                         }
                     }
-            
+
+                    workerManager.doneProcessingFamily(familyWithWorkers);
                 }
             }
 
@@ -384,13 +384,14 @@ namespace CampusIndustriesHousingMod
 
                 foreach (uint familyMember in BarracksApartmentFamily) 
                 {
-                    Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving Out: {0}", familyMember);
                     if(familyMember != 0)
                     {
+                        Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving Out: {0}", familyMember);
                         citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, 0, 0);
                     }
-                    
                 }
+
+                workerManager.doneProcessingFamily(BarracksApartmentFamily);
             }
 
         }
