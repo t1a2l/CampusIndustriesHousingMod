@@ -355,7 +355,7 @@ namespace CampusIndustriesHousingMod
                     List<uint> studentsList = new();
                     foreach (uint familyMember in familyWithStudents) 
                     {
-                        if (studentManager.isCampusStudent(familyMember, buildingData))
+                        if (studentManager.isCampusAreaStudent(familyMember))
                         {
                             Logger.logInfo(LOG_PRODUCTION, "DormsAI.ProduceGoods -- familyMember: {0} is a student", familyMember);
                             studentsList.Add(familyMember);
