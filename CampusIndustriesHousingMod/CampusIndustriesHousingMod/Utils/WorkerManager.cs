@@ -140,6 +140,8 @@ namespace CampusIndustriesHousingMod
                 return null;
             }
 
+            this.familiesBeingProcessed.Add(family);
+
             Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkersInternal -- Finished: {0}", string.Join(", ", Array.ConvertAll(family, item => item.ToString())));
             this.running = 0;
             return family;
@@ -162,6 +164,8 @@ namespace CampusIndustriesHousingMod
                 this.running = 0;
                 return null;
             }
+
+            this.familiesBeingProcessed.Add(barracks_family);
 
             Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamily -- Finished: {0}", string.Join(", ", Array.ConvertAll(barracks_family, item => item.ToString())));
             this.running = 0;
@@ -191,15 +195,16 @@ namespace CampusIndustriesHousingMod
                 return null;
             }
 
-            uint[] family = new uint[5];
+            // build an array of family members
             CitizenUnit familyWithWorkers = this.citizenManager.m_units.m_buffer[familyId];
+            uint[] family = new uint[5];
             bool workerPresent = false;
             for (int i = 0; i < 5; i++) 
             {
                 uint familyMember = familyWithWorkers.GetCitizen(i);
-                if (this.isIndustryAreaWorker(familyMember, buildingData)) 
+                if (familyMember != 0 && this.isIndustryAreaWorker(familyMember, buildingData)) 
                 {
-                    Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}, is industrial worker you can move in", familyMember);
+                    Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}, is an industrial worker and can move in", familyMember);
                     workerPresent = true;
                 }
                 Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}", familyMember);
@@ -217,8 +222,6 @@ namespace CampusIndustriesHousingMod
                 // No Worker was found in this family (which is a bit weird), try again
                 return this.getFamilyWithWorkersInternal(--numAttempts, buildingData);
             }
-
-            this.familiesBeingProcessed.Add(family);
 
             return family;
         }
@@ -248,13 +251,12 @@ namespace CampusIndustriesHousingMod
             {
                 uint familyMember = barracksApartment.GetCitizen(i);
                 Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Member: {0}", familyMember);
-
+                // found a worker in the family -> no need to move out
                 if (familyMember != 0 && this.isIndustryAreaWorker(familyMember, buildingData))
                 {
                     Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Member: {0}, is a worker", familyMember);
                     return null;
-                }                    
-                Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Member: {0}", familyMember);
+                } 
                 barracks_apartment[i] = familyMember;
             }
 
@@ -263,8 +265,6 @@ namespace CampusIndustriesHousingMod
                 // This particular family is already being proccesed 
                 return this.getBarracksApartmentFamilyInternal(--numAttempts, buildingData);
             }
-
-            this.familiesBeingProcessed.Add(barracks_apartment);
 
             return barracks_apartment;
         
@@ -388,10 +388,10 @@ namespace CampusIndustriesHousingMod
             // Validate this family is not already being processed
             if (this.familiesBeingProcessed.Contains(family)) 
             {
-                return false;
+                return false; // being processed 
             }
 
-            return true;
+            return true; // not being processed
         }
 
         private bool isMovingIn(uint citizenId)
@@ -411,7 +411,7 @@ namespace CampusIndustriesHousingMod
             // not working in an industry area building
             if(workBuilding.Info.m_buildingAI is not IndustryBuildingAI && workBuilding.Info.m_buildingAI is not AuxiliaryBuildingAI &&
                 workBuilding.Info.m_buildingAI is not ExtractingFacilityAI && workBuilding.Info.m_buildingAI is not ProcessingFacilityAI
-                && workBuilding.Info.m_buildingAI is not MainIndustryBuildingAI)
+                && workBuilding.Info.m_buildingAI is not MainIndustryBuildingAI && workBuilding.Info.m_buildingAI is not WarehouseAI)
             {
                  return false;
             }

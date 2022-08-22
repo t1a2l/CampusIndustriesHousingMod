@@ -150,7 +150,8 @@ namespace CampusIndustriesHousingMod
         {
             Logger.logInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudents -- Start");
             // Lock to prevent refreshing while running, otherwise bail
-            if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) {
+            if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) 
+            {
                 return null;
             }
 
@@ -193,23 +194,23 @@ namespace CampusIndustriesHousingMod
             // Get a random family with students
             uint familyId = this.fetchRandomFamilyWithStudents();
                 
-            Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- Family Id: {0}", familyId);
+            Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal moving in -- Family Id: {0}", familyId);
             if (familyId == 0) 
             {
                 // No Family with students to be located
                 return null;
             }
 
-            // Validate all students in the family and build an array of family members
+            // validate all students in the family and build an array of family members
             CitizenUnit familyWithStudents = this.citizenManager.m_units.m_buffer[familyId];
             uint[] family = new uint[5];
             bool studentPresent = false;
             for (int i = 0; i < 5; i++) 
             {
                 uint familyMember = familyWithStudents.GetCitizen(i);
-                if (this.isCampusStudent(familyMember, buildingData)) 
+                if (familyMember != 0 && this.isCampusStudent(familyMember, buildingData)) 
                 {
-                    Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- Family Member: {0}, is industrial worker you can move in", familyMember);
+                    Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- Family Member: {0}, is a campus student and can move in", familyMember);
                     if (!this.validateStudent(familyMember)) {
                         // This particular Student is no longer valid for some reason, call recursively with one less attempt
                         return this.getFamilyWithStudentsInternal(--numAttempts, buildingData);
@@ -257,7 +258,11 @@ namespace CampusIndustriesHousingMod
                 // not a campus area student or this campus area student -> move out
                 if(studentId != 0 && !this.isCampusStudent(studentId, buildingData))
                 {
-                    Logger.logInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Member: {0}, is not a student", studentId);
+                    if (!this.validateStudent(studentId)) {
+                        // This particular student is already being processed
+                        return this.getDormApartmentStudentsInternal(--numAttempts, buildingData);
+                    }
+                    Logger.logInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Member: {0}, is not a student or does not study in this campus", studentId);
                     dorm_apartment[i] = studentId;
                 } 
             }
@@ -347,10 +352,10 @@ namespace CampusIndustriesHousingMod
             // Validate this Student is not already being processed
             if (this.studentsBeingProcessed.Contains(studentId)) 
             {
-                return false;
+                return false; // being processed 
             }
 
-            return true;
+            return true; // not being processed
         }
 
         private bool isMovingIn(uint citizenId)
