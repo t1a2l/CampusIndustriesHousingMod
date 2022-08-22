@@ -19,10 +19,16 @@ namespace CampusIndustriesHousingMod
         private readonly CitizenManager citizenManager;
 
         private readonly uint[] familiesWithStudents;
-        private readonly uint[] studentsMovingOut;
+        private readonly uint[] studentsMovingOutUniversity;
+        private readonly uint[] studentsMovingOutLiberalArts;
+        private readonly uint[] studentsMovingOutTradeSchool;
+
         private readonly HashSet<uint> studentsBeingProcessed;
         private uint numFamiliesWithStudents;
-        private uint numStudentsMoveOut;
+
+        private uint numStudentsMoveOutUniversity;
+        private uint numStudentsMoveOutLiberalArts;
+        private uint numStudentsMoveOutTradeSchool;
 
         private Randomizer randomizer;
 
@@ -42,13 +48,21 @@ namespace CampusIndustriesHousingMod
 
             this.familiesWithStudents = new uint[numCitizenUnits];
 
-            this.studentsMovingOut = new uint[numCitizenUnits];
+            this.studentsMovingOutUniversity = new uint[numCitizenUnits];
+
+            this.studentsMovingOutLiberalArts = new uint[numCitizenUnits];
+
+            this.studentsMovingOutTradeSchool = new uint[numCitizenUnits];
 
             this.studentsBeingProcessed = new HashSet<uint>();
 
             this.numFamiliesWithStudents = 0;
 
-            this.numStudentsMoveOut = 0;
+            this.numStudentsMoveOutUniversity = 0;
+
+            this.numStudentsMoveOutLiberalArts = 0;
+
+            this.numStudentsMoveOutTradeSchool = 0;
         }
 
         public static StudentManager getInstance() 
@@ -81,7 +95,9 @@ namespace CampusIndustriesHousingMod
         {
             CitizenUnit[] citizenUnits = this.citizenManager.m_units.m_buffer;
             this.numFamiliesWithStudents = 0;
-            this.numStudentsMoveOut = 0;
+            this.numStudentsMoveOutUniversity = 0;
+            this.numStudentsMoveOutLiberalArts = 0;
+            this.numStudentsMoveOutTradeSchool = 0;
             for (uint i = 0; i < citizenUnits.Length; i++) 
             {
                 for (int j = 0; j < 5; j++) 
@@ -94,9 +110,19 @@ namespace CampusIndustriesHousingMod
                             this.familiesWithStudents[this.numFamiliesWithStudents++] = i;
                             break;
                         }
-                        else if(this.isMovingOut(citizenId))
+                        else if(this.isMovingOutUniversity(citizenId))
                         {
-                            this.studentsMovingOut[this.numStudentsMoveOut++] = i;
+                            this.studentsMovingOutUniversity[this.numStudentsMoveOutUniversity++] = i;
+                            break;
+                        }
+                        else if(this.isMovingOutLiberalArts(citizenId))
+                        {
+                            this.studentsMovingOutLiberalArts[this.numStudentsMoveOutLiberalArts++] = i;
+                            break;
+                        }
+                        else if(this.isMovingOutTradeSchool(citizenId))
+                        {
+                            this.studentsMovingOutTradeSchool[this.numStudentsMoveOutTradeSchool++] = i;
                             break;
                         }
                     }
@@ -135,7 +161,7 @@ namespace CampusIndustriesHousingMod
             // Mark student as being processed
             foreach (uint familyMember in family) 
             {
-                if(this.isCampusStudent(familyMember, buildingData))
+                if(this.isCampusAreaStudent(familyMember))
                 {
                     this.studentsBeingProcessed.Add(familyMember);
                 }
@@ -167,7 +193,7 @@ namespace CampusIndustriesHousingMod
             // Mark student as being processed
             foreach (uint student in dorms_apartment) 
             {
-                if(this.isCampusStudent(student, buildingData))
+                if(this.isCampusAreaStudent(student))
                 {
                     this.studentsBeingProcessed.Add(student);
                 }
@@ -208,7 +234,7 @@ namespace CampusIndustriesHousingMod
             for (int i = 0; i < 5; i++) 
             {
                 uint familyMember = familyWithStudents.GetCitizen(i);
-                if (familyMember != 0 && this.isCampusStudent(familyMember, buildingData)) 
+                if (familyMember != 0 && this.isCampusAreaStudent(familyMember) && this.checkSameCampusArea(familyMember, buildingData)) 
                 {
                     Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- Family Member: {0}, is a campus student and can move in", familyMember);
                     if (!this.validateStudent(familyMember)) {
@@ -239,7 +265,7 @@ namespace CampusIndustriesHousingMod
             }
 
             // Get a random dorm apartment
-            uint dormApartmentId = this.fetchRandomDormApartment();  
+            uint dormApartmentId = this.fetchRandomDormApartment(buildingData);  
 
             Logger.logInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Id: {0}", dormApartmentId);
             if (dormApartmentId == 0) 
@@ -256,7 +282,7 @@ namespace CampusIndustriesHousingMod
                 uint studentId = dormApartment.GetCitizen(i);
                 Logger.logInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Member: {0}", studentId);
                 // not a campus area student or this campus area student -> move out
-                if(studentId != 0 && !this.isCampusStudent(studentId, buildingData))
+                if(studentId != 0 && !this.isCampusAreaStudent(studentId) || !this.checkSameCampusArea(studentId, buildingData))
                 {
                     if (!this.validateStudent(studentId)) {
                         // This particular student is already being processed
@@ -282,46 +308,46 @@ namespace CampusIndustriesHousingMod
             return this.familiesWithStudents[index];
         }
 
-        private uint fetchRandomDormApartment() 
+        private uint fetchRandomDormApartment(Building buildingData) 
         {
-            if (this.numStudentsMoveOut <= 0) 
+            if(buildingData.Info.GetAI() is DormsAI dormsAI)
             {
-                return 0;
-            }
+                if(dormsAI.m_campusType == DistrictPark.ParkType.University)
+                {
+                    if (this.numStudentsMoveOutUniversity <= 0) 
+                    {
+                        return 0;
+                    }
 
-            int index = this.randomizer.Int32(this.numStudentsMoveOut);
-            return this.studentsMovingOut[index];
+                    int index = this.randomizer.Int32(this.numStudentsMoveOutUniversity);
+                    return this.studentsMovingOutUniversity[index];
+                }
+                if(dormsAI.m_campusType == DistrictPark.ParkType.LiberalArts)
+                {
+                    if (this.numStudentsMoveOutLiberalArts <= 0) 
+                    {
+                        return 0;
+                    }
+
+                    int index = this.randomizer.Int32(this.numStudentsMoveOutLiberalArts);
+                    return this.studentsMovingOutLiberalArts[index];
+                }
+                if(dormsAI.m_campusType == DistrictPark.ParkType.TradeSchool)
+                {
+                    if (this.numStudentsMoveOutTradeSchool <= 0) 
+                    {
+                        return 0;
+                    }
+
+                    int index = this.randomizer.Int32(this.numStudentsMoveOutTradeSchool);
+                    return this.studentsMovingOutTradeSchool[index];
+                }
+            }
+            
+            return 0;
         }
 
-        public bool isCampusStudent(uint studentId, Building buildingData) 
-        {
-            if (studentId == 0) 
-            {
-                return false;
-            }
-
-            // Validate not dead
-            if (this.citizenManager.m_citizens.m_buffer[studentId].Dead) 
-            {
-                return false;
-            }
-
-            // validate is student
-            if ((this.citizenManager.m_citizens.m_buffer[studentId].m_flags & Citizen.Flags.Student) == 0) 
-            {
-                return false;
-            }
-
-            // Validate learning in a campus and living in a dorm that is located at the same campus
-            if(!this.checkCampusArea(studentId, buildingData)) 
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool checkCampusArea(uint studentId, Building buildingData)
+        private bool checkSameCampusArea(uint studentId, Building buildingData)
         {
             ushort studyBuildingId = this.citizenManager.m_citizens.m_buffer[studentId].m_workBuilding;
             Building studyBuilding = buildingManager.m_buildings.m_buffer[studyBuildingId];
@@ -358,6 +384,37 @@ namespace CampusIndustriesHousingMod
             return true; // not being processed
         }
 
+        public bool isCampusAreaStudent(uint citizenId)
+        {
+            if (citizenId == 0) 
+            {
+                return false;
+            }
+
+            // Validate not dead
+            if (this.citizenManager.m_citizens.m_buffer[citizenId].Dead) 
+            {
+                return false;
+            }
+
+            ushort studyBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_workBuilding;
+            Building studyBuilding = buildingManager.m_buildings.m_buffer[studyBuildingId];
+
+            // Validate studying in a campus area
+            if(studyBuilding.Info.m_buildingAI is not CampusBuildingAI && studyBuilding.Info.m_buildingAI is not MainCampusBuildingAI)
+            {
+                 return false;
+            }
+
+             // Validate is a student
+            if ((this.citizenManager.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Student) == 0) 
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private bool isMovingIn(uint citizenId)
         {
             ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
@@ -370,19 +427,6 @@ namespace CampusIndustriesHousingMod
             }
 
             Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-            Building studyBuilding = buildingManager.m_buildings.m_buffer[studyBuildingId];
-
-            // not a student
-            if ((this.citizenManager.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Student) == 0) 
-            {
-                return false;
-            }
-
-            // not studying in a campus area building
-            if(studyBuilding.Info.m_buildingAI is not CampusBuildingAI && studyBuilding.Info.m_buildingAI is not MainCampusBuildingAI)
-            {
-                return false;
-            }
 
             // if already living in a dorm
             if(homeBuilding.Info.m_buildingAI is DormsAI)
@@ -390,15 +434,47 @@ namespace CampusIndustriesHousingMod
                 return false;
             } 
 
+            // not studying in a campus area
+            if(!this.isCampusAreaStudent(citizenId))
+            {
+                return false;
+            }
+
             return true;
         }
 
-        private bool isMovingOut(uint citizenId)
+        private bool isMovingOutUniversity(uint citizenId)
         {
             // if this student is living in the dorms we should check the entire apartment
             ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
             Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-            if(homeBuilding.Info.m_buildingAI is DormsAI)
+            if(homeBuilding.Info.m_buildingAI is DormsAI dormsAI && dormsAI.m_campusType == DistrictPark.ParkType.University)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool isMovingOutLiberalArts(uint citizenId)
+        {
+            // if this student is living in the dorms we should check the entire apartment
+            ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
+            Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
+            if(homeBuilding.Info.m_buildingAI is DormsAI dormsAI && dormsAI.m_campusType == DistrictPark.ParkType.LiberalArts)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool isMovingOutTradeSchool(uint citizenId)
+        {
+            // if this student is living in the dorms we should check the entire apartment
+            ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
+            Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
+            if(homeBuilding.Info.m_buildingAI is DormsAI dormsAI && dormsAI.m_campusType == DistrictPark.ParkType.TradeSchool)
             {
                 return true;
             }

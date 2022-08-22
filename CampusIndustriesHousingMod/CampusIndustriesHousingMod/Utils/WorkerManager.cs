@@ -19,10 +19,18 @@ namespace CampusIndustriesHousingMod
         private readonly CitizenManager citizenManager;
 
         private readonly uint[] familiesWithWorkers;
-        private readonly uint[] barracksFamilies;
+        private readonly uint[] farmingBarracksFamilies;
+        private readonly uint[] forestryBarracksFamilies;
+        private readonly uint[] oilBarracksFamilies;
+        private readonly uint[] oreBarracksFamilies;
+
         private readonly HashSet<uint[]> familiesBeingProcessed;
+
         private uint numFamiliesWithWorkers;
-        private uint numBarracksFamilies;
+        private uint numFarmingBarracksFamilies;
+        private uint numForestryBarracksFamilies;
+        private uint numOilBarracksFamilies;
+        private uint numOreBarracksFamilies;
 
         private Randomizer randomizer;
 
@@ -42,13 +50,25 @@ namespace CampusIndustriesHousingMod
 
             this.familiesWithWorkers = new uint[numCitizenUnits];
 
-            this.barracksFamilies = new uint[numCitizenUnits];
+            this.farmingBarracksFamilies = new uint[numCitizenUnits];
+
+            this.forestryBarracksFamilies = new uint[numCitizenUnits];
+
+            this.oilBarracksFamilies = new uint[numCitizenUnits];
+
+            this.oreBarracksFamilies = new uint[numCitizenUnits];
 
             this.familiesBeingProcessed = new HashSet<uint[]>();
 
             this.numFamiliesWithWorkers = 0;
 
-            this.numBarracksFamilies = 0;
+            this.numFarmingBarracksFamilies = 0;
+
+            this.numForestryBarracksFamilies = 0;
+
+            this.numOilBarracksFamilies = 0;
+
+            this.numOreBarracksFamilies = 0;
         }
 
         public static WorkerManager getInstance() 
@@ -81,7 +101,10 @@ namespace CampusIndustriesHousingMod
         {
             CitizenUnit[] citizenUnits = this.citizenManager.m_units.m_buffer;
             this.numFamiliesWithWorkers = 0;
-            this.numBarracksFamilies = 0;
+            this.numFarmingBarracksFamilies = 0;
+            this.numForestryBarracksFamilies = 0;
+            this.numOilBarracksFamilies = 0;
+            this.numOreBarracksFamilies = 0;
             for (uint i = 0; i < citizenUnits.Length; i++) 
             {
                 CitizenUnit citizenUnit = citizenUnits[i];
@@ -104,10 +127,25 @@ namespace CampusIndustriesHousingMod
                             break;  
                         }
                     }
-                    if(!move_in && this.isMovingOut(family))
+                    if(!move_in) 
                     {
-                        this.barracksFamilies[this.numBarracksFamilies++] = i;
-                    }
+                        if(this.isMovingOutFarming(family))
+                        {
+                            this.farmingBarracksFamilies[this.numFarmingBarracksFamilies++] = i;
+                        }
+                        else if(this.isMovingOutForestry(family))
+                        {
+                            this.forestryBarracksFamilies[this.numForestryBarracksFamilies++] = i;
+                        }
+                        else if(this.isMovingOutOil(family))
+                        {
+                            this.oilBarracksFamilies[this.numOilBarracksFamilies++] = i;
+                        }
+                        else if(this.isMovingOutOre(family))
+                        {
+                            this.oreBarracksFamilies[this.numOreBarracksFamilies++] = i;
+                        }
+                    } 
                 }
             }
         }
@@ -202,7 +240,7 @@ namespace CampusIndustriesHousingMod
             for (int i = 0; i < 5; i++) 
             {
                 uint familyMember = familyWithWorkers.GetCitizen(i);
-                if (familyMember != 0 && this.isIndustryAreaWorker(familyMember, buildingData)) 
+                if (familyMember != 0 && this.isIndustryAreaWorker(familyMember) && this.checkSameIndestryArea(familyMember, buildingData)) 
                 {
                     Logger.logInfo(LOG_WORKERS, "WorkerManager.getFamilyWithWorkerInternal -- Family Member: {0}, is an industrial worker and can move in", familyMember);
                     workerPresent = true;
@@ -234,8 +272,8 @@ namespace CampusIndustriesHousingMod
                 return null;
             }
 
-            // Get a random barracks apartment
-            uint barracksApartmentId = this.fetchRandomBarracksApartment();  
+            // Get a random barracks apartment according to the barracks industry type
+            uint barracksApartmentId = this.fetchRandomBarracksApartment(buildingData);  
 
             Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Id: {0}", barracksApartmentId);
             if (barracksApartmentId == 0) 
@@ -252,7 +290,7 @@ namespace CampusIndustriesHousingMod
                 uint familyMember = barracksApartment.GetCitizen(i);
                 Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Member: {0}", familyMember);
                 // found a worker in the family -> no need to move out
-                if (familyMember != 0 && this.isIndustryAreaWorker(familyMember, buildingData))
+                if (familyMember != 0 && this.isIndustryAreaWorker(familyMember) && this.checkSameIndestryArea(familyMember, buildingData))
                 {
                     Logger.logInfo(LOG_WORKERS, "WorkerManager.getBarracksApartmentFamilyInternal -- Family Member: {0}, is a worker", familyMember);
                     return null;
@@ -281,40 +319,56 @@ namespace CampusIndustriesHousingMod
             return this.familiesWithWorkers[index];
         }
 
-        private uint fetchRandomBarracksApartment() 
+        private uint fetchRandomBarracksApartment(Building buildingData) 
         {
-            if (this.numBarracksFamilies <= 0) 
+            if(buildingData.Info.GetAI() is BarracksAI barracksAI)
             {
-                return 0;
-            }
+                if(barracksAI.m_industryType == DistrictPark.ParkType.Farming)
+                {
+                    if (this.numFarmingBarracksFamilies <= 0) 
+                    {
+                        return 0;
+                    }
 
-            int index = this.randomizer.Int32(this.numBarracksFamilies);
-            return this.barracksFamilies[index];
+                    int index = this.randomizer.Int32(this.numFarmingBarracksFamilies);
+                    return this.farmingBarracksFamilies[index];
+                }
+                if(barracksAI.m_industryType == DistrictPark.ParkType.Forestry)
+                {
+                    if (this.numForestryBarracksFamilies <= 0) 
+                    {
+                        return 0;
+                    }
+
+                    int index = this.randomizer.Int32(this.numForestryBarracksFamilies);
+                    return this.forestryBarracksFamilies[index];
+                }
+                if(barracksAI.m_industryType == DistrictPark.ParkType.Oil)
+                {
+                    if (this.numOilBarracksFamilies <= 0) 
+                    {
+                        return 0;
+                    }
+
+                    int index = this.randomizer.Int32(this.numOilBarracksFamilies);
+                    return this.oilBarracksFamilies[index];
+                }
+                if(barracksAI.m_industryType == DistrictPark.ParkType.Ore)
+                {
+                    if (this.numOreBarracksFamilies <= 0) 
+                    {
+                        return 0;
+                    }
+
+                    int index = this.randomizer.Int32(this.numOreBarracksFamilies);
+                    return this.oreBarracksFamilies[index];
+                }
+            } 
+         
+            return 0;
         }
 
-        public bool isIndustryAreaWorker(uint workerId, Building buildingData) 
-        {
-            if (workerId == 0) 
-            {
-                return false;
-            }
-
-            // Validate not dead
-            if (this.citizenManager.m_citizens.m_buffer[workerId].Dead) 
-            {
-                return false;
-            }
-
-            // Validate working in the industrial area and living in a barracks that is located at the same industrial area
-            if(!this.checkIndestryArea(workerId, buildingData)) 
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool checkIndestryArea(uint workerId, Building buildingData)
+        private bool checkSameIndestryArea(uint workerId, Building buildingData)
         {
             ushort workBuildingId = this.citizenManager.m_citizens.m_buffer[workerId].m_workBuilding;
             Building workBuilding = buildingManager.m_buildings.m_buffer[workBuildingId];
@@ -394,6 +448,46 @@ namespace CampusIndustriesHousingMod
             return true; // not being processed
         }
 
+        public bool isIndustryAreaWorker(uint citizenId)
+        {
+            if (citizenId == 0) 
+            {
+                return false;
+            }
+
+            // Validate not dead
+            if (this.citizenManager.m_citizens.m_buffer[citizenId].Dead) 
+            {
+                return false;
+            }
+
+            ushort workBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_workBuilding;
+            Building workBuilding = buildingManager.m_buildings.m_buffer[workBuildingId];
+
+            // Validate working in an industrial area building
+            if(workBuilding.Info.m_buildingAI is not IndustryBuildingAI && workBuilding.Info.m_buildingAI is AuxiliaryBuildingAI
+                && workBuilding.Info.m_buildingAI is not ExtractingFacilityAI && workBuilding.Info.m_buildingAI is not ProcessingFacilityAI
+                && workBuilding.Info.m_buildingAI is not MainIndustryBuildingAI && workBuilding.Info.m_buildingAI is not WarehouseAI)
+            {
+                 return false;
+            }
+
+            // validate if working in a industrial area warehouse type
+            if(workBuilding.Info.m_buildingAI is WarehouseAI warehouseAI)
+            {
+                if(warehouseAI.m_storageType != TransferManager.TransferReason.Grain &&
+                   warehouseAI.m_storageType != TransferManager.TransferReason.Logs &&
+                   warehouseAI.m_storageType != TransferManager.TransferReason.Ore &&
+                   warehouseAI.m_storageType != TransferManager.TransferReason.Oil
+                    )
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private bool isMovingIn(uint citizenId)
         {
             ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
@@ -406,15 +500,6 @@ namespace CampusIndustriesHousingMod
             }
 
             Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-            Building workBuilding = buildingManager.m_buildings.m_buffer[workBuildingId];
-
-            // not working in an industry area building
-            if(workBuilding.Info.m_buildingAI is not IndustryBuildingAI && workBuilding.Info.m_buildingAI is not AuxiliaryBuildingAI &&
-                workBuilding.Info.m_buildingAI is not ExtractingFacilityAI && workBuilding.Info.m_buildingAI is not ProcessingFacilityAI
-                && workBuilding.Info.m_buildingAI is not MainIndustryBuildingAI && workBuilding.Info.m_buildingAI is not WarehouseAI)
-            {
-                 return false;
-            }
 
             // if already living in a barracks
             if(homeBuilding.Info.m_buildingAI is BarracksAI)
@@ -422,10 +507,16 @@ namespace CampusIndustriesHousingMod
                 return false;
             } 
 
+            // not an industry area worker
+            if(!this.isIndustryAreaWorker(citizenId))
+            {
+                return false;
+            }
+
             return true;
         }
 
-        private bool isMovingOut(uint[] citizen_family)
+        private bool isMovingOutFarming(uint[] citizen_family)
         {
             // if this family is living in the barracks there are up to moveout
             for (int i = 0; i < citizen_family.Length; i++) 
@@ -435,7 +526,67 @@ namespace CampusIndustriesHousingMod
                 {
                     ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
                     Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-                    if(homeBuilding.Info.m_buildingAI is BarracksAI)
+                    if(homeBuilding.Info.m_buildingAI is BarracksAI barracksAI && barracksAI.m_industryType == DistrictPark.ParkType.Farming)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool isMovingOutForestry(uint[] citizen_family)
+        {
+            // if this family is living in the barracks there are up to moveout
+            for (int i = 0; i < citizen_family.Length; i++) 
+            {
+                var citizenId = citizen_family[i];
+                if(citizenId != 0)
+                {
+                    ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
+                    Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
+                    if(homeBuilding.Info.m_buildingAI is BarracksAI barracksAI && barracksAI.m_industryType == DistrictPark.ParkType.Forestry)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool isMovingOutOil(uint[] citizen_family)
+        {
+            // if this family is living in the barracks there are up to moveout
+            for (int i = 0; i < citizen_family.Length; i++) 
+            {
+                var citizenId = citizen_family[i];
+                if(citizenId != 0)
+                {
+                    ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
+                    Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
+                    if(homeBuilding.Info.m_buildingAI is BarracksAI barracksAI && barracksAI.m_industryType == DistrictPark.ParkType.Oil)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool isMovingOutOre(uint[] citizen_family)
+        {
+            // if this family is living in the barracks there are up to moveout
+            for (int i = 0; i < citizen_family.Length; i++) 
+            {
+                var citizenId = citizen_family[i];
+                if(citizenId != 0)
+                {
+                    ushort homeBuildingId = this.citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
+                    Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
+                    if(homeBuilding.Info.m_buildingAI is BarracksAI barracksAI && barracksAI.m_industryType == DistrictPark.ParkType.Ore)
                     {
                         return true;
                     }

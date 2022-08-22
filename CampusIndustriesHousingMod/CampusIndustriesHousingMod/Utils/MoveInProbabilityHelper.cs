@@ -61,7 +61,7 @@ namespace CampusIndustriesHousingMod
             {
                 foreach (uint familyMember in family) 
                 {
-                    if (workerManager.isIndustryAreaWorker(familyMember, buildingData))
+                    if (workerManager.isIndustryAreaWorker(familyMember))
                     {
                         workBuildingId = getWorkBuildingId(familyMember);
                         break;
@@ -72,7 +72,7 @@ namespace CampusIndustriesHousingMod
             {
                 foreach (uint familyMember in family) 
                 {
-                    if (studentManager.isCampusStudent(familyMember, buildingData))
+                    if (studentManager.isCampusAreaStudent(familyMember))
                     {
                         workBuildingId = getWorkBuildingId(familyMember);
                         break;
