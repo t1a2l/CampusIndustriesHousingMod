@@ -800,6 +800,8 @@ namespace CampusIndustriesHousingMod
             {
                 barracks.numApartments = numApartments;
             }
+            barracks.m_noiseAccumulation = 0;
+            barracks.m_noiseRadius = 0;
 
             return capacityModifier > 0 ? (int) (barracks.numApartments * capacityModifier) : barracks.numApartments;
         }
