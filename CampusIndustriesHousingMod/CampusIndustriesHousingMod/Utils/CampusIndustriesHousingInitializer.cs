@@ -303,7 +303,7 @@ namespace CampusIndustriesHousingMod
                     // Check for replacement of AI
                     if (buildingInfo != null && buildingInfo.name.Contains("Barracks"))
                     {
-                        // custom assets get the farm workers barracks info
+                        // custom assets get the workers barracks info
                         if(buildingInfo.m_isCustomContent)
                         {
                             buildingInfo.m_class = industriesHousingBuildingInfo.m_class;
