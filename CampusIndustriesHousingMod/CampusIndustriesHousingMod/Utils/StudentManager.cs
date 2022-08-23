@@ -9,7 +9,7 @@ namespace CampusIndustriesHousingMod
 {
     public class StudentManager : ThreadingExtensionBase 
     {
-        private const bool LOG_STUDENTS = true;
+        private const bool LOG_STUDENTS = false;
 
         private const int DEFAULT_NUM_SEARCH_ATTEMPTS = 3;
 

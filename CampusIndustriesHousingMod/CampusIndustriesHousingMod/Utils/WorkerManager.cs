@@ -9,7 +9,7 @@ namespace CampusIndustriesHousingMod
 {
     public class WorkerManager : ThreadingExtensionBase 
     {
-        private const bool LOG_WORKERS = true;
+        private const bool LOG_WORKERS = false;
 
         private const int DEFAULT_NUM_SEARCH_ATTEMPTS = 3;
 
