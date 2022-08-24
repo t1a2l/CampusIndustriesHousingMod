@@ -101,7 +101,7 @@ namespace CampusIndustriesHousingMod
             for (uint i = 0; i < citizenUnits.Length; i++) 
             {
                 CitizenUnit citizenUnit = citizenUnits[i];
-                if(citizenUnit.Empty())
+                if((citizenUnit.m_flags & CitizenUnit.Flags.Created) == 0 || citizenUnit.Empty())
                 {
                     continue;
                 }
