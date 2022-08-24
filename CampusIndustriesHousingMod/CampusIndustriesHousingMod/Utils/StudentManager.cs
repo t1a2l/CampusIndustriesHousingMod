@@ -100,10 +100,16 @@ namespace CampusIndustriesHousingMod
             this.numStudentsMoveOutTradeSchool = 0;
             for (uint i = 0; i < citizenUnits.Length; i++) 
             {
+                CitizenUnit citizenUnit = citizenUnits[i];
+                if(citizenUnit.Empty())
+                {
+                    continue;
+                }
                 for (int j = 0; j < 5; j++) 
                 {
-                    uint citizenId = citizenUnits[i].GetCitizen(j);
-                    if (this.validateStudent(citizenId)) 
+                    uint citizenId = citizenUnit.GetCitizen(j);
+                    Citizen citizen = citizenManager.m_citizens.m_buffer[citizenId];
+                    if (citizen.m_flags.IsFlagSet(Citizen.Flags.Created) && this.validateStudent(citizenId)) 
                     {
                         if(this.isMovingIn(citizenId))
                         {

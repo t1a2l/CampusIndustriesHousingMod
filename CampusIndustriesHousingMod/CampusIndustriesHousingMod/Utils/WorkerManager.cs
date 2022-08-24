@@ -105,14 +105,22 @@ namespace CampusIndustriesHousingMod
             this.numForestryBarracksFamilies = 0;
             this.numOilBarracksFamilies = 0;
             this.numOreBarracksFamilies = 0;
+            uint[] family;
             for (uint i = 0; i < citizenUnits.Length; i++) 
             {
                 CitizenUnit citizenUnit = citizenUnits[i];
-                uint[] family = new uint[5];
+                if(citizenUnit.Empty())
+                {
+                    continue;
+                }
+                family = new uint[5];
                 for (int j = 0; j < 5; j++)
                 {
                     uint citizenId = citizenUnit.GetCitizen(j);
-                    family[j] = citizenId;
+                    if(citizenManager.m_citizens.m_buffer[citizenId].m_flags.IsFlagSet(Citizen.Flags.Created))
+                    {
+                        family[j] = citizenId;
+                    }
                 }
 
                 bool move_in = false;
@@ -120,7 +128,8 @@ namespace CampusIndustriesHousingMod
                 {
                     for (int k = 0; k < family.Length; k++) 
                     {
-                        if (family[k] != 0 && this.isMovingIn(family[k])) 
+                        uint familyMember = family[k];
+                        if (familyMember != 0 && this.isMovingIn(familyMember)) 
                         {
                             this.familiesWithWorkers[this.numFamiliesWithWorkers++] = i;
                             move_in = true; // moving in, so not moving out
