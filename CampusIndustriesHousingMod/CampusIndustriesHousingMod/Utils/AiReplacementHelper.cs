@@ -30,15 +30,14 @@ namespace CampusIndustriesHousingMod
 
         private static void ChangeBuildingAI(BuildingInfo b, Type AIType) 
         {
-            //Delete old AI
-            var oldAI = b.gameObject.GetComponent<PrefabAI>();
-            b.DestroyPrefab();
-            UnityEngine.Object.DestroyImmediate(oldAI);
-
-            //Add new AI
-            var newAI = (PrefabAI)b.gameObject.AddComponent(AIType);
+            var oldAI = b.gameObject.GetComponent<BuildingAI>();
+            var newAI = (BuildingAI)b.gameObject.AddComponent(AIType);
             TryCopyAttributes(oldAI, newAI, false);
-            b.InitializePrefab();
+            oldAI.DestroyPrefab();
+            UnityEngine.Object.DestroyImmediate(oldAI);
+            b.m_buildingAI = newAI;
+            newAI.m_info = b;
+            newAI.InitializePrefab();
         }
 
         private static void TryCopyAttributes(PrefabAI src, PrefabAI dst, bool safe = true) 
