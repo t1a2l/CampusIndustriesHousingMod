@@ -782,18 +782,34 @@ namespace CampusIndustriesHousingMod
                 if(barracks.m_industryType == DistrictPark.ParkType.Farming)
                 {
                     barracks.numApartments = 2;
+                    barracks.m_workPlaceCount0 = 5;
+                    barracks.m_workPlaceCount1 = 0;
+                    barracks.m_workPlaceCount2 = 0;
+                    barracks.m_workPlaceCount3 = 0;
                 }
                 else if(barracks.m_industryType == DistrictPark.ParkType.Forestry)
                 {
                     barracks.numApartments = 10;
+                    barracks.m_workPlaceCount0 = 5;
+                    barracks.m_workPlaceCount1 = 2;
+                    barracks.m_workPlaceCount2 = 0;
+                    barracks.m_workPlaceCount3 = 0;
                 }
                 else if(barracks.m_industryType == DistrictPark.ParkType.Oil)
                 {
                     barracks.numApartments = 50;
+                    barracks.m_workPlaceCount0 = 5;
+                    barracks.m_workPlaceCount1 = 2;
+                    barracks.m_workPlaceCount2 = 0;
+                    barracks.m_workPlaceCount3 = 0;
                 }
                 else if(barracks.m_industryType == DistrictPark.ParkType.Ore)
                 {
                     barracks.numApartments = 48;
+                    barracks.m_workPlaceCount0 = 5;
+                    barracks.m_workPlaceCount1 = 2;
+                    barracks.m_workPlaceCount2 = 0;
+                    barracks.m_workPlaceCount3 = 0;
                 }
             } 
             else 

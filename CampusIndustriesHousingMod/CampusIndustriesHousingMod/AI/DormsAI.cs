@@ -776,14 +776,26 @@ namespace CampusIndustriesHousingMod
                 if(dorms.m_campusType == DistrictPark.ParkType.University)
                 {
                     dorms.numApartments = 60;
+                    dorms.m_workPlaceCount0 = 3;
+                    dorms.m_workPlaceCount1 = 3;
+                    dorms.m_workPlaceCount2 = 0;
+                    dorms.m_workPlaceCount3 = 0;
                 }
                 else if(dorms.m_campusType == DistrictPark.ParkType.LiberalArts)
                 {
                     dorms.numApartments = 60;
+                    dorms.m_workPlaceCount0 = 3;
+                    dorms.m_workPlaceCount1 = 3;
+                    dorms.m_workPlaceCount2 = 0;
+                    dorms.m_workPlaceCount3 = 0;
                 }
                 else if(dorms.m_campusType == DistrictPark.ParkType.TradeSchool)
                 {
                     dorms.numApartments = 60;
+                    dorms.m_workPlaceCount0 = 3;
+                    dorms.m_workPlaceCount1 = 3;
+                    dorms.m_workPlaceCount2 = 0;
+                    dorms.m_workPlaceCount3 = 0;
                 }
             } 
             else 
