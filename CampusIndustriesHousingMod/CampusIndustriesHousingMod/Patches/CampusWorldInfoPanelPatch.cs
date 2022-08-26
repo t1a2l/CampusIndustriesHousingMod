@@ -9,7 +9,7 @@ namespace CampusIndustriesHousingMod
     [HarmonyPatch(typeof(CampusWorldInfoPanel))]
     class CampusWorldInfoPanelPatch
     {
-        private static readonly bool LOG_CAMPUS = true;
+        private static readonly bool LOG_CAMPUS = false;
 
         [HarmonyPatch(typeof(CampusWorldInfoPanel), "UpdateBindings")]
         [HarmonyPostfix]

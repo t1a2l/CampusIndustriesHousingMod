@@ -9,7 +9,7 @@ namespace CampusIndustriesHousingMod
     [HarmonyPatch(typeof(IndustryWorldInfoPanel))]
     class IndustryWorldInfoPanelPatch
     {
-        private static readonly bool LOG_INDUSTRY = true;
+        private static readonly bool LOG_INDUSTRY = false;
 
         [HarmonyPatch(typeof(IndustryWorldInfoPanel), "UpdateWorkersAndTotalUpkeep")]
         [HarmonyPostfix]
