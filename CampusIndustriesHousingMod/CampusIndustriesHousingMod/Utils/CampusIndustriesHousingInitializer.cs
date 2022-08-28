@@ -267,7 +267,7 @@ namespace CampusIndustriesHousingMod
                     BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(index);
 
                     // Check for replacement of AI
-                    if (buildingInfo != null && buildingInfo.name.Contains("Dormitory"))
+                    if (buildingInfo != null && buildingInfo.GetAI() is CampusBuildingAI && buildingInfo.name.Contains("Dormitory") || buildingInfo.name.Contains("Dorm"))
                     {
                         // custom assets get the university dormitory info
                         if(buildingInfo.m_isCustomContent)
@@ -301,7 +301,7 @@ namespace CampusIndustriesHousingMod
                     BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(index);
 
                     // Check for replacement of AI
-                    if (buildingInfo != null && buildingInfo.name.Contains("Barracks"))
+                    if (buildingInfo != null && buildingInfo.GetAI() is AuxiliaryBuildingAI && buildingInfo.name.Contains("Barracks"))
                     {
                         // custom assets get the workers barracks info
                         if(buildingInfo.m_isCustomContent)

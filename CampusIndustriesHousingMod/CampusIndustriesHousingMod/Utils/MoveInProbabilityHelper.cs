@@ -97,7 +97,7 @@ namespace CampusIndustriesHousingMod
 
             float distanceChanceValue;
             // Calulate the chance modifier based on distances
-            if(distance_from_current_home_to_work <= distance_from_new_home_to_Work)
+            if(distance_from_current_home_to_work <= distance_from_new_home_to_Work || distance_from_current_home_to_work <= 500f)
             {
                 distanceChanceValue = DISTANCE_MAX_CHANCE_VALUE * 0.25f;
             } 
