@@ -1,6 +1,7 @@
 ﻿using System;
 using ColossalFramework;
 using ColossalFramework.UI;
+using HarmonyLib;
 using UnityEngine;
 using static CampusIndustriesHousingMod.HousingManager;
 
@@ -8,123 +9,96 @@ namespace CampusIndustriesHousingMod
 {
     public class HousingUI
     {
-        CityServiceWorldInfoPanel _cityServiceWorldInfoPanel;
-        UIPanel _parkButtonsPanel;
-        UIComponent parkButtons;
-        UIComponent wrapper;
-        UIComponent mainSectionPanel;
-        UIComponent mainBottom;
-        UIComponent buttonPanels;
-
-        private UILabel _settingsHeader;
-        private UIPanel _settingsPanel;
-        private UICheckBox _settingsCheckBox;
-
-        private UILabel _apartmentsNumLabel;
+        private static UILabel _apartmentsNumLabel;
         private static UITextField _apartmentsNumTextfield;
 
-        private UILabel _workPlaceCount0Label;
+        private static UILabel _workPlaceCount0Label;
         private static UITextField _workPlaceCount0Textfield;
 
-        private UILabel _workPlaceCount1Label;
+        private static UILabel _workPlaceCount1Label;
         private static UITextField _workPlaceCount1Textfield;
 
-        private UILabel _workPlaceCount2Label;
+        private static UILabel _workPlaceCount2Label;
         private static UITextField _workPlaceCount2Textfield;
 
-        private UILabel _workPlaceCount3Label;
+        private static UILabel _workPlaceCount3Label;
         private static UITextField _workPlaceCount3Textfield;
 
-        private UIButton ApplySettingsThisBuildingOnly;
-        private UIButton ApplySettingsThisBuildingTypeDefaultThisSave;
-        private UIButton ApplySettingsThisBuildingTypeDefaultGlobal;
-
-        public void Start()
-        {
-            try
-            {
-                _cityServiceWorldInfoPanel = GameObject.Find("(Library) CityServiceWorldInfoPanel").GetComponent<CityServiceWorldInfoPanel>();
-
-                // Get ParkButtons UIPanel.
-                wrapper = _cityServiceWorldInfoPanel?.Find("Wrapper");
-                mainSectionPanel = wrapper?.Find("MainSectionPanel");
-                mainBottom = mainSectionPanel?.Find("MainBottom");
-                buttonPanels = mainSectionPanel?.Find("ButtonPanels");
-                parkButtons = mainSectionPanel?.Find("ParkButtons");
-
-                _parkButtonsPanel = _cityServiceWorldInfoPanel.Find("ParkButtons").GetComponent<UIPanel>();
-
-                CreateUI();
-            }
-            catch (Exception e)
-            {
-                Debug.Log("[Show It!] ModManager:Start -> Exception: " + e.Message);
-            }
-        }
-
-        public void CreateUI()
+        [HarmonyPatch(typeof(CityServiceWorldInfoPanel), "UpdateBindings")]
+        [HarmonyPostfix]
+        public static void Postfix()
         {
             try
             {  
+                CityServiceWorldInfoPanel _cityServiceWorldInfoPanel = GameObject.Find("(Library) CityServiceWorldInfoPanel").GetComponent<CityServiceWorldInfoPanel>();
+
+                // Get ParkButtons UIPanel.
+                UIComponent wrapper = _cityServiceWorldInfoPanel?.Find("Wrapper");
+                UIComponent mainSectionPanel = wrapper?.Find("MainSectionPanel");
+                UIComponent mainBottom = mainSectionPanel?.Find("MainBottom");
+                UIComponent buttonPanels = mainSectionPanel?.Find("ButtonPanels");
+                UIComponent parkButtons = mainSectionPanel?.Find("ParkButtons");
+
+                UIPanel _parkButtonsPanel = _cityServiceWorldInfoPanel.Find("ParkButtons").GetComponent<UIPanel>();
+
                 ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
 
                 if(parkButtons != null)
                 {
-                    _settingsPanel = CreatePanel(_cityServiceWorldInfoPanel.component, "ShowSettingsPanel");
+                    UIPanel _settingsPanel = CreatePanel(_cityServiceWorldInfoPanel.component, "ShowSettingsPanel");
                     _settingsPanel.opacity = 0.90f;
-
-                    _settingsCheckBox = CreateCheckBox(parkButtons, "SettingsCheckBox", "settings", false);
-                    _settingsCheckBox.width = 110f;
-                    _settingsCheckBox.label.textColor = new Color32(185, 221, 254, 255);
-                    _settingsCheckBox.label.textScale = 0.8125f;
-                    _settingsCheckBox.tooltip = "Indicators will show how well serviced the building is and what problems might prevent the building from leveling up.";
-                    _settingsCheckBox.AlignTo(_parkButtonsPanel, UIAlignAnchor.TopLeft);
-                    _settingsCheckBox.relativePosition = new Vector3(_parkButtonsPanel.width - _settingsCheckBox.width, 6f);
-                    _settingsCheckBox.eventCheckChanged += (component, value) =>
-                    {
-                        _settingsCheckBox.isVisible = value;
-                    };
-
-                    _settingsHeader = CreateLabel(_settingsPanel, "SettingsPanelHeader", "Settings", "");
-                    _settingsHeader.font = GetUIFont("OpenSans-Regular");
-                    _settingsHeader.textAlignment = UIHorizontalAlignment.Center;
-
-                    _apartmentsNumLabel = CreateLabel(_settingsPanel, "ApartmentNumberLabel", "", "Number of apartments: ");
-                    _apartmentsNumLabel.relativePosition = PositionUnder(_settingsHeader);
-                    _apartmentsNumTextfield = CreateTextField(_settingsPanel, "ApartmentNumberTextfield", "number of apartments");
-                    _apartmentsNumTextfield.relativePosition = PositionRightOf(_apartmentsNumLabel);
-
-                    _workPlaceCount0Label = CreateLabel(_settingsPanel, "WorkPlaceCount0Label", "", "Uneducated Workers: ");
-                    _workPlaceCount0Label.relativePosition = PositionUnder(_apartmentsNumLabel);
-                    _workPlaceCount0Textfield = CreateTextField(_settingsPanel, "WorkPlaceCount0Textfield", "number of uneducated workers");
-                    _workPlaceCount0Textfield.relativePosition = PositionRightOf(_workPlaceCount0Label);
-
-                    _workPlaceCount1Label = CreateLabel(_settingsPanel, "WorkPlaceCount1Label", "", "Educated Workers: ");
-                    _workPlaceCount1Label.relativePosition = PositionUnder(_workPlaceCount0Label);
-                    _workPlaceCount1Textfield = CreateTextField(_settingsPanel, "WorkPlaceCount1Textfield", "number of educated workers");
-                    _workPlaceCount1Textfield.relativePosition = PositionRightOf(_workPlaceCount1Label);
-
-                     _workPlaceCount2Label = CreateLabel(_settingsPanel, "WorkPlaceCount2Label", "", "Well Educated Workers: ");
-                    _workPlaceCount2Label.relativePosition = PositionUnder(_workPlaceCount1Label);
-                    _workPlaceCount2Textfield = CreateTextField(_settingsPanel, "WorkPlaceCount0Textfield", "number of well educated workers");
-                    _workPlaceCount2Textfield.relativePosition = PositionRightOf(_workPlaceCount2Label);
-
-                     _workPlaceCount3Label = CreateLabel(_settingsPanel, "WorkPlaceCount3Label", "", "Highly Educated Workers: ");
-                    _workPlaceCount3Label.relativePosition = PositionUnder(_workPlaceCount2Label);
-                    _workPlaceCount3Textfield = CreateTextField(_settingsPanel, "WorkPlaceCount0Textfield", "number of highly educated workers");
-                    _workPlaceCount3Textfield.relativePosition = PositionRightOf(_workPlaceCount3Label);
 
                     // set default values
                     Building[] buildingBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
                     BuildingInfo buildingInfo = buildingBuffer[buildingID].Info;
                     var buildingAI = buildingInfo.GetAI();
-                    if (buildingAI == null)
+                    if (buildingAI is not BarracksAI && buildingAI is not DormsAI)
                     {
                         // Not a barracks or dorms building - hide the label.
                         _settingsPanel.Hide();
                     }
                     else
                     {
+                        UICheckBox _settingsCheckBox = CreateCheckBox(parkButtons, "SettingsCheckBox", "settings", false);
+                        _settingsCheckBox.width = 110f;
+                        _settingsCheckBox.label.textColor = new Color32(185, 221, 254, 255);
+                        _settingsCheckBox.label.textScale = 0.8125f;
+                        _settingsCheckBox.tooltip = "Indicators will show how well serviced the building is and what problems might prevent the building from leveling up.";
+                        _settingsCheckBox.AlignTo(_parkButtonsPanel, UIAlignAnchor.TopLeft);
+                        _settingsCheckBox.relativePosition = new Vector3(_parkButtonsPanel.width - _settingsCheckBox.width, 6f);
+                        _settingsCheckBox.eventCheckChanged += (component, value) =>
+                        {
+                            _settingsCheckBox.isVisible = value;
+                        };
+
+                        UILabel _settingsHeader = CreateLabel(_settingsPanel, "SettingsPanelHeader", "Settings", "");
+                        _settingsHeader.font = GetUIFont("OpenSans-Regular");
+                        _settingsHeader.textAlignment = UIHorizontalAlignment.Center;
+
+                        _apartmentsNumLabel = CreateLabel(_settingsPanel, "ApartmentNumberLabel", "", "Number of apartments: ");
+                        _apartmentsNumLabel.relativePosition = PositionUnder(_settingsHeader);
+                        _apartmentsNumTextfield = CreateTextField(_settingsPanel, "ApartmentNumberTextfield", "number of apartments");
+                        _apartmentsNumTextfield.relativePosition = PositionRightOf(_apartmentsNumLabel);
+
+                        _workPlaceCount0Label = CreateLabel(_settingsPanel, "WorkPlaceCount0Label", "", "Uneducated Workers: ");
+                        _workPlaceCount0Label.relativePosition = PositionUnder(_apartmentsNumLabel);
+                        _workPlaceCount0Textfield = CreateTextField(_settingsPanel, "WorkPlaceCount0Textfield", "number of uneducated workers");
+                        _workPlaceCount0Textfield.relativePosition = PositionRightOf(_workPlaceCount0Label);
+
+                        _workPlaceCount1Label = CreateLabel(_settingsPanel, "WorkPlaceCount1Label", "", "Educated Workers: ");
+                        _workPlaceCount1Label.relativePosition = PositionUnder(_workPlaceCount0Label);
+                        _workPlaceCount1Textfield = CreateTextField(_settingsPanel, "WorkPlaceCount1Textfield", "number of educated workers");
+                        _workPlaceCount1Textfield.relativePosition = PositionRightOf(_workPlaceCount1Label);
+
+                        _workPlaceCount2Label = CreateLabel(_settingsPanel, "WorkPlaceCount2Label", "", "Well Educated Workers: ");
+                        _workPlaceCount2Label.relativePosition = PositionUnder(_workPlaceCount1Label);
+                        _workPlaceCount2Textfield = CreateTextField(_settingsPanel, "WorkPlaceCount0Textfield", "number of well educated workers");
+                        _workPlaceCount2Textfield.relativePosition = PositionRightOf(_workPlaceCount2Label);
+
+                        _workPlaceCount3Label = CreateLabel(_settingsPanel, "WorkPlaceCount3Label", "", "Highly Educated Workers: ");
+                        _workPlaceCount3Label.relativePosition = PositionUnder(_workPlaceCount2Label);
+                        _workPlaceCount3Textfield = CreateTextField(_settingsPanel, "WorkPlaceCount0Textfield", "number of highly educated workers");
+                        _workPlaceCount3Textfield.relativePosition = PositionRightOf(_workPlaceCount3Label);
                         var res = HousingManager.BuildingRecords.TryGetValue(buildingID, out BuildingRecord buildingRecord);
                         if(res)
                         {
@@ -136,7 +110,6 @@ namespace CampusIndustriesHousingMod
                         } 
                         else
                         {
-
                             if(buildingAI is BarracksAI barracksAI)
                             {
                                 barracksAI = DefaultBarracksValues(barracksAI);
@@ -159,15 +132,15 @@ namespace CampusIndustriesHousingMod
                         _settingsPanel.Show();
                     }
 
-                    ApplySettingsThisBuildingOnly = CreateButton(_settingsPanel, "apply settings to this building");
+                    UIButton ApplySettingsThisBuildingOnly = CreateButton(_settingsPanel, "apply settings to this building");
                     ApplySettingsThisBuildingOnly.relativePosition = PositionUnder(_workPlaceCount3Label);
                     ApplySettingsThisBuildingOnly.eventClicked += delegate { SaveChangesThisBuildingOnly(buildingID, buildingInfo); };
 
-                    ApplySettingsThisBuildingTypeDefaultThisSave = CreateButton(_settingsPanel, "set default type values");
+                    UIButton ApplySettingsThisBuildingTypeDefaultThisSave = CreateButton(_settingsPanel, "set default type values");
                     ApplySettingsThisBuildingTypeDefaultThisSave.relativePosition = PositionRightOf(ApplySettingsThisBuildingOnly);
                     ApplySettingsThisBuildingTypeDefaultThisSave.eventClicked += delegate { SaveChangesThisBuildingTypeDefaultThisSave(buildingInfo); };
 
-                    ApplySettingsThisBuildingTypeDefaultGlobal = CreateButton(_settingsPanel, "set default global values");
+                    UIButton ApplySettingsThisBuildingTypeDefaultGlobal = CreateButton(_settingsPanel, "set default global values");
                     ApplySettingsThisBuildingTypeDefaultGlobal.relativePosition = PositionRightOf(ApplySettingsThisBuildingTypeDefaultThisSave);
                     ApplySettingsThisBuildingTypeDefaultGlobal.eventClicked += delegate { SaveChangesThisBuildingTypeDefaultGlobal(buildingInfo); };
                 }
