@@ -241,7 +241,7 @@ namespace CampusIndustriesHousingMod
             for (uint i=0; (long) PrefabCollection<BuildingInfo>.LoadedCount() > (long) i; ++i) 
             {
                 BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(i);
-                if (buildingInfo != null && buildingInfo.GetService() == ItemClass.Service.PlayerIndustry && !buildingInfo.m_buildingAI.IsWonder() && buildingInfo.m_buildingAI is AuxiliaryBuildingAI && buildingInfo.name.Contains("Barracks")) 
+                if (buildingInfo != null && buildingInfo.GetService() == ItemClass.Service.PlayerIndustry && !buildingInfo.m_buildingAI.IsWonder() && buildingInfo.m_buildingAI is AuxiliaryBuildingAI && (buildingInfo.name.Contains("Barracks") || buildingInfo.name.Contains("Residential"))) 
                 {
                     Logger.logInfo(LOG_INITIALIZER, "NursingHomeInitializer.findIndustrialBarracksBuildingInfo -- Using the {0} as a template instead of the Barracks", buildingInfo);
                     return buildingInfo;
@@ -267,7 +267,7 @@ namespace CampusIndustriesHousingMod
                     BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(index);
 
                     // Check for replacement of AI
-                    if (buildingInfo != null && buildingInfo.GetAI() is CampusBuildingAI && buildingInfo.name.Contains("Dormitory") || buildingInfo.name.Contains("Dorm"))
+                    if (buildingInfo != null && buildingInfo.GetAI() is CampusBuildingAI && (buildingInfo.name.Contains("Dormitory") || buildingInfo.name.Contains("Dorm")))
                     {
                         // custom assets get the university dormitory info
                         if(buildingInfo.m_isCustomContent)
