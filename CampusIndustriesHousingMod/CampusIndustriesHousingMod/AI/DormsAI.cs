@@ -5,7 +5,6 @@ using ColossalFramework.Math;
 using UnityEngine;
 using System.Threading;
 using System.Collections.Generic;
-using static CampusIndustriesHousingMod.HousingManager;
 
 namespace CampusIndustriesHousingMod 
 {
@@ -113,7 +112,7 @@ namespace CampusIndustriesHousingMod
 	    {
 		    base.CreateBuilding(buildingID, ref data);
 		    int workCount = m_workPlaceCount0 + m_workPlaceCount1 + m_workPlaceCount2 + m_workPlaceCount3;
-		    Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, getModifiedCapacity(buildingID, ref data), workCount, 0, 0, 0);
+		    Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, getModifiedCapacity(ref data), workCount, 0, 0, 0);
         }
 
         public override void BuildingLoaded(ushort buildingID, ref Building data, uint version)
@@ -126,7 +125,7 @@ namespace CampusIndustriesHousingMod
             this.validateCapacity(buildingID, ref data, false);
 
 		    int workCount =  m_workPlaceCount0 + m_workPlaceCount1 + m_workPlaceCount2 + m_workPlaceCount3;
-		    EnsureCitizenUnits(buildingID, ref data, getModifiedCapacity(buildingID, ref data), workCount, 0, 0);
+		    EnsureCitizenUnits(buildingID, ref data, getModifiedCapacity(ref data), workCount, 0, 0);
 	    }
 
         public override void EndRelocating(ushort buildingID, ref Building data)
@@ -139,7 +138,7 @@ namespace CampusIndustriesHousingMod
             this.validateCapacity(buildingID, ref data, false);
 
 		    int workCount = m_workPlaceCount0 + m_workPlaceCount1 + m_workPlaceCount2 + m_workPlaceCount3;
-		    EnsureCitizenUnits(buildingID, ref data, getModifiedCapacity(buildingID, ref data), workCount, 0, 0);
+		    EnsureCitizenUnits(buildingID, ref data, getModifiedCapacity(ref data), workCount, 0, 0);
 	    }
 
         public override void SimulationStep(ushort buildingID, ref Building buildingData, ref Building.Frame frameData) 
@@ -280,7 +279,7 @@ namespace CampusIndustriesHousingMod
             HandleDead(buildingID, ref buildingData, ref behaviour, totalWorkerCount + totalCount);
 
             // Handle Crime and Fire Factors
-            int crimeAccumulation = behaviour.m_crimeAccumulation / (3 * getModifiedCapacity(buildingID, ref buildingData));
+            int crimeAccumulation = behaviour.m_crimeAccumulation / (3 * getModifiedCapacity(ref buildingData));
             if ((policies & DistrictPolicies.Services.RecreationalUse) != DistrictPolicies.Services.None) 
             {
                 crimeAccumulation = crimeAccumulation * 3 + 3 >> 2;
@@ -317,7 +316,7 @@ namespace CampusIndustriesHousingMod
             districtManager.m_districts.m_buffer[(int) district].AddResidentialData(ref behaviour, aliveCount, health, happiness, crimeRate, homeCount, aliveHomeCount, emptyHomeCount, (int) this.m_info.m_class.m_level, modifiedElectricityConsumption, heatingConsumption, waterConsumption, modifiedSewageAccumulation, garbageAccumulation, modifiedIncomeAccumulation, Mathf.Min(100, (int) buildingData.m_garbageBuffer / 50), (int) buildingData.m_waterPollution * 100 / (int) byte.MaxValue, this.m_info.m_class.m_subService);
 
             // Handle custom maintenance in addition to the standard maintenance handled in the base class
-            handleAdditionalMaintenanceCost(buildingID, ref buildingData);
+            handleAdditionalMaintenanceCost(ref buildingData);
 		    
             base.SimulationStepActive(buildingID, ref buildingData, ref frameData);
             HandleFire(buildingID, ref buildingData, ref frameData, policies);
@@ -431,13 +430,13 @@ namespace CampusIndustriesHousingMod
                     stringBuilder.Append(Environment.NewLine);
 			    }
 		    }
-            stringBuilder.Append(string.Format("Apartments Occupied: {0} of {1}", numApartmentsOccupied, getModifiedCapacity(buildingID, ref data)));
+            stringBuilder.Append(string.Format("Apartments Occupied: {0} of {1}", numApartmentsOccupied, getModifiedCapacity(ref data)));
             stringBuilder.Append(Environment.NewLine);
             stringBuilder.Append(string.Format("Number of Residents: {0}", numResidents));
             return stringBuilder.ToString();
         }
 
-        private int getCustomMaintenanceCost(ushort buildingID, ref Building buildingData) 
+        private int getCustomMaintenanceCost(ref Building buildingData) 
         {
             int originalAmount = -(this.m_maintenanceCost * 100);
 
@@ -454,7 +453,7 @@ namespace CampusIndustriesHousingMod
             }
 
             getOccupancyDetails(ref buildingData, out int numResidents, out int numApartmentsOccupied);
-            float capacityModifier = (float) numApartmentsOccupied / (float) getModifiedCapacity(buildingID,ref buildingData);
+            float capacityModifier = (float) numApartmentsOccupied / (float) getModifiedCapacity(ref buildingData);
             int modifiedAmount = (int) ((float) originalAmount * capacityModifier);
 
             int amount = 0;
@@ -490,9 +489,9 @@ namespace CampusIndustriesHousingMod
             return amount;
         }
 
-        public void handleAdditionalMaintenanceCost(ushort buildingID, ref Building buildingData) 
+        public void handleAdditionalMaintenanceCost(ref Building buildingData) 
         {
-            int amount = getCustomMaintenanceCost(buildingID, ref buildingData);
+            int amount = getCustomMaintenanceCost(ref buildingData);
             if (amount == 0) 
             {
                 return;
@@ -769,28 +768,47 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        public int getModifiedCapacity(ushort buildingID, ref Building data) 
+        public int getModifiedCapacity(ref Building data) 
         {
-            var res = HousingManager.BuildingRecords.TryGetValue(buildingID, out BuildingRecord buildingRecord);
             var dorms = data.Info.GetAI() as DormsAI;
-            if(res)
+            if(!data.Info.m_isCustomContent)
             {
-                dorms.numApartments = buildingRecord.NumOfApartments;
-                dorms.m_workPlaceCount0 = buildingRecord.WorkPlaceCount0;
-                dorms.m_workPlaceCount1 = buildingRecord.WorkPlaceCount1;
-                dorms.m_workPlaceCount2 = buildingRecord.WorkPlaceCount2;
-                dorms.m_workPlaceCount3 = buildingRecord.WorkPlaceCount3;
+                if(dorms.m_campusType == DistrictPark.ParkType.University)
+                {
+                    dorms.numApartments = 60;
+                    dorms.m_workPlaceCount0 = 3;
+                    dorms.m_workPlaceCount1 = 3;
+                    dorms.m_workPlaceCount2 = 0;
+                    dorms.m_workPlaceCount3 = 0;
+                }
+                else if(dorms.m_campusType == DistrictPark.ParkType.LiberalArts)
+                {
+                    dorms.numApartments = 60;
+                    dorms.m_workPlaceCount0 = 3;
+                    dorms.m_workPlaceCount1 = 3;
+                    dorms.m_workPlaceCount2 = 0;
+                    dorms.m_workPlaceCount3 = 0;
+                }
+                else if(dorms.m_campusType == DistrictPark.ParkType.TradeSchool)
+                {
+                    dorms.numApartments = 60;
+                    dorms.m_workPlaceCount0 = 3;
+                    dorms.m_workPlaceCount1 = 3;
+                    dorms.m_workPlaceCount2 = 0;
+                    dorms.m_workPlaceCount3 = 0;
+                }
             } 
-            else
+            else 
             {
-                dorms = HousingUI.DefaultDormsValues(dorms);
-            }   
+                dorms.numApartments = numApartments;
+            }
+
             return capacityModifier > 0 ? (int) (dorms.numApartments * capacityModifier) : dorms.numApartments;
         }
 
         public void validateCapacity(ushort buildingId, ref Building data, bool shouldCreateApartments) 
         {
-            int numApartmentsExpected = getModifiedCapacity(buildingId, ref data);
+            int numApartmentsExpected = getModifiedCapacity(ref data);
             
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitIndex = data.m_citizenUnits;

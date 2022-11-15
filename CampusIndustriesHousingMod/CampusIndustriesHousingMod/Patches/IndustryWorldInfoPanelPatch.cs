@@ -45,7 +45,7 @@ namespace CampusIndustriesHousingMod
                 {
                     barracksAI.getOccupancyDetails(ref industryBuilding, out int numResidents, out int numApartmentsOccupied);
                     total_ocuppied_apartment_num += numApartmentsOccupied;
-                    total_apartment_num += barracksAI.getModifiedCapacity(buildingId, ref industryBuilding);
+                    total_apartment_num += barracksAI.getModifiedCapacity(ref industryBuilding);
                     Logger.logInfo(LOG_INDUSTRY, "Industry Building occupied apartments: {0}", numApartmentsOccupied);
                 }
             }
