@@ -18,7 +18,7 @@ namespace CampusIndustriesHousingMod
         public int numApartments = 50;
         private float capacityModifier = 1.0f;
 
-        public override Color GetColor(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode) 
+        public override Color GetColor(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode, InfoManager.SubInfoMode subInfoMode) 
         {
             // This is a copy from ResidentialBuildingAI
             InfoManager.InfoMode infoModeCopy = infoMode;
@@ -83,12 +83,12 @@ namespace CampusIndustriesHousingMod
                             int num6 = Mathf.Clamp(num4, 0, 100);
                             return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int) infoMode].m_negativeColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int) infoMode].m_targetColor, (float) num6 * 0.01f);
                         default:
-                            return this.handleOtherColors(buildingId, ref data, infoMode);
+                            return this.handleOtherColors(buildingId, ref data, infoMode, subInfoMode);
                     }
             }
         }
 
-        private Color handleOtherColors(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode) 
+        private Color handleOtherColors(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode, InfoManager.SubInfoMode subInfoMode) 
         {
             switch (infoMode) 
             {
@@ -101,9 +101,9 @@ namespace CampusIndustriesHousingMod
                 case InfoManager.InfoMode.Garbage:
                     if (m_garbageAccumulation == 0)
                         return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
-                    return base.GetColor(buildingId, ref data, infoMode);
+                    return base.GetColor(buildingId, ref data, infoMode, subInfoMode);
                 default:
-                    return base.GetColor(buildingId, ref data, infoMode);
+                    return base.GetColor(buildingId, ref data, infoMode, subInfoMode);
             }
         }
 
