@@ -1,8 +1,9 @@
-﻿using System;
+﻿using CampusIndustriesHousingMod.AI;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace CampusIndustriesHousingMod 
+namespace CampusIndustriesHousingMod.Utils 
 {
     public static class AiReplacementHelper 
     {

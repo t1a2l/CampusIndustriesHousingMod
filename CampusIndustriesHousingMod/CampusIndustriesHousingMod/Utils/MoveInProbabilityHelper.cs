@@ -3,7 +3,7 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using UnityEngine;
 
-namespace CampusIndustriesHousingMod 
+namespace CampusIndustriesHousingMod.Utils  
 {
     public class MoveInProbabilityHelper 
     {

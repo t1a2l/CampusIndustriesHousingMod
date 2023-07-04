@@ -4,8 +4,9 @@ using System.IO;
 using System.Xml.Serialization;
 using System;
 using ColossalFramework;
+using CampusIndustriesHousingMod.AI;
 
-namespace CampusIndustriesHousingMod 
+namespace CampusIndustriesHousingMod.Utils  
 {
     public class OptionsManager {
 

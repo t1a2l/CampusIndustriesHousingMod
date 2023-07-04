@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
+using CampusIndustriesHousingMod.AI;
 using ColossalFramework;
 using UnityEngine;
 
-namespace CampusIndustriesHousingMod
+namespace CampusIndustriesHousingMod.Utils 
 {
     public class CampusIndustriesHousingInitializer : MonoBehaviour 
     {

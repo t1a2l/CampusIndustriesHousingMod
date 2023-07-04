@@ -1,13 +1,14 @@
-﻿using ColossalFramework;
+﻿using CampusIndustriesHousingMod.AI;
+using ColossalFramework;
 using ColossalFramework.UI;
 using HarmonyLib;
 using System;
 using System.Reflection;
 
-namespace CampusIndustriesHousingMod
+namespace CampusIndustriesHousingMod.Patches
 {
     [HarmonyPatch(typeof(IndustryWorldInfoPanel))]
-    class IndustryWorldInfoPanelPatch
+    public static class IndustryWorldInfoPanelPatch
     {
         private static readonly bool LOG_INDUSTRY = false;
 

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using CampusIndustriesHousingMod.AI;
 using ColossalFramework;
 using ColossalFramework.Math;
 using ICities;
 
-namespace CampusIndustriesHousingMod 
+namespace CampusIndustriesHousingMod.Utils  
 {
     public class StudentManager : ThreadingExtensionBase 
     {

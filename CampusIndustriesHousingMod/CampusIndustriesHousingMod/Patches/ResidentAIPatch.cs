@@ -1,7 +1,8 @@
-﻿using ColossalFramework;
+﻿using CampusIndustriesHousingMod.AI;
+using ColossalFramework;
 using HarmonyLib;
 
-namespace CampusIndustriesHousingMod
+namespace CampusIndustriesHousingMod.Patches
 {
     [HarmonyPatch(typeof(ResidentAI))]
     class ResidentAIPatch

@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using CampusIndustriesHousingMod.AI;
+using System.Collections.Generic;
 
-namespace CampusIndustriesHousingMod
+namespace CampusIndustriesHousingMod.Utils
 {
-    public class HousingManager
+    public static class HousingManager
     {
         internal static readonly Dictionary<uint, BuildingRecord> BuildingRecords = new Dictionary<uint, BuildingRecord>();
 
         internal static readonly List<PrefabRecord> PrefabRecords = new List<PrefabRecord>();
-
-        private const bool LOG_SERIALIZATION = false;
 
         public struct BuildingRecord
         {
@@ -88,148 +86,75 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        /// <summary>
-        /// Serializes savegame data.
-        /// </summary>
-        /// <param name="writer">Binary writer instance to serialize to.</param>
-        internal static void Serialize(BinaryWriter writer)
+        public static BarracksAI DefaultBarracksValues(BarracksAI barracks)
         {
-            Logger.logInfo("serializing building data");
-
-            // Write length of dictionary.
-            writer.Write(BuildingRecords.Count);
-
-            // Serialise each building entry.
-            foreach (KeyValuePair<uint, BuildingRecord> entry in BuildingRecords)
+            if(barracks.m_industryType == DistrictPark.ParkType.Farming)
             {
-                // Local reference.
-                BuildingRecord buildingRecord = entry.Value;
-
-                // Serialize key and simple fields.
-                writer.Write(entry.Key);
-
-                writer.Write(buildingRecord.BuildingAI);
-
-                writer.Write(buildingRecord.NumOfApartments);
-
-                writer.Write(buildingRecord.WorkPlaceCount0);
-
-                writer.Write(buildingRecord.WorkPlaceCount1);
-
-                writer.Write(buildingRecord.WorkPlaceCount2);
-
-                writer.Write(buildingRecord.WorkPlaceCount3);
-
-                Logger.logInfo(LOG_SERIALIZATION, "wrote entry ", entry.Key);
+                barracks.numApartments = 2;
+                barracks.m_workPlaceCount0 = 5;
+                barracks.m_workPlaceCount1 = 0;
+                barracks.m_workPlaceCount2 = 0;
+                barracks.m_workPlaceCount3 = 0;
+            }
+            else if(barracks.m_industryType == DistrictPark.ParkType.Forestry)
+            {
+                barracks.numApartments = 10;
+                barracks.m_workPlaceCount0 = 5;
+                barracks.m_workPlaceCount1 = 2;
+                barracks.m_workPlaceCount2 = 0;
+                barracks.m_workPlaceCount3 = 0;
+            }
+            else if(barracks.m_industryType == DistrictPark.ParkType.Oil)
+            {
+                barracks.numApartments = 50;
+                barracks.m_workPlaceCount0 = 5;
+                barracks.m_workPlaceCount1 = 2;
+                barracks.m_workPlaceCount2 = 0;
+                barracks.m_workPlaceCount3 = 0;
+            }
+            else if(barracks.m_industryType == DistrictPark.ParkType.Ore)
+            {
+                barracks.numApartments = 48;
+                barracks.m_workPlaceCount0 = 5;
+                barracks.m_workPlaceCount1 = 2;
+                barracks.m_workPlaceCount2 = 0;
+                barracks.m_workPlaceCount3 = 0;
             }
 
-            // Write length of list.
-            writer.Write(PrefabRecords.Count);
-
-             // Serialise each prefab entry.
-            foreach (PrefabRecord prefabRecord in PrefabRecords)
-            {
-                writer.Write(prefabRecord.Name);
-
-                writer.Write(prefabRecord.BuildingAI);
-
-                writer.Write(prefabRecord.NumOfApartments);
-
-                writer.Write(prefabRecord.WorkPlaceCount0);
-
-                writer.Write(prefabRecord.WorkPlaceCount1);
-
-                writer.Write(prefabRecord.WorkPlaceCount2);
-
-                writer.Write(prefabRecord.WorkPlaceCount3);
-
-                Logger.logInfo(LOG_SERIALIZATION, "wrote entry ", prefabRecord.Name);
-            }
+            return barracks;
         }
 
-        /// <summary>
-        /// Deserializes savegame data.
-        /// </summary>
-        /// <param name="reader">Reader to deserialize from.</param>
-        internal static void Deserialize(BinaryReader reader)
+        public static DormsAI DefaultDormsValues(DormsAI dorms)
         {
-            Logger.logInfo("deserializing building data");
-
-            // Clear dictionary.
-            BuildingRecords.Clear();
-
-            PrefabRecords.Clear();
-
-            // Iterate through each entry read.
-            int BuildingRecords_Lenght = reader.ReadInt32();
-            for (int i = 0; i < BuildingRecords_Lenght; ++i)
+            if(dorms.m_campusType == DistrictPark.ParkType.University)
             {
-                // Dictionary entry key.
-                uint buildingID = reader.ReadUInt32();
-
-                BuildingRecord buildingRecord = new BuildingRecord
-                {
-                    BuildingAI = reader.ReadString(),
-                    NumOfApartments = reader.ReadInt32(),
-                    WorkPlaceCount0 = reader.ReadInt32(),
-                    WorkPlaceCount1 = reader.ReadInt32(),
-                    WorkPlaceCount2 = reader.ReadInt32(),
-                    WorkPlaceCount3 = reader.ReadInt32(),
-                };
-
-                // Drop any empty entries.
-                if (buildingRecord.BuildingAI == null)
-                {
-                    Logger.logInfo(LOG_SERIALIZATION, "dropping empty entry for building ", buildingID);
-                    continue;
-                }
-
-                // Add completed entry to dictionary.
-                if (!BuildingRecords.ContainsKey(buildingID))
-                {
-                    BuildingRecords.Add(buildingID, buildingRecord);
-                    Logger.logInfo(LOG_SERIALIZATION, "read entry for building ", buildingID);
-                }
-                else
-                {
-                    Logger.logError(LOG_SERIALIZATION, "duplicate buildingRecord key for building ", buildingID);
-                }
+                dorms.numApartments = 60;
+                dorms.m_workPlaceCount0 = 3;
+                dorms.m_workPlaceCount1 = 3;
+                dorms.m_workPlaceCount2 = 0;
+                dorms.m_workPlaceCount3 = 0;
+            }
+            else if(dorms.m_campusType == DistrictPark.ParkType.LiberalArts)
+            {
+                dorms.numApartments = 60;
+                dorms.m_workPlaceCount0 = 3;
+                dorms.m_workPlaceCount1 = 3;
+                dorms.m_workPlaceCount2 = 0;
+                dorms.m_workPlaceCount3 = 0;
+            }
+            else if(dorms.m_campusType == DistrictPark.ParkType.TradeSchool)
+            {
+                dorms.numApartments = 60;
+                dorms.m_workPlaceCount0 = 3;
+                dorms.m_workPlaceCount1 = 3;
+                dorms.m_workPlaceCount2 = 0;
+                dorms.m_workPlaceCount3 = 0;
             }
 
-            int PrefabRecords_Length = reader.ReadInt32();
-            for (int i = 0; i < PrefabRecords_Length; ++i)
-            {
-
-                PrefabRecord prefabgRecord = new PrefabRecord
-                {
-                    Name =  reader.ReadString(),
-                    BuildingAI = reader.ReadString(),
-                    NumOfApartments = reader.ReadInt32(),
-                    WorkPlaceCount0 = reader.ReadInt32(),
-                    WorkPlaceCount1 = reader.ReadInt32(),
-                    WorkPlaceCount2 = reader.ReadInt32(),
-                    WorkPlaceCount3 = reader.ReadInt32(),
-                };
-
-                // Drop any empty entries.
-                if (prefabgRecord.Name == null && prefabgRecord.BuildingAI == null)
-                {
-                    Logger.logInfo(LOG_SERIALIZATION, "dropping empty entry for prefab ", prefabgRecord.Name);
-                    continue;
-                }
-
-                // Add completed entry to list.
-                if (!PrefabRecords.Contains(prefabgRecord))
-                {
-                    PrefabRecords.Add(prefabgRecord);
-                    Logger.logInfo(LOG_SERIALIZATION, "read entry for prefab ", prefabgRecord.Name);
-                }
-                else
-                {
-                    Logger.logError(LOG_SERIALIZATION, "duplicate prefabgRecord setting for prefab ", prefabgRecord.Name);
-                }
-            }
+            return dorms;
         }
+
+        
 
     }
 }

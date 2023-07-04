@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using ICities;
 
-namespace CampusIndustriesHousingMod
+namespace CampusIndustriesHousingMod.Utils
 {
 
     /// <summary>
@@ -35,7 +35,7 @@ namespace CampusIndustriesHousingMod
                     writer.Write(DataVersion);
 
                     // Serialize building data.
-                    HousingManager.Serialize(writer);
+                    HousingManagerSerializer.Serialize(writer);
 
                     // Write to savegame.
                     serializableDataManager.SaveData(dataID, stream.ToArray());
@@ -69,7 +69,7 @@ namespace CampusIndustriesHousingMod
                         Logger.logInfo(LOG_DATA, "found data version ", version);
 
                         // Deserialise building settings.
-                        HousingManager.Deserialize(reader);
+                        HousingManagerSerializer.Deserialize(reader);
 
                         Logger.logInfo(LOG_DATA, "read ", stream.Length);
                     }

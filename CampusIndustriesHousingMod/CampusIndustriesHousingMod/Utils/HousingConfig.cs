@@ -6,13 +6,15 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace CampusIndustriesHousingMod
+namespace CampusIndustriesHousingMod.Utils
 {
     public class HousingConfig
     {
         public List<Housing> HousingSettings = new List<Housing>();
 
         private const string optionsFileName = "CampusIndustriesHousingMod.xml";
+
+        public bool ShowPanel { get; set; } = true;
 
         static XmlSerializer ser_ => new XmlSerializer(typeof(HousingConfig));
 
