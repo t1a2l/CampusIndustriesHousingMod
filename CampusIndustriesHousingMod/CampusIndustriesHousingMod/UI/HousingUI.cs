@@ -11,21 +11,13 @@ namespace CampusIndustriesHousingMod.UI
         private CityServiceWorldInfoPanel m_cityServiceWorldInfoPanel;
         private UIPanel m_uiMainPanel;
         private UILabel m_settingsHeader;
+        private UICheckBox m_settingsCheckBox;
 
-        private UILabel m_apartmentsNumLabel;
-        private UITextField m_apartmentsNumTextfield;
-
-        private UILabel m_workPlaceCount0Label;
-        private UITextField m_workPlaceCount0Textfield;
-
-        private UILabel m_workPlaceCount1Label;
-        private UITextField m_workPlaceCount1Textfield;
-
-        private UILabel m_workPlaceCount2Label;
-        private UITextField m_workPlaceCount2Textfield;
-
-        private UILabel m_workPlaceCount3Label;
-        private UITextField m_workPlaceCount3Textfield;
+        private UIPanel ApartmentNumberPanel;
+        private UIPanel WorkPlaceCount0Panel;
+        private UIPanel WorkPlaceCount1Panel;
+        private UIPanel WorkPlaceCount2Panel;
+        private UIPanel WorkPlaceCount3Panel;
 
         private UIButton ApplySettingsThisBuildingOnly;
         private UIButton ApplySettingsThisBuildingTypeDefaultThisSave;
@@ -47,7 +39,9 @@ namespace CampusIndustriesHousingMod.UI
             m_uiMainPanel.height = 60f + (default_height + 2f) * 24 + 10f;
             m_uiMainPanel.width = m_cityServiceWorldInfoPanel.component.width;
 
-            UICheckBox m_settingsCheckBox = UiUtils.CreateCheckBox(m_cityServiceWorldInfoPanel.component.Find<UIPanel>("MainBottom"), "SettingsCheckBox", "settings", HousingConfig.Config.ShowPanel);
+
+            UIPanel m_parkButtons = m_cityServiceWorldInfoPanel.Find("ParkButtons").GetComponent<UIPanel>();
+            m_settingsCheckBox = UiUtils.CreateCheckBox(m_parkButtons, "SettingsCheckBox", "settings", HousingConfig.Config.ShowPanel);
             m_settingsCheckBox.width = 110f;
             m_settingsCheckBox.label.textColor = new Color32(185, 221, 254, 255);
             m_settingsCheckBox.label.textScale = 0.8125f;
@@ -56,49 +50,40 @@ namespace CampusIndustriesHousingMod.UI
             m_settingsCheckBox.relativePosition = new Vector3(m_uiMainPanel.width - m_settingsCheckBox.width, 6f);
             m_settingsCheckBox.eventCheckChanged += (component, value) =>
             {
-                m_settingsCheckBox.isVisible = value;
+                m_uiMainPanel.isVisible = value;
                 HousingConfig.Config.ShowPanel = value;
                 HousingConfig.Config.Serialize();
             };
+            m_parkButtons.AttachUIComponent(m_settingsCheckBox.gameObject);
 
             m_settingsHeader = UiUtils.CreateLabel(m_uiMainPanel, "SettingsPanelHeader", "Settings", "");
             m_settingsHeader.font = UiUtils.GetUIFont("OpenSans-Regular");
             m_settingsHeader.textAlignment = UIHorizontalAlignment.Center;
 
-            m_apartmentsNumLabel = UiUtils.CreateLabel(m_uiMainPanel, "ApartmentNumberLabel", "", "Number of apartments: ");
-            m_apartmentsNumLabel.relativePosition = UiUtils.PositionUnder(m_settingsHeader);
-            m_apartmentsNumTextfield = UiUtils.CreateTextField(m_uiMainPanel, "ApartmentNumberTextfield", "number of apartments");
-            m_apartmentsNumTextfield.relativePosition = UiUtils.PositionRightOf(m_apartmentsNumLabel);
 
-            m_workPlaceCount0Label = UiUtils.CreateLabel(m_uiMainPanel, "WorkPlaceCount0Label", "", "Uneducated Workers: ");
-            m_workPlaceCount0Label.relativePosition = UiUtils.PositionUnder(m_apartmentsNumLabel);
-            m_workPlaceCount0Textfield = UiUtils.CreateTextField(m_uiMainPanel, "WorkPlaceCount0Textfield", "number of uneducated workers");
-            m_workPlaceCount0Textfield.relativePosition = UiUtils.PositionRightOf(m_workPlaceCount0Label);
+            ApartmentNumberPanel = UiUtils.UIServiceBar(m_uiMainPanel, "ApartmentNumber", "", "Number of apartments: ", "number of apartments");
+            m_uiMainPanel.AttachUIComponent(ApartmentNumberPanel.gameObject);
 
-            m_workPlaceCount1Label = UiUtils.CreateLabel(m_uiMainPanel, "WorkPlaceCount1Label", "", "Educated Workers: ");
-            m_workPlaceCount1Label.relativePosition = UiUtils.PositionUnder(m_workPlaceCount0Label);
-            m_workPlaceCount1Textfield = UiUtils.CreateTextField(m_uiMainPanel, "WorkPlaceCount1Textfield", "number of educated workers");
-            m_workPlaceCount1Textfield.relativePosition = UiUtils.PositionRightOf(m_workPlaceCount1Label);
+            WorkPlaceCount0Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount0", "", "Uneducated Workers: ", "number of uneducated workers");
+            m_uiMainPanel.AttachUIComponent(WorkPlaceCount0Panel.gameObject);
 
-            m_workPlaceCount2Label = UiUtils.CreateLabel(m_uiMainPanel, "WorkPlaceCount2Label", "", "Well Educated Workers: ");
-            m_workPlaceCount2Label.relativePosition = UiUtils.PositionUnder(m_workPlaceCount1Label);
-            m_workPlaceCount2Textfield = UiUtils.CreateTextField(m_uiMainPanel, "WorkPlaceCount0Textfield", "number of well educated workers");
-            m_workPlaceCount2Textfield.relativePosition = UiUtils.PositionRightOf(m_workPlaceCount2Label);
+            WorkPlaceCount1Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount1", "", "Educated Workers: ", "number of educated workers");
+            m_uiMainPanel.AttachUIComponent(WorkPlaceCount1Panel.gameObject);
 
-            m_workPlaceCount3Label = UiUtils.CreateLabel(m_uiMainPanel, "WorkPlaceCount3Label", "", "Highly Educated Workers: ");
-            m_workPlaceCount3Label.relativePosition = UiUtils.PositionUnder(m_workPlaceCount2Label);
-            m_workPlaceCount3Textfield = UiUtils.CreateTextField(m_uiMainPanel, "WorkPlaceCount0Textfield", "number of highly educated workers");
-            m_workPlaceCount3Textfield.relativePosition = UiUtils.PositionRightOf(m_workPlaceCount3Label);
+            WorkPlaceCount2Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount2", "", "Well Educated Workers: ", "number of well educated workers");
+            m_uiMainPanel.AttachUIComponent(WorkPlaceCount2Panel.gameObject);
 
-
+            WorkPlaceCount3Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount3", "", "Highly Educated Workers: ", "number of highly educated workers");
+            m_uiMainPanel.AttachUIComponent(WorkPlaceCount3Panel.gameObject);
+ 
             ApplySettingsThisBuildingOnly = UiUtils.CreateButton(m_uiMainPanel, "apply settings to this building");
-            ApplySettingsThisBuildingOnly.relativePosition = UiUtils.PositionUnder(m_workPlaceCount3Label);
+            m_uiMainPanel.AttachUIComponent(ApplySettingsThisBuildingOnly.gameObject);
 
             ApplySettingsThisBuildingTypeDefaultThisSave = UiUtils.CreateButton(m_uiMainPanel, "set default type values");
-            ApplySettingsThisBuildingTypeDefaultThisSave.relativePosition = UiUtils.PositionRightOf(ApplySettingsThisBuildingOnly);
+            m_uiMainPanel.AttachUIComponent(ApplySettingsThisBuildingTypeDefaultThisSave.gameObject);
 
             ApplySettingsThisBuildingTypeDefaultGlobal = UiUtils.CreateButton(m_uiMainPanel, "set default global values");
-            ApplySettingsThisBuildingTypeDefaultGlobal.relativePosition = UiUtils.PositionRightOf(ApplySettingsThisBuildingTypeDefaultThisSave);
+            m_uiMainPanel.AttachUIComponent(ApplySettingsThisBuildingTypeDefaultGlobal.gameObject);
 
         }
 
@@ -109,10 +94,17 @@ namespace CampusIndustriesHousingMod.UI
             var buildingAI = buildingInfo.GetAI();
             if (buildingAI is not BarracksAI && buildingAI is not DormsAI)
 			{
-                m_uiMainPanel.Hide();
+                m_settingsCheckBox.Hide();
 			}
             else
 			{
+                var m_apartmentsNumTextfield = ApartmentNumberPanel.GetComponent<UITextField>();
+                var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.GetComponent<UITextField>();
+                var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.GetComponent<UITextField>();
+                var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.GetComponent<UITextField>();
+                var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.GetComponent<UITextField>();
+
+
                 var res = HousingManager.BuildingRecords.TryGetValue(buildingID, out HousingManager.BuildingRecord buildingRecord);
                 if(res)
                 {
@@ -146,7 +138,7 @@ namespace CampusIndustriesHousingMod.UI
                 ApplySettingsThisBuildingOnly.eventClicked += delegate { SaveChangesThisBuildingOnly(buildingID, buildingInfo); };
                 ApplySettingsThisBuildingTypeDefaultThisSave.eventClicked += delegate { SaveChangesThisBuildingTypeDefaultThisSave(buildingInfo); };
                 ApplySettingsThisBuildingTypeDefaultGlobal.eventClicked += delegate { SaveChangesThisBuildingTypeDefaultGlobal(buildingInfo); };
-                m_uiMainPanel.Show();
+                m_settingsCheckBox.Show();
 			}
         }
 
@@ -155,6 +147,12 @@ namespace CampusIndustriesHousingMod.UI
             HousingManager.BuildingRecord buildingRecord = new();
 
             var buildingAI = buildingInfo.GetAI();
+
+            var m_apartmentsNumTextfield = ApartmentNumberPanel.GetComponent<UITextField>();
+            var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.GetComponent<UITextField>();
+            var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.GetComponent<UITextField>();
+            var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.GetComponent<UITextField>();
+            var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.GetComponent<UITextField>();
 
             buildingRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
             buildingRecord.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
@@ -176,6 +174,12 @@ namespace CampusIndustriesHousingMod.UI
         public void SaveChangesThisBuildingTypeDefaultThisSave(BuildingInfo buildingInfo)
         {
             HousingManager.PrefabRecord prefabRecord = new();
+
+            var m_apartmentsNumTextfield = ApartmentNumberPanel.GetComponent<UITextField>();
+            var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.GetComponent<UITextField>();
+            var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.GetComponent<UITextField>();
+            var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.GetComponent<UITextField>();
+            var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.GetComponent<UITextField>();
 
             prefabRecord.Name = buildingInfo.name;
             prefabRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
@@ -201,6 +205,12 @@ namespace CampusIndustriesHousingMod.UI
         public void SaveChangesThisBuildingTypeDefaultGlobal(BuildingInfo buildingInfo)
         {
             Housing housing = new();
+
+            var m_apartmentsNumTextfield = ApartmentNumberPanel.GetComponent<UITextField>();
+            var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.GetComponent<UITextField>();
+            var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.GetComponent<UITextField>();
+            var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.GetComponent<UITextField>();
+            var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.GetComponent<UITextField>();
 
             housing.Name = buildingInfo.name;
             housing.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);

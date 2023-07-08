@@ -2,6 +2,7 @@
 using CitiesHarmony.API;
 using UnityEngine;
 using CampusIndustriesHousingMod.Utils;
+using CampusIndustriesHousingMod.UI;
 
 namespace CampusIndustriesHousingMod
 {
@@ -12,6 +13,8 @@ namespace CampusIndustriesHousingMod
         private GameObject campusIndustriesHousingInitializerObj;
         private CampusIndustriesHousingInitializer campusIndustriesHousingInitializer;
         private OptionsManager optionsManager = new OptionsManager();
+        private static GameObject m_goPanel;
+        public static HousingUIPanel Panel { get { return m_goPanel?.GetComponent<HousingUIPanel>(); } }
 
         public new IManagers managers { get; }
 
@@ -67,6 +70,11 @@ namespace CampusIndustriesHousingMod
 	    {
 		    base.OnLevelUnloading();
 		    campusIndustriesHousingInitializer?.OnLevelUnloading();
+            if (m_goPanel != null)
+            {
+                Object.Destroy(m_goPanel);
+                m_goPanel = null;
+            }
 	    }
 
         public override void OnLevelLoaded(LoadMode mode) 
@@ -77,7 +85,10 @@ namespace CampusIndustriesHousingMod
 		    {
 		        case LoadMode.NewGame:
 		        case LoadMode.LoadGame:
-			        campusIndustriesHousingInitializer?.OnLevelWasLoaded(6);
+                case LoadMode.NewGameFromScenario:
+                    campusIndustriesHousingInitializer?.OnLevelWasLoaded(6);
+                    m_goPanel = new GameObject("HousingUIGameObject");
+                    m_goPanel.AddComponent<HousingUIPanel>();
 			    break;
 		        case LoadMode.NewAsset:
 		        case LoadMode.LoadAsset:

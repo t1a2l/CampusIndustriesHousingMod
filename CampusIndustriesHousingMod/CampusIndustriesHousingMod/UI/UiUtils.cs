@@ -116,5 +116,29 @@ namespace CampusIndustriesHousingMod.UI
         {
             return new Vector3(uIComponent.relativePosition.x + uIComponent.width + margin, uIComponent.relativePosition.y + verticalOffset);
         }
+
+        public static UIPanel UIServiceBar(UIComponent parent, string name, string text, string prefix, string tooltip)
+        {
+            float DEFAULT_SCALE = 0.8f;
+            // panel
+            UIPanel m_uiPanel = parent.AddUIComponent<UIPanel>();
+            m_uiPanel.name = name;
+            m_uiPanel.height = 20f;
+
+            // text
+            var label_name = name + "Label";
+            UILabel m_uiTextLabel = CreateLabel(m_uiPanel, label_name, text, prefix);
+            m_uiTextLabel.textAlignment = UIHorizontalAlignment.Left;
+            m_uiTextLabel.relativePosition = new Vector3(0, 0);
+            m_uiTextLabel.textScale = DEFAULT_SCALE;
+
+            // value
+            var text_name = name + "Textfield";
+            UITextField m_uiValueLabel = CreateTextField(m_uiPanel, text_name, tooltip);
+            m_uiValueLabel.name = name + "Value";
+            m_uiValueLabel.textScale = DEFAULT_SCALE; // Infixo todo: connect with options
+
+            return m_uiPanel;
+        }
 	}
 }
