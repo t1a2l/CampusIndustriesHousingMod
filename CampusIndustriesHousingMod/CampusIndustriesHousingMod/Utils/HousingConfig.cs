@@ -32,7 +32,7 @@ namespace CampusIndustriesHousingMod.Utils
             }
             else
             {
-               var index = HousingSettings.FindIndex(x => x.Name == housing.Name && x.Type == housing.Type);
+               var index = HousingSettings.FindIndex(x => x.Name == housing.Name && x.BuildingAI == housing.BuildingAI);
                HousingSettings[index] = housing;
             }
         }
@@ -117,8 +117,8 @@ namespace CampusIndustriesHousingMod.Utils
         [XmlAttribute("Name")]
         public string Name { get; set; }
 
-        [XmlAttribute("Type")]
-        public string Type { get; set; }
+        [XmlAttribute("BuildingAI")]
+        public string BuildingAI { get; set; }
 
         [XmlAttribute("numOfApartments")]
         public int NumOfApartments { get; set; }
