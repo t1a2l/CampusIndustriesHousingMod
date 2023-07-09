@@ -121,7 +121,7 @@ namespace CampusIndustriesHousingMod.AI
 		    base.BuildingLoaded(buildingID, ref data, version);
            
             // Validate the capacity and adjust accordingly - but don't create new units, that will be done by EnsureCitizenUnits
-            float capcityModifier = CampusIndustriesHousingMod.getInstance().getOptionsManager().getDormsCapacityModifier();
+            float capcityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
             this.updateCapacity(capcityModifier);
             this.validateCapacity(buildingID, ref data, false);
 
@@ -134,7 +134,7 @@ namespace CampusIndustriesHousingMod.AI
 		    base.EndRelocating(buildingID, ref data);
 
             // Validate the capacity and adjust accordingly - but don't create new units, that will be done by EnsureCitizenUnits
-            float capcityModifier = CampusIndustriesHousingMod.getInstance().getOptionsManager().getDormsCapacityModifier();
+            float capcityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
             this.updateCapacity(capcityModifier);
             this.validateCapacity(buildingID, ref data, false);
 
@@ -441,7 +441,7 @@ namespace CampusIndustriesHousingMod.AI
         {
             int originalAmount = -(this.m_maintenanceCost * 100);
 
-            CampusIndustriesHousingMod mod = CampusIndustriesHousingMod.getInstance();
+            Mod mod = Mod.getInstance();
             if (mod == null) 
             {
                 return 0;
