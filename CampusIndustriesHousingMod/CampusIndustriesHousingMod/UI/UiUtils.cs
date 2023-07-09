@@ -159,6 +159,7 @@ namespace CampusIndustriesHousingMod.UI
             UIPanel m_uiPanel = parent.AddUIComponent<UIPanel>();
             m_uiPanel.name = name;
             m_uiPanel.height = 20f;
+            m_uiPanel.width = 440f;
 
             // text
             var label_name = name + "Label";
@@ -171,7 +172,7 @@ namespace CampusIndustriesHousingMod.UI
             var text_name = name + "TextField";
             UITextField m_uiValueLabel = CreateTextField(m_uiPanel, text_name, tooltip);
             m_uiValueLabel.textScale = DEFAULT_SCALE;
-            m_uiValueLabel.relativePosition = new Vector3(135f, 0f);
+            m_uiValueLabel.relativePosition = new Vector3(145f, 0f);
 
             return m_uiPanel;
         }
