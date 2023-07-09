@@ -5,12 +5,46 @@ namespace CampusIndustriesHousingMod.UI
 {
 	public static class UiUtils 
 	{
-		public static UIButton CreateButton(UIComponent parent, string name, string text)
+		public static UIButton AddButton(UIComponent parent, float posX, float posY, string name, string text, float width = 200f, float height = 30f, float scale = 0.9f, int vertPad = 4, string tooltip = null)
         {
             UIButton button = parent.AddUIComponent<UIButton>();
-            button.name = name;
+
+            // Size and position.
+            button.size = new Vector2(width, height);
+            button.relativePosition = new Vector2(posX, posY);
+
+            // Appearance.
+            button.textScale = scale;
+            button.normalBgSprite = "ButtonWhite";
+            button.hoveredBgSprite = "ButtonWhite";
+            button.focusedBgSprite = "ButtonWhite";
+            button.pressedBgSprite = "ButtonWhitePressed";
+            button.disabledBgSprite = "ButtonWhiteDisabled";
+            button.color = Color.white;
+            button.focusedColor = Color.white;
+            button.hoveredColor = Color.white;
+            button.pressedColor = Color.white;
+            button.textColor = Color.black;
+            button.pressedTextColor = Color.black;
+            button.focusedTextColor = Color.black;
+            button.hoveredTextColor = Color.blue;
+            button.disabledTextColor = Color.grey;
+            button.canFocus = false;
+
+            // Add tooltip.
+            if (tooltip != null)
+            {
+                button.tooltip = tooltip;
+            }
+
+            // Text.
+            button.textScale = scale;
+            button.textPadding = new RectOffset(0, 0, vertPad, 0);
+            button.textVerticalAlignment = UIVerticalAlignment.Middle;
+            button.textHorizontalAlignment = UIHorizontalAlignment.Center;
             button.text = text;
-            button.autoSize = true;
+            button.name = name;
+
             return button;
         }
 

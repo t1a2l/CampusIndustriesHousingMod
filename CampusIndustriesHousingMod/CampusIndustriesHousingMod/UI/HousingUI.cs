@@ -26,6 +26,10 @@ namespace CampusIndustriesHousingMod.UI
         private static UIButton ApplySettingsThisBuildingTypeDefaultThisSave;
         private static UIButton ApplySettingsThisBuildingTypeDefaultGlobal;
 
+        private static float DEFAULT_HEIGHT = 18F;
+        private static float BUTTON_Y = 60f + 12 * (DEFAULT_HEIGHT * 0.8f + 2f);
+
+
         public static void Init()
         {
             CreateUI();
@@ -45,8 +49,7 @@ namespace CampusIndustriesHousingMod.UI
                 m_uiMainPanel.name = "HousingUIPanel";
                 m_uiMainPanel.backgroundSprite = "SubcategoriesPanel";
                 m_uiMainPanel.opacity = 0.90f;
-                var default_height = 18f;
-                m_uiMainPanel.height = 10f + (default_height * 12f/16f + 2f) * 25 + 10f;
+                m_uiMainPanel.height = 10f + (DEFAULT_HEIGHT * 12f/16f + 2f) * 25 + 10f;
                 m_uiMainPanel.isVisible = HousingConfig.Config.ShowPanel;
                 m_uiMainPanel.relativePosition = new Vector3(m_uiMainPanel.parent.width + 1f, 0f);
 
@@ -68,33 +71,30 @@ namespace CampusIndustriesHousingMod.UI
                 m_settingsHeader = UiUtils.CreateLabel(m_uiMainPanel, "SettingsPanelHeader", "Settings", "");
                 m_settingsHeader.font = UiUtils.GetUIFont("OpenSans-Regular");
                 m_settingsHeader.textAlignment = UIHorizontalAlignment.Center;
-                m_settingsHeader.relativePosition = new Vector3(10f, 60f + 0 * (default_height * 0.8f + 2f));
+                m_settingsHeader.relativePosition = new Vector3(10f, 60f + 0 * (DEFAULT_HEIGHT * 0.8f + 2f));
 
                 ApartmentNumberPanel = UiUtils.UIServiceBar(m_uiMainPanel, "ApartmentNumber", "", "Number of apartments: ", "number of apartments");
-                ApartmentNumberPanel.relativePosition = new Vector3(10f, 60f + 2 * (default_height * 0.8f + 2f));
+                ApartmentNumberPanel.relativePosition = new Vector3(10f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f));
 
                 WorkPlaceCount0Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount0", "", "Uneducated Workers: ", "number of uneducated workers");
-                WorkPlaceCount0Panel.relativePosition = new Vector3(10f, 60f + 4 * (default_height * 0.8f + 2f));
+                WorkPlaceCount0Panel.relativePosition = new Vector3(10f, 60f + 4 * (DEFAULT_HEIGHT * 0.8f + 2f));
 
                 WorkPlaceCount1Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount1", "", "Educated Workers: ", "number of educated workers");
-                WorkPlaceCount1Panel.relativePosition = new Vector3(10f, 60f + 6 * (default_height * 0.8f + 2f));
+                WorkPlaceCount1Panel.relativePosition = new Vector3(10f, 60f + 6 * (DEFAULT_HEIGHT * 0.8f + 2f));
 
                 WorkPlaceCount2Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount2", "", "Well Educated Workers: ", "number of well educated workers");
-                WorkPlaceCount2Panel.relativePosition = new Vector3(10f, 60f + 8 * (default_height * 0.8f + 2f));
+                WorkPlaceCount2Panel.relativePosition = new Vector3(10f, 60f + 8 * (DEFAULT_HEIGHT * 0.8f + 2f));
 
                 WorkPlaceCount3Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount3", "", "Highly Educated Workers: ", "number of highly educated workers");
-                WorkPlaceCount3Panel.relativePosition = new Vector3(10f, 60f + 10 * (default_height * 0.8f + 2f));
+                WorkPlaceCount3Panel.relativePosition = new Vector3(10f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f));
  
-                ApplySettingsThisBuildingOnly = UiUtils.CreateButton(m_uiMainPanel, "ApplySettingsThisBuildingOnly", "apply to building");
-                ApplySettingsThisBuildingOnly.relativePosition = new Vector3(10f, 60f + 12 * (default_height * 0.8f + 2f));
+                ApplySettingsThisBuildingOnly = UiUtils.AddButton(m_uiMainPanel, 10f, BUTTON_Y, "ApplySettingsThisBuildingOnly", "apply to building");
                 ApplySettingsThisBuildingOnly.eventClicked += SaveChangesThisBuildingOnly;
 
-                ApplySettingsThisBuildingTypeDefaultThisSave = UiUtils.CreateButton(m_uiMainPanel, "ApplySettingsThisBuildingTypeDefaultThisSave", "apply to type across save");
-                ApplySettingsThisBuildingTypeDefaultThisSave.relativePosition = new Vector3(10f, 60f + 14 * (default_height * 0.8f + 2f));
+                ApplySettingsThisBuildingTypeDefaultThisSave = UiUtils.AddButton(m_uiMainPanel, 15F + ApplySettingsThisBuildingOnly.width, BUTTON_Y, "ApplySettingsThisBuildingTypeDefaultThisSave", "apply to type across save");
                 ApplySettingsThisBuildingTypeDefaultThisSave.eventClicked += SaveChangesThisBuildingTypeDefaultThisSave;
 
-                ApplySettingsThisBuildingTypeDefaultGlobal = UiUtils.CreateButton(m_uiMainPanel, "ApplySettingsThisBuildingTypeDefaultGlobal", "apply to type across all saves");
-                ApplySettingsThisBuildingTypeDefaultGlobal.relativePosition = new Vector3(10f, 60f + 16 * (default_height * 0.8f + 2f));               
+                ApplySettingsThisBuildingTypeDefaultGlobal = UiUtils.AddButton(m_uiMainPanel, 20F + ApplySettingsThisBuildingTypeDefaultThisSave.width, BUTTON_Y, "ApplySettingsThisBuildingTypeDefaultGlobal", "apply to type across all saves");            
                 ApplySettingsThisBuildingTypeDefaultGlobal.eventClicked += SaveChangesThisBuildingTypeDefaultGlobal;
             }
         }
@@ -111,7 +111,16 @@ namespace CampusIndustriesHousingMod.UI
 			}
             else
 			{
-                var type = buildingInfo.GetAI().ToString();
+                var type = "";
+                if(buildingAI is BarracksAI)
+                {
+                    type = "BarracksAI";
+                }
+                else if(buildingAI is DormsAI)
+                {
+                    type = "DormsAI";
+                }
+
                 var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
                 var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.Find<UITextField>("WorkPlaceCount0TextField");
                 var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.Find<UITextField>("WorkPlaceCount1TextField");
