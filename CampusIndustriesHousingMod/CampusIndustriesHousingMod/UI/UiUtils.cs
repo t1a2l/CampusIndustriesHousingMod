@@ -117,7 +117,6 @@ namespace CampusIndustriesHousingMod.UI
 		{
 			UITextField textField = parent.AddUIComponent<UITextField>();
             textField.name = name;
-            textField.size = new Vector2(90f, 17f);
             textField.padding = new RectOffset(0, 0, 9, 3);
             textField.builtinKeyNavigation = true;
             textField.isInteractive = true;
@@ -132,7 +131,7 @@ namespace CampusIndustriesHousingMod.UI
             textField.disabledTextColor = new Color32(0, 0, 0, 128);
             textField.color = new Color32(185, 221, 254, 255);
             textField.tooltip = tooltip;
-            textField.size = new Vector2(150f, 27f);
+            textField.size = new Vector2(50f, 27f);
             textField.padding.top = 2;
             textField.numericalOnly = true;
             textField.allowNegative = false;
@@ -172,7 +171,7 @@ namespace CampusIndustriesHousingMod.UI
             var text_name = name + "TextField";
             UITextField m_uiValueLabel = CreateTextField(m_uiPanel, text_name, tooltip);
             m_uiValueLabel.textScale = DEFAULT_SCALE;
-            m_uiValueLabel.relativePosition = new Vector3(145f, 0f);
+            m_uiValueLabel.relativePosition = new Vector3(175f, -6f);
 
             return m_uiPanel;
         }

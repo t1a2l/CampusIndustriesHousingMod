@@ -27,8 +27,6 @@ namespace CampusIndustriesHousingMod.UI
         private static UIButton ApplySettingsThisBuildingTypeDefaultGlobal;
 
         private static float DEFAULT_HEIGHT = 18F;
-        private static float BUTTON_Y = 60f + 12 * (DEFAULT_HEIGHT * 0.8f + 2f);
-
 
         public static void Init()
         {
@@ -49,9 +47,10 @@ namespace CampusIndustriesHousingMod.UI
                 m_uiMainPanel.name = "HousingUIPanel";
                 m_uiMainPanel.backgroundSprite = "SubcategoriesPanel";
                 m_uiMainPanel.opacity = 0.90f;
-                m_uiMainPanel.height = 10f + (DEFAULT_HEIGHT * 12f/16f + 2f) * 25 + 10f;
+                m_uiMainPanel.height = m_uiMainPanel.parent.height - 7f;
                 m_uiMainPanel.isVisible = HousingConfig.Config.ShowPanel;
-                m_uiMainPanel.relativePosition = new Vector3(m_uiMainPanel.parent.width + 1f, 0f);
+                m_uiMainPanel.relativePosition = new Vector3(m_uiMainPanel.parent.width + 1f, m_uiMainPanel.parent.position.y + 40f);
+                m_uiMainPanel.width = 350f;
 
                 m_settingsCheckBox = UiUtils.CreateCheckBox(m_parkButtons, "SettingsCheckBox", "settings", HousingConfig.Config.ShowPanel);
                 m_settingsCheckBox.width = 110f;
@@ -88,13 +87,13 @@ namespace CampusIndustriesHousingMod.UI
                 WorkPlaceCount3Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount3", "", "Highly Educated Workers: ", "number of highly educated workers");
                 WorkPlaceCount3Panel.relativePosition = new Vector3(10f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f));
  
-                ApplySettingsThisBuildingOnly = UiUtils.AddButton(m_uiMainPanel, 10f, BUTTON_Y, "ApplySettingsThisBuildingOnly", "apply to building");
+                ApplySettingsThisBuildingOnly = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 12 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplySettingsThisBuildingOnly", "apply to building");
                 ApplySettingsThisBuildingOnly.eventClicked += SaveChangesThisBuildingOnly;
 
-                ApplySettingsThisBuildingTypeDefaultThisSave = UiUtils.AddButton(m_uiMainPanel, 15F + ApplySettingsThisBuildingOnly.width, BUTTON_Y, "ApplySettingsThisBuildingTypeDefaultThisSave", "apply to type across save");
+                ApplySettingsThisBuildingTypeDefaultThisSave = UiUtils.AddButton(m_uiMainPanel, 10F, 60f + 14 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplySettingsThisBuildingTypeDefaultThisSave", "apply to type across save");
                 ApplySettingsThisBuildingTypeDefaultThisSave.eventClicked += SaveChangesThisBuildingTypeDefaultThisSave;
 
-                ApplySettingsThisBuildingTypeDefaultGlobal = UiUtils.AddButton(m_uiMainPanel, 20F + ApplySettingsThisBuildingTypeDefaultThisSave.width, BUTTON_Y, "ApplySettingsThisBuildingTypeDefaultGlobal", "apply to type across all saves");            
+                ApplySettingsThisBuildingTypeDefaultGlobal = UiUtils.AddButton(m_uiMainPanel, 10F, 60f + 16 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplySettingsThisBuildingTypeDefaultGlobal", "apply to type across all saves");            
                 ApplySettingsThisBuildingTypeDefaultGlobal.eventClicked += SaveChangesThisBuildingTypeDefaultGlobal;
             }
         }
