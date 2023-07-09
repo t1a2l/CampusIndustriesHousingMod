@@ -136,7 +136,8 @@ namespace CampusIndustriesHousingMod.UI
             var text_name = name + "Textfield";
             UITextField m_uiValueLabel = CreateTextField(m_uiPanel, text_name, tooltip);
             m_uiValueLabel.name = name + "Value";
-            m_uiValueLabel.textScale = DEFAULT_SCALE; // Infixo todo: connect with options
+            m_uiValueLabel.textScale = DEFAULT_SCALE;
+            m_uiValueLabel.relativePosition = new Vector3(135f, 0f);
 
             return m_uiPanel;
         }

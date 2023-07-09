@@ -2,23 +2,21 @@
 using CitiesHarmony.API;
 using UnityEngine;
 using CampusIndustriesHousingMod.Utils;
-using CampusIndustriesHousingMod.UI;
+using System;
 
 namespace CampusIndustriesHousingMod
 {
-    public class CampusIndustriesHousingMod : LoadingExtensionBase, IUserMod, ISerializableData  
+    public class Mod : LoadingExtensionBase, IUserMod, ISerializableData  
     {
         private const bool LOG_BASE = true;
 
         private GameObject campusIndustriesHousingInitializerObj;
         private CampusIndustriesHousingInitializer campusIndustriesHousingInitializer;
         private OptionsManager optionsManager = new OptionsManager();
-        private static GameObject m_goPanel;
-        public static HousingUIPanel Panel { get { return m_goPanel?.GetComponent<HousingUIPanel>(); } }
 
         public new IManagers managers { get; }
 
-        private static CampusIndustriesHousingMod instance;
+        private static Mod instance;
         string IUserMod.Name => "Campus Industries Housing Mod";
 
         string IUserMod.Description => "Turn the Dorms and Barracks to actual living spaces apart from their other functions";
@@ -33,7 +31,7 @@ namespace CampusIndustriesHousingMod
             if (HarmonyHelper.IsHarmonyInstalled) Patcher.UnpatchAll();
         }
 
-        public static CampusIndustriesHousingMod getInstance() 
+        public static Mod getInstance() 
         {
             return instance;
         }
@@ -45,13 +43,13 @@ namespace CampusIndustriesHousingMod
 
         public OptionsManager getOptionsManager() 
         {
-            return this.optionsManager;
+            return optionsManager;
         }
 
         public void OnSettingsUI(UIHelperBase helper) 
         {
-            this.optionsManager.initialize(helper);
-            this.optionsManager.loadOptions();
+            optionsManager.initialize(helper);
+            optionsManager.loadOptions();
         }
 
         public override void OnCreated(ILoading loading) 
@@ -59,42 +57,40 @@ namespace CampusIndustriesHousingMod
             Logger.logInfo(LOG_BASE, "CampusIndustriesHousingMod Created");
             instance = this;
             base.OnCreated(loading);
-            if (!(this.campusIndustriesHousingInitializerObj != null)) 
+            if (campusIndustriesHousingInitializerObj == null) 
             {
-                this.campusIndustriesHousingInitializerObj = new GameObject("CampusIndustriesHousing");
-                this.campusIndustriesHousingInitializer = this.campusIndustriesHousingInitializerObj.AddComponent<CampusIndustriesHousingInitializer>();
+                campusIndustriesHousingInitializerObj = new GameObject("CampusIndustriesHousing");
+                campusIndustriesHousingInitializer = campusIndustriesHousingInitializerObj.AddComponent<CampusIndustriesHousingInitializer>();
             }
+            try
+            {
+                HousingManager.Init();
+            }
+            catch (Exception e)
+            {
+                HousingManager.Deinit();
+            }
+
         }
 
         public override void OnLevelUnloading()
 	    {
 		    base.OnLevelUnloading();
 		    campusIndustriesHousingInitializer?.OnLevelUnloading();
-            if (m_goPanel != null)
-            {
-                Object.Destroy(m_goPanel);
-                m_goPanel = null;
-            }
 	    }
 
         public override void OnLevelLoaded(LoadMode mode) 
         {
             Logger.logInfo(true, "CampusIndustriesHousingMod Level Loaded: {0}", mode);
 		    base.OnLevelLoaded(mode);
-		    switch (mode)
-		    {
-		        case LoadMode.NewGame:
-		        case LoadMode.LoadGame:
-                case LoadMode.NewGameFromScenario:
-                    campusIndustriesHousingInitializer?.OnLevelWasLoaded(6);
-                    m_goPanel = new GameObject("HousingUIGameObject");
-                    m_goPanel.AddComponent<HousingUIPanel>();
-			    break;
-		        case LoadMode.NewAsset:
-		        case LoadMode.LoadAsset:
-			        campusIndustriesHousingInitializer?.OnLevelWasLoaded(19);
-			    break;
-		    }
+            if(mode == LoadMode.NewGame || mode == LoadMode.LoadGame || mode == LoadMode.NewGameFromScenario)
+            {
+                campusIndustriesHousingInitializer?.OnLevelWasLoaded(6);
+            }
+            if(mode == LoadMode.NewAsset || mode == LoadMode.LoadAsset)
+            {
+                campusIndustriesHousingInitializer?.OnLevelWasLoaded(19);
+            }
         }
 
         public override void OnReleased() 
@@ -104,9 +100,9 @@ namespace CampusIndustriesHousingMod
             {
                 return;
             }
-            if (this.campusIndustriesHousingInitializerObj != null) 
+            if (campusIndustriesHousingInitializerObj != null) 
             {
-                Object.Destroy(this.campusIndustriesHousingInitializerObj);
+                UnityEngine.Object.Destroy(campusIndustriesHousingInitializerObj);
             }
         }
 

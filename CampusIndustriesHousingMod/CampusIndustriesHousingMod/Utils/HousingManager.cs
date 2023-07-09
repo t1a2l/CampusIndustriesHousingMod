@@ -5,9 +5,9 @@ namespace CampusIndustriesHousingMod.Utils
 {
     public static class HousingManager
     {
-        internal static readonly Dictionary<uint, BuildingRecord> BuildingRecords = new Dictionary<uint, BuildingRecord>();
+        internal static Dictionary<uint, BuildingRecord> BuildingRecords;
 
-        internal static readonly List<PrefabRecord> PrefabRecords = new List<PrefabRecord>();
+        internal static List<PrefabRecord> PrefabRecords;
 
         public struct BuildingRecord
         {
@@ -39,6 +39,18 @@ namespace CampusIndustriesHousingMod.Utils
             public int WorkPlaceCount2;
 
             public int WorkPlaceCount3;
+        }
+
+        public static void Init()
+        {
+			BuildingRecords ??= new();
+			PrefabRecords ??= new();
+        }
+
+        public static void Deinit()
+        {
+            BuildingRecords = new();
+            PrefabRecords = new();
         }
 
         public static void AddBuilding(ushort buildingID, BuildingRecord newBuildingRecord)

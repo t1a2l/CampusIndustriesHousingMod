@@ -256,7 +256,7 @@ namespace CampusIndustriesHousingMod.Utils
         private IEnumerator InitCampusHousing() 
         {
             Logger.logInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.initCampusHousing");
-            float capcityModifier = CampusIndustriesHousingMod.getInstance().getOptionsManager().getDormsCapacityModifier();
+            float capcityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
             uint index = 0U;
             int i = 0;
             BuildingInfo campusDormsBuildingInfo = this.FindDormsBuildingInfo();
@@ -290,7 +290,7 @@ namespace CampusIndustriesHousingMod.Utils
 
         private IEnumerator InitIndustriesHousing() {
             Logger.logInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.initIndustriesHousing");
-            float capcityModifier = CampusIndustriesHousingMod.getInstance().getOptionsManager().getBarracksCapacityModifier();
+            float capcityModifier = Mod.getInstance().getOptionsManager().getBarracksCapacityModifier();
             uint index = 0U;
             int i = 0;
             BuildingInfo industriesHousingBuildingInfo = this.FindDormsBuildingInfo();
