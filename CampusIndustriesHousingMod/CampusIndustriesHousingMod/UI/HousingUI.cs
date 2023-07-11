@@ -240,6 +240,7 @@ namespace CampusIndustriesHousingMod.UI
                 buildingRecord.BuildingAI = "DormsAI";
             }
             HousingManager.SetBuildingRecord(buildingID, buildingRecord);
+            RefreshData();
         }
 
         public static void ApplyDefaultSettings(UIComponent c, UIMouseEventParameter eventParameter)
@@ -278,7 +279,7 @@ namespace CampusIndustriesHousingMod.UI
                 m_workPlaceCount2Textfield.text = dormsAI.m_workPlaceCount2.ToString();
                 m_workPlaceCount3Textfield.text = dormsAI.m_workPlaceCount3.ToString();
             }
-
+            RefreshData();
         }
 
         public static void ApplyPrefabSettings(UIComponent c, UIMouseEventParameter eventParameter)
@@ -313,6 +314,7 @@ namespace CampusIndustriesHousingMod.UI
             }
 
             HousingManager.SetPrefab(prefabRecord);
+            RefreshData();
         }
 
         public static void ApplyGlobalSettings(UIComponent c, UIMouseEventParameter eventParameter)
@@ -347,6 +349,7 @@ namespace CampusIndustriesHousingMod.UI
             housing.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
 
             HousingConfig.Config.SetGlobalSettings(housing);
+            RefreshData();
         }
 
         public static void UpdateHouse(ushort buildingID, ref Building data, int numOfApartments, int workCount)
