@@ -39,7 +39,7 @@ namespace CampusIndustriesHousingMod.Utils
         public void initialize(UIHelperBase helper) 
         {
             Logger.logInfo(Logger.LOG_OPTIONS, "OptionsManager.initialize -- Initializing Menu Options");
-            UIHelperBase group = helper.AddGroup("Nursing Home Settings");
+            UIHelperBase group = helper.AddGroup("Housing Global Settings");
             this.barracksCapacityDropDown = (UIDropDown) group.AddDropdown("Barracks Capacity Modifier", CAPACITY_LABELS, 1, handleCapacityChange);
             this.barracksIncomeDropDown = (UIDropDown) group.AddDropdown("Barracks Income Modifier", BARRACKS_INCOME_LABELS, 2, handleIncomeChange);
             group.AddSpace(2);
@@ -47,6 +47,13 @@ namespace CampusIndustriesHousingMod.Utils
             this.dormsIncomeDropDown = (UIDropDown) group.AddDropdown("Dorms Income Modifier", DORMS_INCOME_LABELS, 2, handleIncomeChange);
             group.AddSpace(5);
             group.AddButton("Save", saveOptions);
+
+            UIHelperBase group_clear = helper.AddGroup("Housing Clear Settings, Use with Caution!! Can't be undone!");
+            group_clear.AddButton("Clear All Buildings Records", HousingManager.ClearBuildingRecords);
+            group_clear.AddSpace(1);
+            group_clear.AddButton("Clear All Buildings Prefab Records", HousingManager.ClearPrefabRecords);
+            group_clear.AddSpace(1);
+            group_clear.AddButton("Clear Housing Global Settings", HousingConfig.Config.ClearGlobalSettings);
         }
 
         private void handleCapacityChange(int newSelection) 

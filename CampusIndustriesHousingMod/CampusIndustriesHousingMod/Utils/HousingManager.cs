@@ -1,7 +1,5 @@
 ﻿using CampusIndustriesHousingMod.AI;
 using System.Collections.Generic;
-using System.Xml.Linq;
-using static CampusIndustriesHousingMod.Utils.HousingManager;
 
 namespace CampusIndustriesHousingMod.Utils
 {
@@ -96,6 +94,11 @@ namespace CampusIndustriesHousingMod.Utils
             }
         }
 
+        public static void ClearBuildingRecords()
+        {
+            BuildingRecords.Clear();
+        }
+
         public static PrefabRecord GetPrefab(string name)
         {
             var index = PrefabRecords.FindIndex(item => item.Name == name);
@@ -124,6 +127,11 @@ namespace CampusIndustriesHousingMod.Utils
             {
                 PrefabRecords.RemoveAt(index);
             }
+        }
+
+        public static void ClearPrefabRecords()
+        {
+            PrefabRecords.Clear();
         }
 
         public static BarracksAI DefaultBarracksValues(BarracksAI barracks)

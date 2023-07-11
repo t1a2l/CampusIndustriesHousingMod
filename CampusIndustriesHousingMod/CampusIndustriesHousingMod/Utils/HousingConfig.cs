@@ -45,6 +45,11 @@ namespace CampusIndustriesHousingMod.Utils
             HousingSettings[index] = housing;
         }
 
+        public void ClearGlobalSettings()
+        {
+            HousingSettings.Clear();
+        }
+
         public static HousingConfig Deserialize() 
         {
             try 
