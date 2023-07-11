@@ -133,8 +133,8 @@ namespace CampusIndustriesHousingMod.AI
 		    base.EndRelocating(buildingID, ref data);
 
             // Validate the capacity and adjust accordingly - but don't create new units, that will be done by EnsureCitizenUnits
-            float capcityModifier = Mod.getInstance().getOptionsManager().getBarracksCapacityModifier();
-            this.updateCapacity(capcityModifier);
+            float capacityModifier = Mod.getInstance().getOptionsManager().getBarracksCapacityModifier();
+            this.updateCapacity(capacityModifier);
             this.validateCapacity(buildingID, ref data, false);
 
 		    int workCount = m_workPlaceCount0 + m_workPlaceCount1 + m_workPlaceCount2 + m_workPlaceCount3;
