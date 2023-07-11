@@ -5,7 +5,7 @@ namespace CampusIndustriesHousingMod.UI
 {
 	public static class UiUtils 
 	{
-		public static UIButton AddButton(UIComponent parent, float posX, float posY, string name, string text, float width = 200f, float height = 30f, float scale = 0.9f, int vertPad = 4, string tooltip = null)
+		public static UIButton AddButton(UIComponent parent, float posX, float posY, string name, string text, float width = 230f, float height = 30f, float scale = 0.9f, int vertPad = 4, string tooltip = null)
         {
             UIButton button = parent.AddUIComponent<UIButton>();
 

@@ -1,5 +1,7 @@
 ﻿using CampusIndustriesHousingMod.AI;
 using System.Collections.Generic;
+using System.Xml.Linq;
+using static CampusIndustriesHousingMod.Utils.HousingManager;
 
 namespace CampusIndustriesHousingMod.Utils
 {
@@ -53,21 +55,38 @@ namespace CampusIndustriesHousingMod.Utils
             PrefabRecords = new();
         }
 
-        public static void AddBuilding(ushort buildingID, BuildingRecord newBuildingRecord)
+        public static bool BuildingRecordExist(ushort buildingID)
         {
-            // See if we've already got an entry for this building; if not, create one.
-            if (!BuildingRecords.TryGetValue(buildingID, out _))
+            if (BuildingRecords.TryGetValue(buildingID, out BuildingRecord buildingRecord))
             {
-                // Init buildingRecord.
-                BuildingRecords.Add(buildingID, newBuildingRecord);
-            }
+                return true;
+			}
             else
             {
-               BuildingRecords[buildingID] = newBuildingRecord;
+                return false;
             }
         }
 
-        public static void RemoveBuilding(ushort buildingID)
+        public static BuildingRecord GetBuildingRecord(ushort buildingID)
+        {
+            if (BuildingRecords.TryGetValue(buildingID, out BuildingRecord buildingRecord))
+            {
+                return buildingRecord;
+			}
+            else
+            {
+                BuildingRecord newBuildingRecord = new();
+                BuildingRecords.Add(buildingID, newBuildingRecord);
+                return newBuildingRecord;
+            }
+        }
+
+        public static void SetBuildingRecord(ushort buildingID, BuildingRecord buildingRecord)
+        {
+            BuildingRecords[buildingID] = buildingRecord;
+        }
+
+        public static void RemoveBuildingRecord(ushort buildingID)
         {
             // See if we've already got an entry for this building; if not, create one.
             if (BuildingRecords.TryGetValue(buildingID, out _))
@@ -77,24 +96,33 @@ namespace CampusIndustriesHousingMod.Utils
             }
         }
 
-        public static void AddPrefab(PrefabRecord newPrefabRecord)
+        public static PrefabRecord GetPrefab(string name)
         {
-            if (!PrefabRecords.Contains(newPrefabRecord))
+            var index = PrefabRecords.FindIndex(item => item.Name == name);
+            if(index != -1)
             {
-                PrefabRecords.Add(newPrefabRecord);
+                return PrefabRecords[index];
             }
             else
             {
-               var index = PrefabRecords.FindIndex(x => x.Name == newPrefabRecord.Name);
-               PrefabRecords[index] = newPrefabRecord;
+                PrefabRecord newPrefabRecord = new();
+                PrefabRecords.Add(newPrefabRecord);
+                return newPrefabRecord;
             }
         }
 
-        public static void RemovePrefab(PrefabRecord newPrefabRecord)
+        public static void SetPrefab(PrefabRecord prefabRecord)
+		{
+            var index = PrefabRecords.FindIndex(item => item.Name == prefabRecord.Name);
+            PrefabRecords[index] = prefabRecord;
+        }
+
+        public static void RemovePrefab(string name)
         {
-            if (PrefabRecords.Contains(newPrefabRecord))
+            var index = PrefabRecords.FindIndex(item => item.Name == name);
+            if(index != -1)
             {
-                PrefabRecords.Remove(newPrefabRecord);
+                PrefabRecords.RemoveAt(index);
             }
         }
 

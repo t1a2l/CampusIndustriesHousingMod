@@ -14,7 +14,7 @@ namespace CampusIndustriesHousingMod.Utils
 
         private const string optionsFileName = "CampusIndustriesHousingMod.xml";
 
-        public bool ShowPanel { get; set; } = true;
+        public bool ShowPanel { get; set; } = false;
 
         static XmlSerializer ser_ => new XmlSerializer(typeof(HousingConfig));
 
@@ -24,25 +24,25 @@ namespace CampusIndustriesHousingMod.Utils
         public static void Reset() => config_ = new HousingConfig();
 
 
-        public void AddGlobalSettings(Housing housing)
+        public Housing GetGlobalSettings(string name, string buildingAI)
         {
-            if (!HousingSettings.Contains(housing))
+            var index = HousingSettings.FindIndex(x => x.Name == name && x.BuildingAI == buildingAI);
+            if (index != -1)
             {
-                HousingSettings.Add(housing);
+                return HousingSettings[index];
             }
             else
             {
-               var index = HousingSettings.FindIndex(x => x.Name == housing.Name && x.BuildingAI == housing.BuildingAI);
-               HousingSettings[index] = housing;
+                Housing newHousing = new();
+                HousingSettings.Add(newHousing);
+                return newHousing;
             }
         }
 
-        public void RemoveGlobalSettings(Housing housing)
+        public void SetGlobalSettings(Housing housing)
         {
-            if (HousingSettings.Contains(housing))
-            {
-                HousingSettings.Remove(housing);
-            }
+            var index = HousingSettings.FindIndex(x => x.Name == housing.Name && x.BuildingAI == housing.BuildingAI);
+            HousingSettings[index] = housing;
         }
 
         public static HousingConfig Deserialize() 
