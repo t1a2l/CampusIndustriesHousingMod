@@ -108,8 +108,11 @@ namespace CampusIndustriesHousingMod.Utils
             }
             else
             {
-                PrefabRecord newPrefabRecord = new();
-                PrefabRecords.Add(newPrefabRecord);
+				PrefabRecord newPrefabRecord = new()
+				{
+					Name = name
+				};
+				PrefabRecords.Add(newPrefabRecord);
                 return newPrefabRecord;
             }
         }

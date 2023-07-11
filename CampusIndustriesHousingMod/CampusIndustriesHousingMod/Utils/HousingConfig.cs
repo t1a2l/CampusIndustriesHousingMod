@@ -33,8 +33,12 @@ namespace CampusIndustriesHousingMod.Utils
             }
             else
             {
-                Housing newHousing = new();
-                HousingSettings.Add(newHousing);
+				Housing newHousing = new()
+				{
+					Name = name,
+					BuildingAI = buildingAI
+				};
+				HousingSettings.Add(newHousing);
                 return newHousing;
             }
         }

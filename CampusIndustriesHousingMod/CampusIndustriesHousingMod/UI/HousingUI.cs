@@ -281,7 +281,6 @@ namespace CampusIndustriesHousingMod.UI
             var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.Find<UITextField>("WorkPlaceCount2TextField");
             var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.Find<UITextField>("WorkPlaceCount3TextField");
 
-            prefabRecord.Name = buildingInfo.name;
             prefabRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
             prefabRecord.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
             prefabRecord.WorkPlaceCount1 = int.Parse(m_workPlaceCount1Textfield.text);
