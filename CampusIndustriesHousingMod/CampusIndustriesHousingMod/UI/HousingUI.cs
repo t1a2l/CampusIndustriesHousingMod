@@ -2,6 +2,7 @@
 using CampusIndustriesHousingMod.Utils;
 using ColossalFramework;
 using ColossalFramework.UI;
+using System;
 using UnityEngine;
 
 
@@ -107,8 +108,8 @@ namespace CampusIndustriesHousingMod.UI
         public static void RefreshData()
         {
             ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
-            BuildingInfo buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
-            var buildingAI = buildingInfo.GetAI();
+            Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
+            PrefabAI buildingAI = building.Info.GetAI();
             if (buildingAI is not BarracksAI && buildingAI is not DormsAI)
 			{
                 m_settingsCheckBox.Hide();
@@ -116,7 +117,9 @@ namespace CampusIndustriesHousingMod.UI
 			}
             else
 			{
-                var type = "";
+                string type = "";
+                int workCount = 0;
+                int numOfApartments = 0;
                 if(buildingAI is BarracksAI)
                 {
                     type = "BarracksAI";
@@ -141,22 +144,26 @@ namespace CampusIndustriesHousingMod.UI
                     m_workPlaceCount1Textfield.text = buildingRecord.WorkPlaceCount1.ToString();
                     m_workPlaceCount2Textfield.text = buildingRecord.WorkPlaceCount2.ToString();
                     m_workPlaceCount3Textfield.text = buildingRecord.WorkPlaceCount3.ToString();
+                    numOfApartments = buildingRecord.NumOfApartments;
+                    workCount = buildingRecord.WorkPlaceCount0 + buildingRecord.WorkPlaceCount1 + buildingRecord.WorkPlaceCount2 + buildingRecord.WorkPlaceCount3;
                 } 
                 else
                 {
                     var prefab_index = HousingManager.PrefabRecords.FindIndex(item => item.BuildingAI == type);
                     if(prefab_index != -1)
                     {
-                        var defaultBarracksPrefab = HousingManager.PrefabRecords[prefab_index];
-                        m_apartmentsNumTextfield.text = defaultBarracksPrefab.NumOfApartments.ToString();
-                        m_workPlaceCount0Textfield.text = defaultBarracksPrefab.WorkPlaceCount0.ToString();
-                        m_workPlaceCount1Textfield.text = defaultBarracksPrefab.WorkPlaceCount1.ToString();
-                        m_workPlaceCount2Textfield.text = defaultBarracksPrefab.WorkPlaceCount2.ToString();
-                        m_workPlaceCount3Textfield.text = defaultBarracksPrefab.WorkPlaceCount3.ToString();
+                        var prefabRecord = HousingManager.PrefabRecords[prefab_index];
+                        m_apartmentsNumTextfield.text = prefabRecord.NumOfApartments.ToString();
+                        m_workPlaceCount0Textfield.text = prefabRecord.WorkPlaceCount0.ToString();
+                        m_workPlaceCount1Textfield.text = prefabRecord.WorkPlaceCount1.ToString();
+                        m_workPlaceCount2Textfield.text = prefabRecord.WorkPlaceCount2.ToString();
+                        m_workPlaceCount3Textfield.text = prefabRecord.WorkPlaceCount3.ToString();
+                        numOfApartments = prefabRecord.NumOfApartments;
+                        workCount = prefabRecord.WorkPlaceCount0 + prefabRecord.WorkPlaceCount1 + prefabRecord.WorkPlaceCount2 + prefabRecord.WorkPlaceCount3;
                     }
                     else
                     {
-                        var global_index = HousingConfig.Config.HousingSettings.FindIndex(item => item.Name == buildingInfo.name && item.BuildingAI == type);
+                        var global_index = HousingConfig.Config.HousingSettings.FindIndex(item => item.Name == building.Info.name && item.BuildingAI == type);
                         if(global_index != -1)
                         {
                             var saved_config = HousingConfig.Config.HousingSettings[global_index];
@@ -165,6 +172,8 @@ namespace CampusIndustriesHousingMod.UI
                             m_workPlaceCount1Textfield.text = saved_config.WorkPlaceCount1.ToString();
                             m_workPlaceCount2Textfield.text = saved_config.WorkPlaceCount2.ToString();
                             m_workPlaceCount3Textfield.text = saved_config.WorkPlaceCount3.ToString();
+                            numOfApartments = saved_config.NumOfApartments;
+                            workCount = saved_config.WorkPlaceCount0 + saved_config.WorkPlaceCount1 + saved_config.WorkPlaceCount2 + saved_config.WorkPlaceCount3;
                         }
                         else
                         {
@@ -177,6 +186,8 @@ namespace CampusIndustriesHousingMod.UI
                                 m_workPlaceCount1Textfield.text = barracksAI.m_workPlaceCount1.ToString();
                                 m_workPlaceCount2Textfield.text = barracksAI.m_workPlaceCount2.ToString();
                                 m_workPlaceCount3Textfield.text = barracksAI.m_workPlaceCount3.ToString();
+                                numOfApartments = barracksAI.numApartments;
+                                workCount = barracksAI.m_workPlaceCount0 + barracksAI.m_workPlaceCount1 + barracksAI.m_workPlaceCount2 + barracksAI.m_workPlaceCount3;
                             }
                             else if(type == "DormsAI")
                             {
@@ -187,10 +198,13 @@ namespace CampusIndustriesHousingMod.UI
                                 m_workPlaceCount1Textfield.text = dormsAI.m_workPlaceCount1.ToString();
                                 m_workPlaceCount2Textfield.text = dormsAI.m_workPlaceCount2.ToString();
                                 m_workPlaceCount3Textfield.text = dormsAI.m_workPlaceCount3.ToString();
+                                numOfApartments = dormsAI.numApartments;
+                                workCount = dormsAI.m_workPlaceCount0 + dormsAI.m_workPlaceCount1 + dormsAI.m_workPlaceCount2 + dormsAI.m_workPlaceCount3;
                             }
                         }
                     }
                 }
+                UpdateHouse(buildingID, ref building, numOfApartments, workCount);
                 m_uiMainPanel.height = m_uiMainPanel.parent.height - 7f;
                 m_settingsCheckBox.Show();
 			}
@@ -299,29 +313,6 @@ namespace CampusIndustriesHousingMod.UI
             }
 
             HousingManager.SetPrefab(prefabRecord);
-
-            // update all buildings of this prefab
-            for (uint i = 0u; i < PrefabCollection<BuildingInfo>.LoadedCount(); ++i)
-			{
-				BuildingInfo info = PrefabCollection<BuildingInfo>.GetLoaded(i);
-				if (info != null && info.name == buildingInfo.name && info.GetAI() is BarracksAI barracksAI)
-				{
-					barracksAI.numApartments = prefabRecord.NumOfApartments;
-                    barracksAI.m_workPlaceCount0 = prefabRecord.WorkPlaceCount0;
-                    barracksAI.m_workPlaceCount1 = prefabRecord.WorkPlaceCount1;
-                    barracksAI.m_workPlaceCount2 = prefabRecord.WorkPlaceCount2;
-                    barracksAI.m_workPlaceCount3 = prefabRecord.WorkPlaceCount3;
-				}
-                else if (info != null && info.name == buildingInfo.name && info.GetAI() is DormsAI dormsAI)
-				{
-					dormsAI.numApartments = prefabRecord.NumOfApartments;
-                    dormsAI.m_workPlaceCount0 = prefabRecord.WorkPlaceCount0;
-                    dormsAI.m_workPlaceCount1 = prefabRecord.WorkPlaceCount1;
-                    dormsAI.m_workPlaceCount2 = prefabRecord.WorkPlaceCount2;
-                    dormsAI.m_workPlaceCount3 = prefabRecord.WorkPlaceCount3;
-				}
-			}
-
         }
 
         public static void ApplyGlobalSettings(UIComponent c, UIMouseEventParameter eventParameter)
@@ -356,6 +347,87 @@ namespace CampusIndustriesHousingMod.UI
             housing.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
 
             HousingConfig.Config.SetGlobalSettings(housing);
+        }
+
+        public static void UpdateHouse(ushort buildingID, ref Building data, int numOfApartments, int workCount)
+	    {
+
+            // Validate the capacity and adjust accordingly - but don't create new units, that will be done by EnsureCitizenUnits
+            float capacityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
+            var NumOfApartments = capacityModifier > 0 ? (int) (numOfApartments * capacityModifier) : numOfApartments;
+            if(data.Info.GetAI() is BarracksAI barracksAI)
+            {
+                barracksAI.updateCapacity(capacityModifier);
+                barracksAI.validateCapacity(buildingID, ref data, false);
+            }
+            else if(data.Info.GetAI() is DormsAI dormsAI)
+            {
+                dormsAI.updateCapacity(capacityModifier);
+                dormsAI.validateCapacity(buildingID, ref data, false);
+            }
+            EnsureCitizenUnits(buildingID, ref data, NumOfApartments, workCount, 0, 0);
+	    }
+
+        private static void EnsureCitizenUnits(ushort buildingID, ref Building data, int homeCount = 0, int workCount = 0, int visitCount = 0, int studentCount = 0, int hotelCount = 0)
+        {
+	        if ((data.m_flags & (Building.Flags.Abandoned | Building.Flags.Collapsed)) != 0)
+	        {
+		        return;
+	        }
+	        Citizen.Wealth wealthLevel = Citizen.GetWealthLevel((ItemClass.Level)data.m_level);
+	        CitizenManager instance = Singleton<CitizenManager>.instance;
+	        uint num = 0u;
+	        uint num2 = data.m_citizenUnits;
+	        int num3 = 0;
+	        while (num2 != 0)
+	        {
+		        CitizenUnit.Flags flags = instance.m_units.m_buffer[num2].m_flags;
+		        if ((flags & CitizenUnit.Flags.Home) != 0)
+		        {
+			        instance.m_units.m_buffer[num2].SetWealthLevel(wealthLevel);
+			        homeCount--;
+		        }
+		        if ((flags & CitizenUnit.Flags.Work) != 0)
+		        {
+			        workCount -= 5;
+		        }
+		        if ((flags & CitizenUnit.Flags.Visit) != 0)
+		        {
+			        visitCount -= 5;
+		        }
+		        if ((flags & CitizenUnit.Flags.Student) != 0)
+		        {
+			        studentCount -= 5;
+		        }
+		        num = num2;
+		        num2 = instance.m_units.m_buffer[num2].m_nextUnit;
+		        if (++num3 > 524288)
+		        {
+			        CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+			        break;
+		        }
+	        }
+	        homeCount = Mathf.Max(0, homeCount);
+	        workCount = Mathf.Max(0, workCount);
+	        visitCount = Mathf.Max(0, visitCount);
+	        studentCount = Mathf.Max(0, studentCount);
+	        hotelCount = Mathf.Max(0, hotelCount);
+	        if (homeCount == 0 && workCount == 0 && visitCount == 0 && studentCount == 0 && hotelCount == 0)
+	        {
+		        return;
+	        }
+	        uint firstUnit = 0u;
+	        if (instance.CreateUnits(out firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount, workCount, visitCount, 0, studentCount, hotelCount))
+	        {
+		        if (num != 0)
+		        {
+			        instance.m_units.m_buffer[num].m_nextUnit = firstUnit;
+		        }
+		        else
+		        {
+			        data.m_citizenUnits = firstUnit;
+		        }
+	        }
         }
 
     }
