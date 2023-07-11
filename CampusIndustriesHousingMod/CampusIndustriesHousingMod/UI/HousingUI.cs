@@ -51,7 +51,7 @@ namespace CampusIndustriesHousingMod.UI
                 m_uiMainPanel.height = m_uiMainPanel.parent.height - 7f;
                 m_uiMainPanel.isVisible = HousingConfig.Config.ShowPanel;
                 m_uiMainPanel.relativePosition = new Vector3(m_uiMainPanel.parent.width + 1f, m_uiMainPanel.parent.position.y + 40f);
-                m_uiMainPanel.width = 5100f;
+                m_uiMainPanel.width = 510f;
 
                 m_settingsCheckBox = UiUtils.CreateCheckBox(m_parkButtons, "SettingsCheckBox", "settings", HousingConfig.Config.ShowPanel);
                 m_settingsCheckBox.width = 110f;
@@ -63,6 +63,7 @@ namespace CampusIndustriesHousingMod.UI
                 m_settingsCheckBox.eventCheckChanged += (component, value) =>
                 {
                     m_uiMainPanel.isVisible = value;
+                    m_uiMainPanel.height = m_uiMainPanel.parent.height - 7f;
                     HousingConfig.Config.ShowPanel = value;
                     HousingConfig.Config.Serialize();
                 };
@@ -190,7 +191,7 @@ namespace CampusIndustriesHousingMod.UI
                         }
                     }
                 }
-                m_uiMainPanel.height = m_uiMainPanel.parent.height;
+                m_uiMainPanel.height = m_uiMainPanel.parent.height - 7f;
                 m_settingsCheckBox.Show();
 			}
         }
@@ -304,7 +305,7 @@ namespace CampusIndustriesHousingMod.UI
             for (uint i = 0u; i < PrefabCollection<BuildingInfo>.LoadedCount(); ++i)
 			{
 				BuildingInfo info = PrefabCollection<BuildingInfo>.GetLoaded(i);
-				if (info != null && info.GetAI() is BarracksAI barracksAI)
+				if (info != null && info.name == buildingInfo.name && info.GetAI() is BarracksAI barracksAI)
 				{
 					barracksAI.numApartments = prefabRecord.NumOfApartments;
                     barracksAI.m_workPlaceCount0 = prefabRecord.WorkPlaceCount0;
@@ -312,7 +313,7 @@ namespace CampusIndustriesHousingMod.UI
                     barracksAI.m_workPlaceCount2 = prefabRecord.WorkPlaceCount2;
                     barracksAI.m_workPlaceCount3 = prefabRecord.WorkPlaceCount3;
 				}
-                else if (info != null && info.GetAI() is DormsAI dormsAI)
+                else if (info != null && info.name == buildingInfo.name && info.GetAI() is DormsAI dormsAI)
 				{
 					dormsAI.numApartments = prefabRecord.NumOfApartments;
                     dormsAI.m_workPlaceCount0 = prefabRecord.WorkPlaceCount0;
