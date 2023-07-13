@@ -792,20 +792,7 @@ namespace CampusIndustriesHousingMod.AI
 
         public int getModifiedCapacity(ushort buildingID, ref Building data) 
         {
-            var res = HousingManager.BuildingRecords.TryGetValue(buildingID, out HousingManager.BuildingRecord buildingRecord);
             var dorms = data.Info.GetAI() as DormsAI;
-            if(res)
-            {
-                dorms.numApartments = buildingRecord.NumOfApartments;
-                dorms.m_workPlaceCount0 = buildingRecord.WorkPlaceCount0;
-                dorms.m_workPlaceCount1 = buildingRecord.WorkPlaceCount1;
-                dorms.m_workPlaceCount2 = buildingRecord.WorkPlaceCount2;
-                dorms.m_workPlaceCount3 = buildingRecord.WorkPlaceCount3;
-            } 
-            else
-            {
-                dorms = HousingManager.DefaultDormsValues(dorms);
-            }   
             return capacityModifier > 0 ? (int) (dorms.numApartments * capacityModifier) : dorms.numApartments;
         }
 

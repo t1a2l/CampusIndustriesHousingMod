@@ -40,6 +40,8 @@ namespace CampusIndustriesHousingMod.Utils
 
                 writer.Write(buildingRecord.WorkPlaceCount3);
 
+                writer.Write(buildingRecord.DefaultValues);
+
                 Logger.logInfo(LOG_SERIALIZATION, "wrote entry ", entry.Key);
             }
 
@@ -95,6 +97,7 @@ namespace CampusIndustriesHousingMod.Utils
                     WorkPlaceCount1 = reader.ReadInt32(),
                     WorkPlaceCount2 = reader.ReadInt32(),
                     WorkPlaceCount3 = reader.ReadInt32(),
+                    DefaultValues = reader.ReadBoolean()
                 };
 
                 // Drop any empty entries.

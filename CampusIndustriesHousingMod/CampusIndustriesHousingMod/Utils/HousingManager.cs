@@ -22,6 +22,8 @@ namespace CampusIndustriesHousingMod.Utils
             public int WorkPlaceCount2;
 
             public int WorkPlaceCount3;
+
+            public bool DefaultValues;
         }
 
         public struct PrefabRecord

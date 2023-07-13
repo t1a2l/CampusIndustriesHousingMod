@@ -4,7 +4,6 @@ using ColossalFramework;
 using ColossalFramework.UI;
 using System;
 using UnityEngine;
-using static CampusIndustriesHousingMod.Utils.HousingManager;
 
 
 namespace CampusIndustriesHousingMod.UI
@@ -231,144 +230,22 @@ namespace CampusIndustriesHousingMod.UI
 
         public static void ApplyBuildingSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
-            ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
-            BuildingInfo buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
-
-            var buildingRecord = HousingManager.GetBuildingRecord(buildingID);
-
-            var buildingAI = buildingInfo.GetAI();
-
-            var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
-            var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.Find<UITextField>("WorkPlaceCount0TextField");
-            var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.Find<UITextField>("WorkPlaceCount1TextField");
-            var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.Find<UITextField>("WorkPlaceCount2TextField");
-            var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.Find<UITextField>("WorkPlaceCount3TextField");
-
-            buildingRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
-            buildingRecord.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
-            buildingRecord.WorkPlaceCount1 = int.Parse(m_workPlaceCount1Textfield.text);
-            buildingRecord.WorkPlaceCount2 = int.Parse(m_workPlaceCount2Textfield.text);
-            buildingRecord.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
-
-            if(buildingAI is BarracksAI)
-            {
-                buildingRecord.BuildingAI = "BarracksAI";
-            }
-            else if(buildingAI is DormsAI)
-            {
-                buildingRecord.BuildingAI = "DormsAI";
-            }
-            HousingManager.SetBuildingRecord(buildingID, buildingRecord);
-            RefreshData();
+            ApplySettingsToBuilding(false, true, false, false);
         }
 
         public static void ApplyDefaultSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
-            ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
-            BuildingInfo buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
-
-            if (HousingManager.BuildingRecordExist(buildingID))
-            {
-                HousingManager.RemoveBuildingRecord(buildingID);
-            }
-
-            var buildingAI = buildingInfo.GetAI();
-
-            var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
-            var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.Find<UITextField>("WorkPlaceCount0TextField");
-            var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.Find<UITextField>("WorkPlaceCount1TextField");
-            var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.Find<UITextField>("WorkPlaceCount2TextField");
-            var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.Find<UITextField>("WorkPlaceCount3TextField");
-
-            if(buildingAI is BarracksAI barracksAI)
-            {
-                barracksAI = HousingManager.DefaultBarracksValues(barracksAI);
-                m_apartmentsNumTextfield.text = barracksAI.numApartments.ToString();
-                m_workPlaceCount0Textfield.text = barracksAI.m_workPlaceCount0.ToString();
-                m_workPlaceCount1Textfield.text = barracksAI.m_workPlaceCount1.ToString();
-                m_workPlaceCount2Textfield.text = barracksAI.m_workPlaceCount2.ToString();
-                m_workPlaceCount3Textfield.text = barracksAI.m_workPlaceCount3.ToString();
-            }
-            else if(buildingAI is DormsAI dormsAI)
-            {
-                dormsAI = HousingManager.DefaultDormsValues(dormsAI);
-                m_apartmentsNumTextfield.text = dormsAI.numApartments.ToString();
-                m_workPlaceCount0Textfield.text = dormsAI.m_workPlaceCount0.ToString();
-                m_workPlaceCount1Textfield.text = dormsAI.m_workPlaceCount1.ToString();
-                m_workPlaceCount2Textfield.text = dormsAI.m_workPlaceCount2.ToString();
-                m_workPlaceCount3Textfield.text = dormsAI.m_workPlaceCount3.ToString();
-            }
-            RefreshData();
+            ApplySettingsToBuilding(true, true, false, false);
         }
 
         public static void ApplyPrefabSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
-            ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
-            BuildingInfo buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
-
-            // get prefab record
-            var prefabRecord = HousingManager.GetPrefab(buildingInfo.name);
-
-            var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
-            var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.Find<UITextField>("WorkPlaceCount0TextField");
-            var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.Find<UITextField>("WorkPlaceCount1TextField");
-            var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.Find<UITextField>("WorkPlaceCount2TextField");
-            var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.Find<UITextField>("WorkPlaceCount3TextField");
-
-            prefabRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
-            prefabRecord.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
-            prefabRecord.WorkPlaceCount1 = int.Parse(m_workPlaceCount1Textfield.text);
-            prefabRecord.WorkPlaceCount2 = int.Parse(m_workPlaceCount2Textfield.text);
-            prefabRecord.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
-
-            var buildingAI = buildingInfo.GetAI();
-
-            if(buildingAI is BarracksAI)
-            {
-                prefabRecord.BuildingAI = "BarracksAI";
-            }
-            else if(buildingAI is DormsAI)
-            {
-                prefabRecord.BuildingAI = "DormsAI";
-            }
-
-            HousingManager.SetPrefab(prefabRecord);
-            RefreshData();
+            ApplySettingsToBuilding(false, false, true, false);
         }
 
         public static void ApplyGlobalSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
-            ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
-            BuildingInfo buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
-
-            var m_apartmentsNumTextfield = ApartmentNumberPanel.GetComponent<UITextField>();
-            var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.GetComponent<UITextField>();
-            var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.GetComponent<UITextField>();
-            var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.GetComponent<UITextField>();
-            var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.GetComponent<UITextField>();
-
-            var buildingAI = buildingInfo.GetAI();
-            var buildingAI_str = "";
-            if(buildingAI is BarracksAI)
-            {
-                buildingAI_str = "BarracksAI";
-            }
-            else if(buildingAI is DormsAI)
-            {
-                buildingAI_str = "DormsAI";
-            }
-
-            var housing = HousingConfig.Config.GetGlobalSettings(buildingInfo.name, buildingAI_str);
-
-            housing.Name = buildingInfo.name;
-            housing.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
-            housing.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
-            housing.WorkPlaceCount1 = int.Parse(m_workPlaceCount1Textfield.text);
-            housing.WorkPlaceCount2 = int.Parse(m_workPlaceCount2Textfield.text);
-            housing.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
-
-            HousingConfig.Config.SetGlobalSettings(housing);
-            RefreshData();
+            ApplySettingsToBuilding(false, false, false, true);
         }
 
         public static void UpdateHouse(ushort buildingID, ref Building data, int numOfApartments, int WorkPlaceCount0, int WorkPlaceCount1, int WorkPlaceCount2, int WorkPlaceCount3)
@@ -460,6 +337,99 @@ namespace CampusIndustriesHousingMod.UI
 		        }
 	        }
         }
+
+        private static void ApplySettingsToBuilding(bool setDefault, bool isBuilding, bool isPrefab, bool isGlobal)
+        {
+            ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
+            BuildingInfo buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
+
+            var buildingAI = buildingInfo.GetAI();
+
+            var BuildingAIstr = "";
+
+            if(buildingAI is BarracksAI)
+            {
+                BuildingAIstr = "BarracksAI";
+            }
+            else if(buildingAI is DormsAI)
+            {
+                BuildingAIstr = "DormsAI";
+            }
+
+            var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
+            var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.Find<UITextField>("WorkPlaceCount0TextField");
+            var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.Find<UITextField>("WorkPlaceCount1TextField");
+            var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.Find<UITextField>("WorkPlaceCount2TextField");
+            var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.Find<UITextField>("WorkPlaceCount3TextField");
+
+            // if set to default
+            if(setDefault)
+            {
+                if(buildingAI is BarracksAI barracksAI)
+                {
+                    barracksAI = HousingManager.DefaultBarracksValues(barracksAI);
+                    m_apartmentsNumTextfield.text = barracksAI.numApartments.ToString();
+                    m_workPlaceCount0Textfield.text = barracksAI.m_workPlaceCount0.ToString();
+                    m_workPlaceCount1Textfield.text = barracksAI.m_workPlaceCount1.ToString();
+                    m_workPlaceCount2Textfield.text = barracksAI.m_workPlaceCount2.ToString();
+                    m_workPlaceCount3Textfield.text = barracksAI.m_workPlaceCount3.ToString();
+                }
+                else if(buildingAI is DormsAI dormsAI)
+                {
+                    dormsAI = HousingManager.DefaultDormsValues(dormsAI);
+                    m_apartmentsNumTextfield.text = dormsAI.numApartments.ToString();
+                    m_workPlaceCount0Textfield.text = dormsAI.m_workPlaceCount0.ToString();
+                    m_workPlaceCount1Textfield.text = dormsAI.m_workPlaceCount1.ToString();
+                    m_workPlaceCount2Textfield.text = dormsAI.m_workPlaceCount2.ToString();
+                    m_workPlaceCount3Textfield.text = dormsAI.m_workPlaceCount3.ToString();
+                }
+            }
+           
+            if(isBuilding)
+            {
+                var buildingRecord = HousingManager.GetBuildingRecord(buildingID);
+
+                buildingRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
+                buildingRecord.BuildingAI = BuildingAIstr;
+                buildingRecord.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
+                buildingRecord.WorkPlaceCount1 = int.Parse(m_workPlaceCount1Textfield.text);
+                buildingRecord.WorkPlaceCount2 = int.Parse(m_workPlaceCount2Textfield.text);
+                buildingRecord.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
+                buildingRecord.DefaultValues = setDefault;
+
+                HousingManager.SetBuildingRecord(buildingID, buildingRecord);
+			}
+			else if(isPrefab)
+			{
+                var prefabRecord = HousingManager.GetPrefab(buildingInfo.name);
+
+                prefabRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
+                prefabRecord.BuildingAI = BuildingAIstr;
+                prefabRecord.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
+                prefabRecord.WorkPlaceCount1 = int.Parse(m_workPlaceCount1Textfield.text);
+                prefabRecord.WorkPlaceCount2 = int.Parse(m_workPlaceCount2Textfield.text);
+                prefabRecord.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
+
+                HousingManager.SetPrefab(prefabRecord);
+            }
+            else if(isGlobal)
+            {
+                var housing = HousingConfig.Config.GetGlobalSettings(buildingInfo.name, BuildingAIstr);
+
+                housing.Name = buildingInfo.name;
+                housing.BuildingAI = BuildingAIstr;
+                housing.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
+                housing.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
+                housing.WorkPlaceCount1 = int.Parse(m_workPlaceCount1Textfield.text);
+                housing.WorkPlaceCount2 = int.Parse(m_workPlaceCount2Textfield.text);
+                housing.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
+
+                HousingConfig.Config.SetGlobalSettings(housing);
+            }
+
+            RefreshData();
+        }
+
 
     }
 
