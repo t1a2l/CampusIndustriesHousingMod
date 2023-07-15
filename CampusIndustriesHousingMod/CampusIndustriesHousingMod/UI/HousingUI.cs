@@ -3,6 +3,7 @@ using CampusIndustriesHousingMod.Utils;
 using ColossalFramework;
 using ColossalFramework.UI;
 using System;
+using System.Linq;
 using UnityEngine;
 
 
@@ -22,6 +23,9 @@ namespace CampusIndustriesHousingMod.UI
         private static UIPanel WorkPlaceCount1Panel;
         private static UIPanel WorkPlaceCount2Panel;
         private static UIPanel WorkPlaceCount3Panel;
+
+        private static UIButton SavePrefabSettingsBtn;
+        private static UIButton SaveGlobalSettingsBtn;
 
         private static UIButton ApplyBuildingSettingsBtn;
         private static UIButton ApplyPrefabSettingsBtn;
@@ -89,17 +93,23 @@ namespace CampusIndustriesHousingMod.UI
 
                 WorkPlaceCount3Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount3", "", "Highly Educated Workers: ", "number of highly educated workers");
                 WorkPlaceCount3Panel.relativePosition = new Vector3(10f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f));
- 
+                
+                ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 13 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "apply to buildings of the same type");
+                ApplyPrefabSettingsBtn.eventClicked += SavePrefabSettings;
+
+                SaveGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 16 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "set global settings");            
+                SaveGlobalSettingsBtn.eventClicked += SaveGlobalSettings;
+
                 ApplyBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyBuildingSettings", "apply to building");
                 ApplyBuildingSettingsBtn.eventClicked += ApplyBuildingSettings;
 
                 ApplyDefaultSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 6 * (DEFAULT_HEIGHT * 0.8f + 2f), "ReturnToDefault", "default game settings");            
                 ApplyDefaultSettingsBtn.eventClicked += ApplyDefaultSettings;
 
-                ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "apply to buildings of type");
-                ApplyPrefabSettingsBtn.eventClicked += ApplyPrefabSettings;
+                SavePrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "apply to buildings of type");
+                SavePrefabSettingsBtn.eventClicked += ApplyPrefabSettings;
 
-                ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 14 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "set global settings");            
+                ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 16 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "set global settings");            
                 ApplyGlobalSettingsBtn.eventClicked += ApplyGlobalSettings;
 
             }
@@ -228,6 +238,26 @@ namespace CampusIndustriesHousingMod.UI
 			}
         }
 
+        public static void ApplyPrefabSettings(UIComponent c, UIMouseEventParameter eventParameter)
+        {
+            ConfirmPanel.ShowModal("Apply Prefab Settings", "This will remove all building records of this type!", (comp, ret) =>
+            {
+                if (ret != 1)
+                    return;
+                SetPrefabGlobalSettings(false);
+            });
+        }
+
+        public static void ApplyGlobalSettings(UIComponent c, UIMouseEventParameter eventParameter)
+        {
+            ConfirmPanel.ShowModal("Apply Global Settings", "This will remove all building records and prefab records of this type!", (comp, ret) =>
+            {
+                if (ret != 1)
+                    return;
+                SetPrefabGlobalSettings(true);
+            });
+        }
+
         public static void ApplyBuildingSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
             ApplySettingsToBuilding(false, true, false, false);
@@ -238,12 +268,12 @@ namespace CampusIndustriesHousingMod.UI
             ApplySettingsToBuilding(true, true, false, false);
         }
 
-        public static void ApplyPrefabSettings(UIComponent c, UIMouseEventParameter eventParameter)
+        public static void SavePrefabSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
             ApplySettingsToBuilding(false, false, true, false);
         }
 
-        public static void ApplyGlobalSettings(UIComponent c, UIMouseEventParameter eventParameter)
+        public static void SaveGlobalSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
             ApplySettingsToBuilding(false, false, false, true);
         }
@@ -430,6 +460,49 @@ namespace CampusIndustriesHousingMod.UI
             RefreshData();
         }
 
+        private static void SetPrefabGlobalSettings(bool isGlobal)
+        {
+            ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
+            BuildingInfo buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
+
+            var buildingAI = buildingInfo.GetAI();
+
+            var BuildingAIstr = "";
+
+            if(buildingAI is BarracksAI)
+            {
+                BuildingAIstr = "BarracksAI";
+            }
+            else if(buildingAI is DormsAI)
+            {
+                BuildingAIstr = "DormsAI";
+            }
+           
+            var buildingsList = HousingManager.BuildingRecords.Where(item =>
+		    {
+                BuildingInfo Info = Singleton<BuildingManager>.instance.m_buildings.m_buffer[item.Key].Info;
+                return Info.name == buildingInfo.name && item.Value.BuildingAI == BuildingAIstr;
+            }).ToList();
+
+            foreach( var item in buildingsList )
+            {
+                HousingManager.BuildingRecords.Remove(item.Key);
+            }
+            if(isGlobal)
+            {
+                var buildingsPrefabList = HousingManager.PrefabRecords.Where(item =>
+			    {
+                        return item.Name == buildingInfo.name && item.BuildingAI == BuildingAIstr;
+                }).ToList();
+
+                foreach( var item in buildingsPrefabList )
+                {
+                    HousingManager.PrefabRecords.Remove(item);
+                }
+            }
+
+            RefreshData();
+        }
 
     }
 
