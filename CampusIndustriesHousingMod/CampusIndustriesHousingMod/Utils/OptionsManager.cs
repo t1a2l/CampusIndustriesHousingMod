@@ -49,12 +49,43 @@ namespace CampusIndustriesHousingMod.Utils
             group.AddButton("Save", saveOptions);
 
             UIHelperBase group_clear = helper.AddGroup("Housing Clear Settings, Use with Caution!! Can't be undone!");
-            group_clear.AddButton("Clear All Buildings Records", HousingManager.ClearBuildingRecords);
+            group_clear.AddButton("Clear All Buildings Records", ConfimDeleteBuildignRecords);
             group_clear.AddSpace(1);
-            group_clear.AddButton("Clear All Buildings Prefab Records", HousingManager.ClearPrefabRecords);
+            group_clear.AddButton("Clear All Buildings Prefab Records", ConfimDeletePrefabRecords);
             group_clear.AddSpace(1);
-            group_clear.AddButton("Clear Housing Global Settings", HousingConfig.Config.ClearGlobalSettings);
+            group_clear.AddButton("Clear Housing Global Settings", ConfimDeleteGlobalConfig);
         }
+
+        private void ConfimDeleteBuildignRecords()
+        {
+            ConfirmPanel.ShowModal("Delete All Building Records", "This will clear all building records!", (comp, ret) =>
+            {
+                if (ret != 1)
+                    return;
+                HousingManager.ClearBuildingRecords();
+            });
+        }
+
+        private void ConfimDeletePrefabRecords()
+        {
+            ConfirmPanel.ShowModal("Delete All Prefab Records", "This will clear all prefab records!", (comp, ret) =>
+            {
+                if (ret != 1)
+                    return;
+                HousingManager.ClearPrefabRecords();
+            });
+        }
+
+        private void ConfimDeleteGlobalConfig()
+        {
+            ConfirmPanel.ShowModal("Delete All Global Settings", "This will clear all global settings!", (comp, ret) =>
+            {
+                if (ret != 1)
+                    return;
+                HousingConfig.Config.ClearGlobalSettings();
+            });
+        }
+
 
         private void handleCapacityChange(int newSelection) 
         {

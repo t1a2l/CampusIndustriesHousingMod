@@ -28,9 +28,9 @@ namespace CampusIndustriesHousingMod.UI
         private static UIButton SaveGlobalSettingsBtn;
 
         private static UIButton ApplyBuildingSettingsBtn;
-        private static UIButton ApplyPrefabSettingsBtn;
-        private static UIButton ApplyGlobalSettingsBtn;
         private static UIButton ApplyDefaultSettingsBtn;
+        private static UIButton ApplyPrefabSettingsBtn;
+        private static UIButton ApplyGlobalSettingsBtn; 
 
         private static float DEFAULT_HEIGHT = 18F;
 
@@ -94,22 +94,22 @@ namespace CampusIndustriesHousingMod.UI
                 WorkPlaceCount3Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount3", "", "Highly Educated Workers: ", "number of highly educated workers");
                 WorkPlaceCount3Panel.relativePosition = new Vector3(10f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f));
                 
-                ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 13 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "apply to buildings of the same type");
-                ApplyPrefabSettingsBtn.eventClicked += SavePrefabSettings;
+                SavePrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 13 * (DEFAULT_HEIGHT * 0.8f + 2f), "SavePrefabSettings", "save as prefab settings");
+                SavePrefabSettingsBtn.eventClicked += SavePrefabSettings;
 
-                SaveGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 16 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "set global settings");            
+                SaveGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 16 * (DEFAULT_HEIGHT * 0.8f + 2f), "SaveGlobalSettings", "save as global settings");            
                 SaveGlobalSettingsBtn.eventClicked += SaveGlobalSettings;
 
                 ApplyBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyBuildingSettings", "apply to building");
                 ApplyBuildingSettingsBtn.eventClicked += ApplyBuildingSettings;
 
-                ApplyDefaultSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 6 * (DEFAULT_HEIGHT * 0.8f + 2f), "ReturnToDefault", "default game settings");            
+                ApplyDefaultSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 6 * (DEFAULT_HEIGHT * 0.8f + 2f), "ReturnToDefault", "back to default");            
                 ApplyDefaultSettingsBtn.eventClicked += ApplyDefaultSettings;
 
-                SavePrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "apply to buildings of type");
-                SavePrefabSettingsBtn.eventClicked += ApplyPrefabSettings;
+                ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "apply prefab");
+                ApplyPrefabSettingsBtn.eventClicked += ApplyPrefabSettings;
 
-                ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 16 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "set global settings");            
+                ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 14 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "apply global");            
                 ApplyGlobalSettingsBtn.eventClicked += ApplyGlobalSettings;
 
             }
