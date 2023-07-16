@@ -5,7 +5,7 @@ namespace CampusIndustriesHousingMod.UI
 {
 	public static class UiUtils 
 	{
-		public static UIButton AddButton(UIComponent parent, float posX, float posY, string name, string text, float width = 230f, float height = 30f, float scale = 0.9f, int vertPad = 4, string tooltip = null)
+		public static UIButton AddButton(UIComponent parent, float posX, float posY, string name, string text, string tooltip = null, float width = 230f, float height = 30f, float scale = 0.9f, int vertPad = 4)
         {
             UIButton button = parent.AddUIComponent<UIButton>();
 
@@ -171,7 +171,7 @@ namespace CampusIndustriesHousingMod.UI
             var text_name = name + "TextField";
             UITextField m_uiValueLabel = CreateTextField(m_uiPanel, text_name, tooltip);
             m_uiValueLabel.textScale = DEFAULT_SCALE;
-            m_uiValueLabel.relativePosition = new Vector3(175f, -6f);
+            m_uiValueLabel.relativePosition = new Vector3(180f, -6f);
 
             return m_uiPanel;
         }

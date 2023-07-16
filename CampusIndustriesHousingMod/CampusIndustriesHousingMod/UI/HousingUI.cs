@@ -25,6 +25,7 @@ namespace CampusIndustriesHousingMod.UI
         private static UIPanel WorkPlaceCount3Panel;
 
         private static UIButton SaveBuildingSettingsBtn;
+        private static UIButton ClearBuildingSettingsBtn;
         private static UIButton SaveDefaultSettingsBtn;
         private static UIButton SavePrefabSettingsBtn;
         private static UIButton SaveGlobalSettingsBtn;
@@ -94,22 +95,25 @@ namespace CampusIndustriesHousingMod.UI
                 WorkPlaceCount3Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount3", "", "Highly Educated Workers: ", "number of highly educated workers");
                 WorkPlaceCount3Panel.relativePosition = new Vector3(10f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f));
                 
-                SaveBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f), "SaveBuildingSettings", "save as building settings");
+                SaveBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f), "SaveBuildingSettings", "save as building settings", "first priority - will override prefab and global settings create a record for this building");
                 SaveBuildingSettingsBtn.eventClicked += SaveBuildingSettings;
 
-                SaveDefaultSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 6 * (DEFAULT_HEIGHT * 0.8f + 2f), "ReturnToDefault", "back to default");            
+                ClearBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 6 * (DEFAULT_HEIGHT * 0.8f + 2f), "ClearBuildingSettings", "clear building settings", "clear tis building record - will get the values from prefab or global settings");
+                ClearBuildingSettingsBtn.eventClicked += ClearBuildingSettings;
+
+                SaveDefaultSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f), "ReturnToDefault", "back to default", "will not delete the record just set a default flag on it - you need to clear settings for this building to get the prefab or global settings");            
                 SaveDefaultSettingsBtn.eventClicked += SaveDefaultSettings;
 
-                SavePrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f), "SavePrefabSettings", "save as prefab settings");
+                SavePrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 14 * (DEFAULT_HEIGHT * 0.8f + 2f), "SavePrefabSettings", "save as prefab settings", "save settings for all buildings of the same type as this building - is not cross save!");
                 SavePrefabSettingsBtn.eventClicked += SavePrefabSettings;
 
-                SaveGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 14 * (DEFAULT_HEIGHT * 0.8f + 2f), "SaveGlobalSettings", "save as global settings");            
+                SaveGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 18 * (DEFAULT_HEIGHT * 0.8f + 2f), "SaveGlobalSettings", "save as global settings", "save settings for all buildings of the same type as this building - is cross save!");            
                 SaveGlobalSettingsBtn.eventClicked += SaveGlobalSettings;
                 
-                ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 13 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "apply prefab");
+                ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 13 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "apply prefab", "ignore all building records of the same type and deletes the records to apply prefab settings");
                 ApplyPrefabSettingsBtn.eventClicked += ApplyPrefabSettings;
 
-                ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 16 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "apply global");            
+                ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 16 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "apply global", "ignore all building records and prefabs of the same type and deletes the records and prefabs to apply global settings");            
                 ApplyGlobalSettingsBtn.eventClicked += ApplyGlobalSettings;
 
             }
@@ -243,6 +247,13 @@ namespace CampusIndustriesHousingMod.UI
             SaveSettings(false, true, false, false);
         }
 
+        public static void ClearBuildingSettings(UIComponent c, UIMouseEventParameter eventParameter)
+        {
+            ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
+            HousingManager.RemoveBuildingRecord(buildingID);
+            RefreshData();
+        }
+        
         public static void SaveDefaultSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
             SaveSettings(true, true, false, false);
