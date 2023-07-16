@@ -101,9 +101,9 @@ namespace CampusIndustriesHousingMod.Utils
             BuildingRecords.Clear();
         }
 
-        public static PrefabRecord GetPrefab(string name)
+        public static PrefabRecord GetPrefab(string name, string buildingAI)
         {
-            var index = PrefabRecords.FindIndex(item => item.Name == name);
+            var index = PrefabRecords.FindIndex(item => item.Name == name && item.BuildingAI == buildingAI);
             if(index != -1)
             {
                 return PrefabRecords[index];
@@ -112,7 +112,8 @@ namespace CampusIndustriesHousingMod.Utils
             {
 				PrefabRecord newPrefabRecord = new()
 				{
-					Name = name
+					Name = name,
+                    BuildingAI = buildingAI
 				};
 				PrefabRecords.Add(newPrefabRecord);
                 return newPrefabRecord;
@@ -121,13 +122,13 @@ namespace CampusIndustriesHousingMod.Utils
 
         public static void SetPrefab(PrefabRecord prefabRecord)
 		{
-            var index = PrefabRecords.FindIndex(item => item.Name == prefabRecord.Name);
+            var index = PrefabRecords.FindIndex(item => item.Name == prefabRecord.Name && item.BuildingAI == prefabRecord.BuildingAI);
             PrefabRecords[index] = prefabRecord;
         }
 
-        public static void RemovePrefab(string name)
+        public static void RemovePrefab(string name, string buildingAI)
         {
-            var index = PrefabRecords.FindIndex(item => item.Name == name);
+            var index = PrefabRecords.FindIndex(item => item.Name == name && item.BuildingAI == buildingAI);
             if(index != -1)
             {
                 PrefabRecords.RemoveAt(index);

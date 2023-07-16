@@ -68,6 +68,7 @@ namespace CampusIndustriesHousingMod
             }
             catch (Exception e)
             {
+                Logger.logError(e.Message);
                 HousingManager.Deinit();
             }
 
