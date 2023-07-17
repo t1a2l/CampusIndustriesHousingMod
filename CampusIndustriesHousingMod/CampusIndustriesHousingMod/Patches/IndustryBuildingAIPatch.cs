@@ -22,15 +22,16 @@ namespace CampusIndustriesHousingMod.Patches
 
 		[HarmonyPatch(typeof(IndustryBuildingAI), "CreateBuilding")]
         [HarmonyPrefix]
-        public static bool CreateBuilding(IndustryBuildingAI __instance, ushort buildingID, ref Building data, ref Dictionary<uint, FastList<IndustryBuildingAI>> ___m_searchTable, ref uint ___SearchKey, ref Dictionary<uint, int> ___m_lastTableIndex)
+        public static bool CreateBuilding(IndustryBuildingAI __instance, ushort buildingID, ref Building data, ref Dictionary<uint, FastList<IndustryBuildingAI>> ___m_searchTable, ref Dictionary<uint, int> ___m_lastTableIndex)
         {
-			if (__instance.m_info.m_placementStyle == ItemClass.Placement.Manual && ___m_searchTable.TryGetValue(___SearchKey, out var value) && value != null && value.m_size >= 2)
+			var SearchKey = (uint)typeof(IndustryBuildingAI).GetProperty("SearchKey", AccessTools.all).GetValue(__instance, null);
+			if (__instance.m_info.m_placementStyle == ItemClass.Placement.Manual && ___m_searchTable.TryGetValue(SearchKey, out var value) && value != null && value.m_size >= 2)
 			{
-				if (___m_lastTableIndex[___SearchKey] < 0)
+				if (___m_lastTableIndex[SearchKey] < 0)
 				{
-					___m_lastTableIndex[___SearchKey] = Singleton<SimulationManager>.instance.m_randomizer.Int32((uint)value.m_size);
+					___m_lastTableIndex[SearchKey] = Singleton<SimulationManager>.instance.m_randomizer.Int32((uint)value.m_size);
 				}
-				IndustryBuildingAI industryBuildingAI = value.m_buffer[___m_lastTableIndex[___SearchKey]];
+				IndustryBuildingAI industryBuildingAI = value.m_buffer[___m_lastTableIndex[SearchKey]];
 				if (industryBuildingAI != null && industryBuildingAI.m_info.m_placementStyle == ItemClass.Placement.Procedural)
 				{
 					data.Info = industryBuildingAI.m_info;
