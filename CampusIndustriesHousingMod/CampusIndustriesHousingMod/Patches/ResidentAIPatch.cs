@@ -5,7 +5,7 @@ using HarmonyLib;
 namespace CampusIndustriesHousingMod.Patches
 {
     [HarmonyPatch(typeof(ResidentAI))]
-    class ResidentAIPatch
+    public static class ResidentAIPatch
     {
 
         [HarmonyPatch(typeof(ResidentAI), "CanMakeBabies")]
