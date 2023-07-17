@@ -113,7 +113,7 @@ namespace CampusIndustriesHousingMod.AI
 	    {
 		    base.CreateBuilding(buildingID, ref data);
 		    int workCount = m_workPlaceCount0 + m_workPlaceCount1 + m_workPlaceCount2 + m_workPlaceCount3;
-		    Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, getModifiedCapacity(buildingID, ref data), workCount, 0, 0, 0);
+		    Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, getModifiedCapacity(buildingID, ref data), workCount, 0, 0, StudentCount * 5 / 4);
         }
 
         public override void BuildingLoaded(ushort buildingID, ref Building data, uint version)
@@ -231,7 +231,6 @@ namespace CampusIndustriesHousingMod.AI
                 {
                     health = (behaviour.m_healthAccumulation + (aliveCount >> 1)) / aliveCount;
                 }
-                Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.ElderCare, behaviour.m_healthAccumulation, buildingData.m_position, radius);
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Health, behaviour.m_healthAccumulation, buildingData.m_position, radius);
             }
             Logger.logInfo(LOG_SIMULATION, "DormsAI.SimulationStepActive -- health: {0}", health);
