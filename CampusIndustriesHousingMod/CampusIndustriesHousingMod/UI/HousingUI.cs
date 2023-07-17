@@ -16,6 +16,7 @@ namespace CampusIndustriesHousingMod.UI
         private static CityServiceWorldInfoPanel m_cityServiceWorldInfoPanel;
         
         private static UILabel m_settingsHeader;
+        private static UILabel m_settingsStatus;
         private static UICheckBox m_settingsCheckBox;
 
         private static UIPanel ApartmentNumberPanel;
@@ -79,6 +80,13 @@ namespace CampusIndustriesHousingMod.UI
                 m_settingsHeader.font = UiUtils.GetUIFont("OpenSans-Regular");
                 m_settingsHeader.textAlignment = UIHorizontalAlignment.Center;
                 m_settingsHeader.relativePosition = new Vector3(10f, 60f + 0 * (DEFAULT_HEIGHT * 0.8f + 2f));
+
+                m_settingsStatus = UiUtils.CreateLabel(m_uiMainPanel, "SettingsStatus", "", "");
+                m_settingsStatus.font = UiUtils.GetUIFont("OpenSans-Regular");
+                m_settingsStatus.textAlignment = UIHorizontalAlignment.Center;
+                m_settingsStatus.textColor = new Color32(215, 51, 58, 255);
+                m_settingsStatus.relativePosition = new Vector3(100f, 20f);
+                m_settingsStatus.textScale = 1.2f;
 
                 ApartmentNumberPanel = UiUtils.UIServiceBar(m_uiMainPanel, "ApartmentNumber", "", "Number of apartments: ", "number of apartments");
                 ApartmentNumberPanel.relativePosition = new Vector3(10f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f));
@@ -156,6 +164,15 @@ namespace CampusIndustriesHousingMod.UI
                 var res = HousingManager.BuildingRecords.TryGetValue(buildingID, out HousingManager.BuildingRecord buildingRecord);
                 if(res)
                 {
+                    if(buildingRecord.DefaultValues)
+                    {
+                        m_settingsStatus.text = "This Building is using default settings";
+                    } 
+                    else
+                    {
+                        m_settingsStatus.text = "This Building is using his own settings";
+                    }
+
                     m_apartmentsNumTextfield.text = buildingRecord.NumOfApartments.ToString();
                     m_workPlaceCount0Textfield.text = buildingRecord.WorkPlaceCount0.ToString();
                     m_workPlaceCount1Textfield.text = buildingRecord.WorkPlaceCount1.ToString();
@@ -172,6 +189,7 @@ namespace CampusIndustriesHousingMod.UI
                     var prefab_index = HousingManager.PrefabRecords.FindIndex(item => item.Name == building.Info.name && item.BuildingAI == buildingAIstr);
                     if(prefab_index != -1)
                     {
+                        m_settingsStatus.text = "This Building is using prefab settings";
                         var prefabRecord = HousingManager.PrefabRecords[prefab_index];
                         m_apartmentsNumTextfield.text = prefabRecord.NumOfApartments.ToString();
                         m_workPlaceCount0Textfield.text = prefabRecord.WorkPlaceCount0.ToString();
@@ -189,6 +207,7 @@ namespace CampusIndustriesHousingMod.UI
                         var global_index = HousingConfig.Config.HousingSettings.FindIndex(item => item.Name == building.Info.name && item.BuildingAI == buildingAIstr);
                         if(global_index != -1)
                         {
+                            m_settingsStatus.text = "This Building is using global settings";
                             var saved_config = HousingConfig.Config.HousingSettings[global_index];
                             m_apartmentsNumTextfield.text = saved_config.NumOfApartments.ToString();
                             m_workPlaceCount0Textfield.text = saved_config.WorkPlaceCount0.ToString();
@@ -203,6 +222,7 @@ namespace CampusIndustriesHousingMod.UI
                         }
                         else
                         {
+                            m_settingsStatus.text = "This Building is using default settings";
                             if(buildingAIstr == "BarracksAI")
                             {
                                 BarracksAI barracksAI = buildingAI as BarracksAI;
