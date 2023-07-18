@@ -55,9 +55,9 @@ namespace CampusIndustriesHousingMod.UI
                 m_uiMainPanel.name = "HousingUIPanel";
                 m_uiMainPanel.backgroundSprite = "SubcategoriesPanel";
                 m_uiMainPanel.opacity = 0.90f;
-                m_uiMainPanel.height = m_uiMainPanel.parent.height - 7f;
                 m_uiMainPanel.isVisible = HousingConfig.Config.ShowPanel;
-                m_uiMainPanel.relativePosition = new Vector3(m_uiMainPanel.parent.width + 1f, m_uiMainPanel.parent.position.y + 40f);
+                m_uiMainPanel.relativePosition = new Vector3(m_uiMainPanel.parent.width + 1f, 40f);
+                m_uiMainPanel.height = 370f;
                 m_uiMainPanel.width = 510f;
 
                 m_settingsCheckBox = UiUtils.CreateCheckBox(m_parkButtons, "SettingsCheckBox", "settings", HousingConfig.Config.ShowPanel);
@@ -257,8 +257,12 @@ namespace CampusIndustriesHousingMod.UI
                     }
                 }
                 UpdateHouse(buildingID, ref building, numOfApartments, WorkPlaceCount0, WorkPlaceCount1, WorkPlaceCount2, WorkPlaceCount3);
-                m_uiMainPanel.height = m_uiMainPanel.parent.height - 7f;
                 m_settingsCheckBox.Show();
+                if(m_settingsCheckBox.isChecked)
+                {
+                    m_uiMainPanel.height = 370f;
+                    m_uiMainPanel.Show();
+                }
 			}
         }
 
