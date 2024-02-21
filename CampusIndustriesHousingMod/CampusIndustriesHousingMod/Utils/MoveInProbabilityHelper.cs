@@ -18,8 +18,8 @@ namespace CampusIndustriesHousingMod.Utils
         public static bool checkIfShouldMoveIn(uint[] family, ref Building buildingData, ref Randomizer randomizer, string type) 
         {
             float chanceValue = BASE_CHANCE_VALUE;
-            Logger.logInfo(LOG_CHANCES, "MoveInProbabilityHelper.checkIfShouldMoveIn -- Base Chance: {0}", chanceValue);
-            Logger.logInfo(LOG_CHANCES, "---------------------------------");
+            Logger.LogInfo(LOG_CHANCES, "MoveInProbabilityHelper.checkIfShouldMoveIn -- Base Chance: {0}", chanceValue);
+            Logger.LogInfo(LOG_CHANCES, "---------------------------------");
 
             // Distance
             chanceValue += getDistanceChanceValue(family, ref buildingData, type);
@@ -30,14 +30,14 @@ namespace CampusIndustriesHousingMod.Utils
             // Check for no chance
             if (chanceValue <= 0) 
             {
-                Logger.logInfo(LOG_CHANCES, "MoveInProbabilityHelper.checkIfShouldMoveIn -- No Chance: {0}", chanceValue);
+                Logger.LogInfo(LOG_CHANCES, "MoveInProbabilityHelper.checkIfShouldMoveIn -- No Chance: {0}", chanceValue);
                 return false;
             }
 
             // Check against random value
             uint maxChance = (uint) MAX_CHANCE_VALUE;
             int randomValue = randomizer.Int32(maxChance);
-            Logger.logInfo(LOG_CHANCES, "MoveInProbabilityHelper.checkIfShouldMoveIn -- Total Chance Value: {0} -- Random Number: {1} -- result: {2}", chanceValue, randomValue, randomValue <= chanceValue);
+            Logger.LogInfo(LOG_CHANCES, "MoveInProbabilityHelper.checkIfShouldMoveIn -- Total Chance Value: {0} -- Random Number: {1} -- result: {2}", chanceValue, randomValue, randomValue <= chanceValue);
             return randomValue <= chanceValue;
         }
 
@@ -52,7 +52,7 @@ namespace CampusIndustriesHousingMod.Utils
             if (homeBuildingId == 0) 
             {
                 // homeBuilding should never be 0, but if it is return NO_CHANCE to prevent this family from being chosen 
-                Logger.logError(LOG_CHANCES, "MoveInProbabilityHelper.getDistanceChanceValue -- Home Building was 0 when it shouldn't have been");
+                Logger.LogError(LOG_CHANCES, "MoveInProbabilityHelper.getDistanceChanceValue -- Home Building was 0 when it shouldn't have been");
                 return NO_CHANCE;
             }
 
@@ -84,7 +84,7 @@ namespace CampusIndustriesHousingMod.Utils
             if (workBuildingId == 0) 
             {
                 // workBuildingId should never be 0, but if it is return NO_CHANCE to prevent this family from being chosen 
-                Logger.logError(LOG_CHANCES, "MoveInProbabilityHelper.getDistanceChanceValue -- Work Building was 0 when it shouldn't have been");
+                Logger.LogError(LOG_CHANCES, "MoveInProbabilityHelper.getDistanceChanceValue -- Work Building was 0 when it shouldn't have been");
                 return NO_CHANCE;
             }
 
@@ -105,7 +105,7 @@ namespace CampusIndustriesHousingMod.Utils
             {
                 distanceChanceValue = DISTANCE_MAX_CHANCE_VALUE * 1f;
             }
-            Logger.logInfo(LOG_CHANCES, "MoveInProbabilityHelper.getDistanceChanceValue -- Distance Chance Value: {0} -- Distance From Current Home: {1}, Distance From New Home: {2}", distanceChanceValue, distance_from_current_home_to_work, distance_from_new_home_to_Work);
+            Logger.LogInfo(LOG_CHANCES, "MoveInProbabilityHelper.getDistanceChanceValue -- Distance Chance Value: {0} -- Distance From Current Home: {1}, Distance From New Home: {2}", distanceChanceValue, distance_from_current_home_to_work, distance_from_new_home_to_Work);
 
             return distanceChanceValue;
         }
@@ -163,7 +163,7 @@ namespace CampusIndustriesHousingMod.Utils
                 }
             }
            
-            Logger.logInfo(LOG_CHANCES, "MoveInProbabilityHelper.getQualityLevelChanceValue -- Wealth Chance Value: {0} -- Family Wealth: {1} -- type: {2}", chance, wealth, type);
+            Logger.LogInfo(LOG_CHANCES, "MoveInProbabilityHelper.getQualityLevelChanceValue -- Wealth Chance Value: {0} -- Family Wealth: {1} -- type: {2}", chance, wealth, type);
             return chance;
         }
 

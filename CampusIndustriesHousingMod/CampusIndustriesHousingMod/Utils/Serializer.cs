@@ -40,7 +40,7 @@ namespace CampusIndustriesHousingMod.Utils
                     // Write to savegame.
                     serializableDataManager.SaveData(dataID, stream.ToArray());
 
-                    Logger.logInfo(LOG_DATA, "wrote ", stream.Length);
+                    Logger.LogInfo(LOG_DATA, "wrote ", stream.Length);
                 }
             }
         }
@@ -66,19 +66,19 @@ namespace CampusIndustriesHousingMod.Utils
                     {
                         // Read version.
                         int version = reader.ReadInt32();
-                        Logger.logInfo(LOG_DATA, "found data version ", version);
+                        Logger.LogInfo(LOG_DATA, "found data version ", version);
 
                         // Deserialise building settings.
                         HousingManagerSerializer.Deserialize(reader);
 
-                        Logger.logInfo(LOG_DATA, "read ", stream.Length);
+                        Logger.LogInfo(LOG_DATA, "read ", stream.Length);
                     }
                 }
             }
             else
             {
                 // No data read.
-                Logger.logInfo(LOG_DATA, "no data read");
+                Logger.LogInfo(LOG_DATA, "no data read");
             }
         }
     }

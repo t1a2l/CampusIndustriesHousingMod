@@ -68,7 +68,7 @@ namespace CampusIndustriesHousingMod.Utils
             } 
             catch (Exception ex) 
             { 
-                 Logger.logError("CampusIndustriesHousingMod: " + ex.Message);
+                 Logger.LogError("CampusIndustriesHousingMod: " + ex.Message);
             }
             return null;
         }
@@ -82,7 +82,7 @@ namespace CampusIndustriesHousingMod.Utils
             } 
             catch(Exception ex) 
             { 
-                Logger.logError("CampusIndustriesHousingMod: " + ex.Message);
+                Logger.LogError("CampusIndustriesHousingMod: " + ex.Message);
             }
         }
 
