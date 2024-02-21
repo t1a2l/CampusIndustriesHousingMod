@@ -25,7 +25,7 @@ namespace CampusIndustriesHousingMod.Utils
             }
             catch (Exception e) 
             {
-                Logger.logInfo(e.ToString());
+                Logger.LogInfo(e.ToString());
             }
         }
 

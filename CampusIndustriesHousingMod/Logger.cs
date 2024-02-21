@@ -9,13 +9,13 @@ namespace CampusIndustriesHousingMod
 
         public static readonly bool LOG_OPTIONS = true;
         public static readonly bool LOG_CAPACITY_MANAGEMENT = true;
-        public static readonly bool LOG_INCOME = false;
+        public static readonly bool LOG_INCOME = true;
 
-        public static void logInfo(bool shouldLog, string message, params object[] args) 
+        public static void LogInfo(bool shouldLog, string message, params object[] args) 
         {
             if (shouldLog) 
             {
-                Logger.logInfo(message, args);
+                LogInfo(message, args);
             }
         }
 
@@ -24,33 +24,33 @@ namespace CampusIndustriesHousingMod
             throw new NotImplementedException();
         }
 
-        public static void logInfo(string message, params object[] args) 
+        public static void LogInfo(string message, params object[] args) 
         {
             Debug.Log(Prefix + string.Format(message, args));
         }
 
-        public static void logWarning(bool shouldLog, string message, params object[] args) 
+        public static void LogWarning(bool shouldLog, string message, params object[] args) 
         {
             if (shouldLog) 
             {
-                Logger.logWarning(message, args);
+                Logger.LogWarning(message, args);
             }
         }
 
-        public static void logWarning(string message, params object[] args) 
+        public static void LogWarning(string message, params object[] args) 
         {
             Debug.LogWarning(Prefix + string.Format(message, args));
         }
 
-        public static void logError(bool shouldLog, string message, params object[] args) 
+        public static void LogError(bool shouldLog, string message, params object[] args) 
         {
             if (shouldLog) 
             {
-                Logger.logError(message, args);
+                Logger.LogError(message, args);
             }
         }
 
-        public static void logError(string message, params object[] args) 
+        public static void LogError(string message, params object[] args) 
         {
             Debug.LogError(Prefix + string.Format(message, args));
         }

@@ -91,8 +91,8 @@ namespace CampusIndustriesHousingMod.Patches
 					b = 0;
 				}
 				else if (__instance.m_industryType == DistrictPark.ParkType.Industry || __instance.m_industryType != instance.m_parks.m_buffer[b].m_parkType)
-						{
-							b = 0;
+				{
+					b = 0;
 				}
 			}
 			instance.AddParkBuilding(b, __instance.m_info, __instance.m_industryType);
@@ -217,8 +217,7 @@ namespace CampusIndustriesHousingMod.Patches
 			{
 				return;
 			}
-			uint firstUnit = 0u;
-			if (instance.CreateUnits(out firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount, workCount, visitCount, 0, studentCount, hotelCount))
+			if (instance.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount, workCount, visitCount, 0, studentCount, hotelCount))
 			{
 				if (num != 0)
 				{

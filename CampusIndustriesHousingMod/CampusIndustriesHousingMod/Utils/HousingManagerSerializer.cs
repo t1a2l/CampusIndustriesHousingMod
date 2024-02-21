@@ -14,7 +14,7 @@ namespace CampusIndustriesHousingMod.Utils
         /// <param name="writer">Binary writer instance to serialize to.</param>
         internal static void Serialize(BinaryWriter writer)
         {
-            Logger.logInfo("serializing building data");
+            Logger.LogInfo("serializing building data");
 
             // Write length of dictionary.
             writer.Write(HousingManager.BuildingRecords.Count);
@@ -75,7 +75,7 @@ namespace CampusIndustriesHousingMod.Utils
         /// <param name="reader">Reader to deserialize from.</param>
         internal static void Deserialize(BinaryReader reader)
         {
-            Logger.logInfo("deserializing building data");
+            Logger.LogInfo("deserializing building data");
 
             // Clear dictionary.
             HousingManager.BuildingRecords.Clear();

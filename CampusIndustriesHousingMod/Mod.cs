@@ -68,7 +68,7 @@ namespace CampusIndustriesHousingMod
             }
             catch (Exception e)
             {
-                Logger.logError(e.Message);
+                Logger.LogError(e.Message);
                 HousingManager.Deinit();
             }
 
@@ -82,7 +82,7 @@ namespace CampusIndustriesHousingMod
 
         public override void OnLevelLoaded(LoadMode mode) 
         {
-            Logger.logInfo(true, "CampusIndustriesHousingMod Level Loaded: {0}", mode);
+            Logger.LogInfo(true, "CampusIndustriesHousingMod Level Loaded: {0}", mode);
 		    base.OnLevelLoaded(mode);
             if(mode == LoadMode.NewGame || mode == LoadMode.LoadGame || mode == LoadMode.NewGameFromScenario)
             {
@@ -109,13 +109,13 @@ namespace CampusIndustriesHousingMod
 
         public byte[] LoadData(string id) 
         {
-            Logger.logInfo(Logger.LOG_OPTIONS, "Load Data: {0}", id);
+            Logger.LogInfo(Logger.LOG_OPTIONS, "Load Data: {0}", id);
             return null;
         }
 
         public void SaveData(string id, byte[] data) 
         {
-            Logger.logInfo(Logger.LOG_OPTIONS, "Save Data: {0} -- {1}", id, data);
+            Logger.LogInfo(Logger.LOG_OPTIONS, "Save Data: {0} -- {1}", id, data);
         }
 
         public string[] EnumerateData()

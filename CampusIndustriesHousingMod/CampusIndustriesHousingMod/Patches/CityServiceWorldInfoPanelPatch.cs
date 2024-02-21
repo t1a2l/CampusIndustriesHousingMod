@@ -8,7 +8,7 @@ namespace CampusIndustriesHousingMod.Patches
 	{
 		[HarmonyPatch(typeof(CityServiceWorldInfoPanel), "OnSetTarget")]
         [HarmonyPostfix]
-        public static void OnSetTarget_Postfix(CityServiceWorldInfoPanel __instance)
+        public static void OnSetTarget_Postfix()
         {
             if(HousingUIPanel.m_uiMainPanel == null)
             {

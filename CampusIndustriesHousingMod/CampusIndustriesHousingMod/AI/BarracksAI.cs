@@ -10,10 +10,10 @@ namespace CampusIndustriesHousingMod.AI
 {
     public class BarracksAI : AuxiliaryBuildingAI {
 
-        private const bool LOG_PRODUCTION = false;
-        private const bool LOG_SIMULATION = false;
+        private const bool LOG_PRODUCTION = true;
+        private const bool LOG_SIMULATION = true;
 
-        private Randomizer randomizer = new Randomizer(97);
+        private Randomizer randomizer = new(97);
 
         [CustomizableProperty("Number of Apartments")]
         public int numApartments = 50;
@@ -236,7 +236,7 @@ namespace CampusIndustriesHousingMod.AI
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.ElderCare, behaviour.m_healthAccumulation, buildingData.m_position, radius);
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Health, behaviour.m_healthAccumulation, buildingData.m_position, radius);
             }
-            Logger.logInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- health: {0}", health);
+            Logger.LogInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- health: {0}", health);
 
             // Get the Wellbeing
             int wellbeing = 0;
@@ -248,7 +248,7 @@ namespace CampusIndustriesHousingMod.AI
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Wellbeing, behaviour.m_wellbeingAccumulation, buildingData.m_position, radius);
             }
-            Logger.logInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
+            Logger.LogInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
 
             if (aliveCount != 0) 
             {
@@ -265,7 +265,7 @@ namespace CampusIndustriesHousingMod.AI
             {
                 happiness -= happiness >> 2;
             }
-            Logger.logInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- happiness: {0}", happiness);
+            Logger.LogInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- happiness: {0}", happiness);
 
             buildingData.m_health = (byte) health;
             buildingData.m_happiness = (byte) happiness;
@@ -354,20 +354,20 @@ namespace CampusIndustriesHousingMod.AI
                     return;
                 }
 
-                Logger.logInfo(LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Worker Family: {0}", string.Join(", ", Array.ConvertAll(familyWithWorkers, item => item.ToString())));
+                Logger.LogInfo(LOG_PRODUCTION, "------------------------------------------------------------");
+                Logger.LogInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Worker Family: {0}", string.Join(", ", Array.ConvertAll(familyWithWorkers, item => item.ToString())));
                 // Check move in chance
                 bool shouldMoveIn = MoveInProbabilityHelper.checkIfShouldMoveIn(familyWithWorkers, ref buildingData, ref randomizer, "worker");
 
                 // Process the worker and his family and move them in if able to, mark the worker as done processing regardless
                 if (shouldMoveIn)
                 {
-                    Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- shouldMoveIn");
+                    Logger.LogInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- shouldMoveIn");
                     foreach (uint familyMember in familyWithWorkers) 
                     {
                         if(familyMember != 0)
                         {
-                            Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving In: {0}", familyMember);
+                            Logger.LogInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving In: {0}", familyMember);
                             citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, buildingID, emptyApartment);
                         }
                     }
@@ -380,14 +380,14 @@ namespace CampusIndustriesHousingMod.AI
             uint[] BarracksApartmentFamily = workerManager.getBarracksApartmentFamily(buildingData);
             if (BarracksApartmentFamily != null) 
             {
-                Logger.logInfo(LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- BarracksApartmentFamily: {0}", string.Join(", ", Array.ConvertAll(BarracksApartmentFamily, item => item.ToString())));
+                Logger.LogInfo(LOG_PRODUCTION, "------------------------------------------------------------");
+                Logger.LogInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- BarracksApartmentFamily: {0}", string.Join(", ", Array.ConvertAll(BarracksApartmentFamily, item => item.ToString())));
 
                 foreach (uint familyMember in BarracksApartmentFamily) 
                 {
                     if(familyMember != 0)
                     {
-                        Logger.logInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving Out: {0}", familyMember);
+                        Logger.LogInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving Out: {0}", familyMember);
                         citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, 0, 0);
                     }
                 }
@@ -514,7 +514,7 @@ namespace CampusIndustriesHousingMod.AI
             }
             
             Singleton<EconomyManager>.instance.m_EconomyWrapper.OnGetMaintenanceCost(ref amount, this.m_info.m_class.m_service, this.m_info.m_class.m_subService, this.m_info.m_class.m_level);
-            Logger.logInfo(Logger.LOG_INCOME, "getCustomMaintenanceCost - building: {0} - calculated maintenance amount: {1}", buildingData.m_buildIndex, amount);
+            Logger.LogInfo(Logger.LOG_INCOME, "getCustomMaintenanceCost - building: {0} - calculated maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
             return amount;
         }
@@ -531,7 +531,7 @@ namespace CampusIndustriesHousingMod.AI
             int budget = Singleton<EconomyManager>.instance.GetBudget(this.m_info.m_class);
             amount = amount / 100;
             amount = productionRate * budget / 100 * amount / 100;
-            Logger.logInfo(Logger.LOG_INCOME, "getCustomMaintenanceCost - building: {0} - adjusted maintenance amount: {1}", buildingData.m_buildIndex, amount);
+            Logger.LogInfo(Logger.LOG_INCOME, "getCustomMaintenanceCost - building: {0} - adjusted maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
             if ((buildingData.m_flags & Building.Flags.Original) == Building.Flags.None && amount != 0) 
             {
@@ -786,12 +786,12 @@ namespace CampusIndustriesHousingMod.AI
 
         public void updateCapacity(float newCapacityModifier) 
         {
-            Logger.logInfo(Logger.LOG_OPTIONS, "BarracksAI.updateCapacity -- Updating capacity with modifier: {0}", newCapacityModifier);
+            Logger.LogInfo(Logger.LOG_OPTIONS, "BarracksAI.updateCapacity -- Updating capacity with modifier: {0}", newCapacityModifier);
             // Set the capcityModifier and check to see if the value actually changes
             if (Interlocked.Exchange(ref capacityModifier, newCapacityModifier) == newCapacityModifier) 
             {
                 // Capcity has already been set to this value, nothing to do
-                Logger.logInfo(Logger.LOG_OPTIONS, "BarracksAI.updateCapacity -- Skipping capacity change because the value was already set");
+                Logger.LogInfo(Logger.LOG_OPTIONS, "BarracksAI.updateCapacity -- Skipping capacity change because the value was already set");
                 return;
             }
         }
@@ -823,7 +823,7 @@ namespace CampusIndustriesHousingMod.AI
                 citizenUnitIndex = nextCitizenUnitIndex;
             }
 
-            Logger.logInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.validateCapacity -- Checking Expected Capacity {0} vs Current Capacity {1} for Building {2}", numApartmentsExpected, numApartmentsFound, buildingId);
+            Logger.LogInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.validateCapacity -- Checking Expected Capacity {0} vs Current Capacity {1} for Building {2}", numApartmentsExpected, numApartmentsFound, buildingId);
             // Check to see if the correct amount of apartments are present, otherwise adjust accordingly
             if (numApartmentsFound == numApartmentsExpected) 
             {
@@ -845,7 +845,7 @@ namespace CampusIndustriesHousingMod.AI
 
         private void createApartments(int numApartmentsToCreate, ushort buildingId, ref Building data, uint lastCitizenUnitIndex) 
         {
-            Logger.logInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.createApartments -- Creating {0} Apartments", numApartmentsToCreate);
+            Logger.LogInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.createApartments -- Creating {0} Apartments", numApartmentsToCreate);
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             citizenManager.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingId, (ushort) 0, numApartmentsToCreate, 0, 0, 0, 0);
             citizenManager.m_units.m_buffer[lastCitizenUnitIndex].m_nextUnit = firstUnit;
@@ -853,7 +853,7 @@ namespace CampusIndustriesHousingMod.AI
 
         private void deleteApartments(int numApartmentsToDelete, ushort buildingId, ref Building data) 
         {
-            Logger.logInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.deleteApartments -- Deleting {0} Apartments", numApartmentsToDelete);
+            Logger.LogInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.deleteApartments -- Deleting {0} Apartments", numApartmentsToDelete);
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             
             // Always start with the second to avoid loss of pointer from the building to the first unit
@@ -887,7 +887,7 @@ namespace CampusIndustriesHousingMod.AI
                 return;
             }
 
-            Logger.logInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.deleteApartments -- Deleting {0} Occupied Apartments", numApartmentsToDelete);
+            Logger.LogInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.deleteApartments -- Deleting {0} Occupied Apartments", numApartmentsToDelete);
             // Still need to delete more apartments so start deleting apartments with people in them...
             // Always start with the second to avoid loss of pointer from the building to the first unit
             prevUnit = data.m_citizenUnits;
