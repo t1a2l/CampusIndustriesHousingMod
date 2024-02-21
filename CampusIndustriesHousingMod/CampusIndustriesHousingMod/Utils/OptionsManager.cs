@@ -38,7 +38,7 @@ namespace CampusIndustriesHousingMod.Utils
 
         public void initialize(UIHelperBase helper) 
         {
-            Logger.logInfo(Logger.LOG_OPTIONS, "OptionsManager.initialize -- Initializing Menu Options");
+            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.initialize -- Initializing Menu Options");
             UIHelperBase group = helper.AddGroup("Housing Global Settings");
             this.barracksCapacityDropDown = (UIDropDown) group.AddDropdown("Barracks Capacity Modifier", CAPACITY_LABELS, 1, handleCapacityChange);
             this.barracksIncomeDropDown = (UIDropDown) group.AddDropdown("Barracks Income Modifier", BARRACKS_INCOME_LABELS, 2, handleIncomeChange);
@@ -234,7 +234,7 @@ namespace CampusIndustriesHousingMod.Utils
 
         public void loadOptions() 
         {
-            Logger.logInfo(Logger.LOG_OPTIONS, "OptionsManager.loadOptions -- Loading Options");
+            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.loadOptions -- Loading Options");
             Options options = new Options();
 
             try 

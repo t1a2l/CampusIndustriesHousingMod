@@ -11,9 +11,6 @@ namespace CampusIndustriesHousingMod.AI
 {
     public class DormsAI : CampusBuildingAI {
 
-        private const bool LOG_PRODUCTION = true;
-        private const bool LOG_SIMULATION = true;
-
         private Randomizer randomizer = new(97);
 
         [CustomizableProperty("Number of Apartments")]
@@ -233,7 +230,7 @@ namespace CampusIndustriesHousingMod.AI
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Health, behaviour.m_healthAccumulation, buildingData.m_position, radius);
             }
-            Logger.LogInfo(LOG_SIMULATION, "DormsAI.SimulationStepActive -- health: {0}", health);
+            Logger.LogInfo(Logger.LOG_SIMULATION, "DormsAI.SimulationStepActive -- health: {0}", health);
 
             // Get the Wellbeing
             int wellbeing = 0;
@@ -245,7 +242,7 @@ namespace CampusIndustriesHousingMod.AI
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Wellbeing, behaviour.m_wellbeingAccumulation, buildingData.m_position, radius);
             }
-            Logger.LogInfo(LOG_SIMULATION, "DormsAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
+            Logger.LogInfo(Logger.LOG_SIMULATION, "DormsAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
 
             if (aliveCount != 0) 
             {
@@ -262,7 +259,7 @@ namespace CampusIndustriesHousingMod.AI
             {
                 happiness -= happiness >> 2;
             }
-            Logger.LogInfo(LOG_SIMULATION, "DormsAI.SimulationStepActive -- happiness: {0}", happiness);
+            Logger.LogInfo(Logger.LOG_SIMULATION, "DormsAI.SimulationStepActive -- happiness: {0}", happiness);
 
             buildingData.m_health = (byte) health;
             buildingData.m_happiness = (byte) happiness;
@@ -344,8 +341,8 @@ namespace CampusIndustriesHousingMod.AI
             uint[] familyWithStudents = studentManager.getFamilyWithStudents(buildingData);
             if (familyWithStudents != null) 
             {
-                Logger.LogInfo(LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.LogInfo(LOG_PRODUCTION, "DormsAI.ProduceGoods -- Student: {0}", string.Join(", ", Array.ConvertAll(familyWithStudents, item => item.ToString())));
+                Logger.LogInfo(Logger.LOG_PRODUCTION, "------------------------------------------------------------");
+                Logger.LogInfo(Logger.LOG_PRODUCTION, "DormsAI.ProduceGoods -- Student: {0}", string.Join(", ", Array.ConvertAll(familyWithStudents, item => item.ToString())));
                 // Check move in chance
                 bool shouldMoveIn = MoveInProbabilityHelper.checkIfShouldMoveIn(familyWithStudents, ref buildingData, ref randomizer, "student");
 
@@ -357,7 +354,7 @@ namespace CampusIndustriesHousingMod.AI
                     {
                         if (studentManager.isCampusAreaStudent(familyMember))
                         {
-                            Logger.LogInfo(LOG_PRODUCTION, "DormsAI.ProduceGoods -- familyMember: {0} is a student", familyMember);
+                            Logger.LogInfo(Logger.LOG_PRODUCTION, "DormsAI.ProduceGoods -- familyMember: {0} is a student", familyMember);
                             studentsList.Add(familyMember);
                         }
                     }
@@ -371,7 +368,7 @@ namespace CampusIndustriesHousingMod.AI
                             return;
                         }
                         uint studentId = studentsList[i];
-                        Logger.LogInfo(LOG_PRODUCTION, "DormsAI.ProduceGoods -- Moving In: {0}", studentId);
+                        Logger.LogInfo(Logger.LOG_PRODUCTION, "DormsAI.ProduceGoods -- Moving In: {0}", studentId);
                         citizenManager.m_citizens.m_buffer[studentId].SetHome(studentId, buildingID, dormApartmentId);
                         studentManager.doneProcessingStudent(studentId);
                     }
@@ -383,12 +380,12 @@ namespace CampusIndustriesHousingMod.AI
             uint[] DormApartmentStudents = studentManager.getDormApartmentStudents(buildingData);
             if (DormApartmentStudents != null) 
             {
-                Logger.LogInfo(LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.LogInfo(LOG_PRODUCTION, "DormsAI.ProduceGoods -- DormApartmentStudents: {0}", string.Join(", ", Array.ConvertAll(DormApartmentStudents, item => item.ToString())));
+                Logger.LogInfo(Logger.LOG_PRODUCTION, "------------------------------------------------------------");
+                Logger.LogInfo(Logger.LOG_PRODUCTION, "DormsAI.ProduceGoods -- DormApartmentStudents: {0}", string.Join(", ", Array.ConvertAll(DormApartmentStudents, item => item.ToString())));
 
                 foreach (uint studentId in DormApartmentStudents)
                 {
-                    Logger.LogInfo(LOG_PRODUCTION, "DormsAI.ProduceGoods -- Moving Out: {0}", studentId);
+                    Logger.LogInfo(Logger.LOG_PRODUCTION, "DormsAI.ProduceGoods -- Moving Out: {0}", studentId);
                     if(studentId != 0)
                     {
                         citizenManager.m_citizens.m_buffer[studentId].SetHome(studentId, 0, 0);

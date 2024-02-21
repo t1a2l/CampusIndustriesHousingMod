@@ -10,8 +10,6 @@ namespace CampusIndustriesHousingMod.Patches
     [HarmonyPatch(typeof(IndustryWorldInfoPanel))]
     public static class IndustryWorldInfoPanelPatch
     {
-        private static readonly bool LOG_INDUSTRY = true;
-
         [HarmonyPatch(typeof(IndustryWorldInfoPanel), "UpdateWorkersAndTotalUpkeep")]
         [HarmonyPostfix]
         public static void UpdateWorkersAndTotalUpkeep(IndustryWorldInfoPanel __instance)
@@ -20,7 +18,7 @@ namespace CampusIndustriesHousingMod.Patches
 
             if(m_InstanceID.Park == 0)
             {
-                Logger.logInfo(LOG_INDUSTRY, "Industry m_InstanceID Park is 0");
+                Logger.LogInfo(Logger.LOG_INDUSTRY, "Industry m_InstanceID Park is 0");
                 return;
             }
 
@@ -31,12 +29,12 @@ namespace CampusIndustriesHousingMod.Patches
             var total_ocuppied_apartment_num = 0;
             var total_apartment_num = 0;
 
-            Logger.LogInfo(LOG_INDUSTRY, "Industry Buildings number: {0}", industry_buildings.m_size);
+            Logger.LogInfo(Logger.LOG_INDUSTRY, "Industry Buildings number: {0}", industry_buildings.m_size);
 
             for (ushort i = 0; i < industry_buildings.m_size; i++) 
             {
                 var buildingId = industry_buildings[i];
-                Logger.LogInfo(LOG_INDUSTRY, "Industry Building id: {0}", buildingId);
+                Logger.LogInfo(Logger.LOG_INDUSTRY, "Industry Building id: {0}", buildingId);
                 if(buildingId == 0)
                 {
                     continue;
@@ -47,21 +45,21 @@ namespace CampusIndustriesHousingMod.Patches
                     barracksAI.getOccupancyDetails(ref industryBuilding, out int numResidents, out int numApartmentsOccupied);
                     total_ocuppied_apartment_num += numApartmentsOccupied;
                     total_apartment_num += barracksAI.getModifiedCapacity(buildingId, ref industryBuilding);
-                    Logger.LogInfo(LOG_INDUSTRY, "Industry Building occupied apartments: {0}", numApartmentsOccupied);
+                    Logger.LogInfo(Logger.LOG_INDUSTRY, "Industry Building occupied apartments: {0}", numApartmentsOccupied);
                 }
             }
 
             var barracks_capacity = StringUtils.SafeFormat("{0} / {1} barracks capacity", total_ocuppied_apartment_num, total_apartment_num);
 
-            Logger.LogInfo(LOG_INDUSTRY, "Barracks Apartment Capacity: {0} / {1}", total_ocuppied_apartment_num, total_apartment_num);
+            Logger.LogInfo(Logger.LOG_INDUSTRY, "Barracks Apartment Capacity: {0} / {1}", total_ocuppied_apartment_num, total_apartment_num);
 
             var m_workersInfoLabel = (UILabel)typeof(IndustryWorldInfoPanel).GetField("m_workersInfoLabel", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(__instance);
 
-            Logger.LogInfo(LOG_INDUSTRY, "old Industry worker label: {0}", m_workersInfoLabel);
+            Logger.LogInfo(Logger.LOG_INDUSTRY, "old Industry worker label: {0}", m_workersInfoLabel);
 
             m_workersInfoLabel.text = m_workersInfoLabel.text + Environment.NewLine + barracks_capacity + Environment.NewLine;
 
-            Logger.LogInfo(LOG_INDUSTRY, "new Industry worker label: {0}", m_workersInfoLabel);
+            Logger.LogInfo(Logger.LOG_INDUSTRY, "new Industry worker label: {0}", m_workersInfoLabel);
 
         }
 

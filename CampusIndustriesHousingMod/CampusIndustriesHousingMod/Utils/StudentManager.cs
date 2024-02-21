@@ -10,8 +10,6 @@ namespace CampusIndustriesHousingMod.Utils
 {
     public class StudentManager : ThreadingExtensionBase 
     {
-        private const bool LOG_STUDENTS = false;
-
         private const int DEFAULT_NUM_SEARCH_ATTEMPTS = 3;
 
         private static StudentManager instance;
@@ -38,7 +36,7 @@ namespace CampusIndustriesHousingMod.Utils
 
         public StudentManager() 
         {
-            Logger.logInfo(LOG_STUDENTS, "StudentManager Created");
+            Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager Created");
             instance = this;
 
             this.randomizer = new Randomizer((uint) 73);
@@ -149,7 +147,7 @@ namespace CampusIndustriesHousingMod.Utils
 
         public uint[] getFamilyWithStudents(int numAttempts, Building buildingData) 
         {
-            Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudents -- Start");
+            Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getFamilyWithStudents -- Start");
             // Lock to prevent refreshing while running, otherwise bail
             if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) 
             {
@@ -160,7 +158,7 @@ namespace CampusIndustriesHousingMod.Utils
             uint[] family = this.getFamilyWithStudentsInternal(numAttempts, buildingData);
             if (family == null) 
             {
-                Logger.logInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- No Family");
+                Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- No Family");
                 this.running = 0;
                 return null;
             }
@@ -174,14 +172,14 @@ namespace CampusIndustriesHousingMod.Utils
                 }
             }
 
-            Logger.LogInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudents -- Finished: {0}", string.Join(", ", Array.ConvertAll(family, item => item.ToString())));
+            Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getFamilyWithStudents -- Finished: {0}", string.Join(", ", Array.ConvertAll(family, item => item.ToString())));
             this.running = 0;
             return family;
         }
 
         public uint[] getDormApartmentStudents(int numAttempts, Building buildingData) 
         {
-            Logger.LogInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudents -- Start");
+            Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getDormApartmentStudents -- Start");
             // Lock to prevent refreshing while running, otherwise bail
             if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) 
             {
@@ -192,7 +190,7 @@ namespace CampusIndustriesHousingMod.Utils
             uint[] dorms_apartment = this.getDormApartmentStudentsInternal(numAttempts, buildingData);
             if (dorms_apartment == null) 
             {
-                Logger.LogInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- No students in this apartment");
+                Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- No students in this apartment");
                 this.running = 0;
                 return null;
             }
@@ -206,7 +204,7 @@ namespace CampusIndustriesHousingMod.Utils
                 }
             }
 
-            Logger.LogInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentInternal -- Finished: {0}", string.Join(", ", Array.ConvertAll(dorms_apartment, item => item.ToString())));
+            Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getDormApartmentStudentInternal -- Finished: {0}", string.Join(", ", Array.ConvertAll(dorms_apartment, item => item.ToString())));
             this.running = 0;
             return dorms_apartment;
         }
@@ -227,7 +225,7 @@ namespace CampusIndustriesHousingMod.Utils
             // Get a random family with students
             uint familyId = this.fetchRandomFamilyWithStudents();
                 
-            Logger.LogInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal moving in -- Family Id: {0}", familyId);
+            Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal moving in -- Family Id: {0}", familyId);
             if (familyId == 0) 
             {
                 // No Family with students to be located
@@ -243,14 +241,14 @@ namespace CampusIndustriesHousingMod.Utils
                 uint familyMember = familyWithStudents.GetCitizen(i);
                 if (familyMember != 0 && this.isCampusAreaStudent(familyMember) && this.checkSameCampusArea(familyMember, buildingData)) 
                 {
-                    Logger.LogInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- Family Member: {0}, is a campus student and can move in", familyMember);
+                    Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- Family Member: {0}, is a campus student and can move in", familyMember);
                     if (!this.validateStudent(familyMember)) {
                         // This particular Student is no longer valid for some reason, call recursively with one less attempt
                         return this.getFamilyWithStudentsInternal(--numAttempts, buildingData);
                     }
                     studentPresent = true;
                 }
-                Logger.LogInfo(LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- Family Member: {0}", familyMember);
+                Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getFamilyWithStudentsInternal -- Family Member: {0}", familyMember);
                 family[i] = familyMember;
             }
 
@@ -274,7 +272,7 @@ namespace CampusIndustriesHousingMod.Utils
             // Get a random dorm apartment
             uint dormApartmentId = this.fetchRandomDormApartment(buildingData);  
 
-            Logger.LogInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Id: {0}", dormApartmentId);
+            Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Id: {0}", dormApartmentId);
             if (dormApartmentId == 0) 
             {
                 // No dorm apartment to be located
@@ -287,7 +285,7 @@ namespace CampusIndustriesHousingMod.Utils
             for (int i = 0; i < 5; i++) 
             {
                 uint studentId = dormApartment.GetCitizen(i);
-                Logger.LogInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Member: {0}", studentId);
+                Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Member: {0}", studentId);
                 // not a campus area student or this campus area student -> move out
                 if(studentId != 0 && !this.isCampusAreaStudent(studentId) || !this.checkSameCampusArea(studentId, buildingData))
                 {
@@ -295,7 +293,7 @@ namespace CampusIndustriesHousingMod.Utils
                         // This particular student is already being processed
                         return this.getDormApartmentStudentsInternal(--numAttempts, buildingData);
                     }
-                    Logger.LogInfo(LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Member: {0}, is not a student or does not study in this campus", studentId);
+                    Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager.getDormApartmentStudentsInternal -- Family Member: {0}, is not a student or does not study in this campus", studentId);
                     dorm_apartment[i] = studentId;
                 } 
             }

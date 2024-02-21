@@ -10,9 +10,6 @@ namespace CampusIndustriesHousingMod.AI
 {
     public class BarracksAI : AuxiliaryBuildingAI {
 
-        private const bool LOG_PRODUCTION = true;
-        private const bool LOG_SIMULATION = true;
-
         private Randomizer randomizer = new(97);
 
         [CustomizableProperty("Number of Apartments")]
@@ -236,7 +233,7 @@ namespace CampusIndustriesHousingMod.AI
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.ElderCare, behaviour.m_healthAccumulation, buildingData.m_position, radius);
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Health, behaviour.m_healthAccumulation, buildingData.m_position, radius);
             }
-            Logger.LogInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- health: {0}", health);
+            Logger.LogInfo(Logger.LOG_SIMULATION, "BarracksAI.SimulationStepActive -- health: {0}", health);
 
             // Get the Wellbeing
             int wellbeing = 0;
@@ -248,7 +245,7 @@ namespace CampusIndustriesHousingMod.AI
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Wellbeing, behaviour.m_wellbeingAccumulation, buildingData.m_position, radius);
             }
-            Logger.LogInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
+            Logger.LogInfo(Logger.LOG_SIMULATION, "BarracksAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
 
             if (aliveCount != 0) 
             {
@@ -265,7 +262,7 @@ namespace CampusIndustriesHousingMod.AI
             {
                 happiness -= happiness >> 2;
             }
-            Logger.LogInfo(LOG_SIMULATION, "BarracksAI.SimulationStepActive -- happiness: {0}", happiness);
+            Logger.LogInfo(Logger.LOG_SIMULATION, "BarracksAI.SimulationStepActive -- happiness: {0}", happiness);
 
             buildingData.m_health = (byte) health;
             buildingData.m_happiness = (byte) happiness;
@@ -354,20 +351,20 @@ namespace CampusIndustriesHousingMod.AI
                     return;
                 }
 
-                Logger.LogInfo(LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.LogInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Worker Family: {0}", string.Join(", ", Array.ConvertAll(familyWithWorkers, item => item.ToString())));
+                Logger.LogInfo(Logger.LOG_PRODUCTION, "------------------------------------------------------------");
+                Logger.LogInfo(Logger.LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Worker Family: {0}", string.Join(", ", Array.ConvertAll(familyWithWorkers, item => item.ToString())));
                 // Check move in chance
                 bool shouldMoveIn = MoveInProbabilityHelper.checkIfShouldMoveIn(familyWithWorkers, ref buildingData, ref randomizer, "worker");
 
                 // Process the worker and his family and move them in if able to, mark the worker as done processing regardless
                 if (shouldMoveIn)
                 {
-                    Logger.LogInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- shouldMoveIn");
+                    Logger.LogInfo(Logger.LOG_PRODUCTION, "BarracksAI.ProduceGoods -- shouldMoveIn");
                     foreach (uint familyMember in familyWithWorkers) 
                     {
                         if(familyMember != 0)
                         {
-                            Logger.LogInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving In: {0}", familyMember);
+                            Logger.LogInfo(Logger.LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving In: {0}", familyMember);
                             citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, buildingID, emptyApartment);
                         }
                     }
@@ -380,14 +377,14 @@ namespace CampusIndustriesHousingMod.AI
             uint[] BarracksApartmentFamily = workerManager.getBarracksApartmentFamily(buildingData);
             if (BarracksApartmentFamily != null) 
             {
-                Logger.LogInfo(LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.LogInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- BarracksApartmentFamily: {0}", string.Join(", ", Array.ConvertAll(BarracksApartmentFamily, item => item.ToString())));
+                Logger.LogInfo(Logger.LOG_PRODUCTION, "------------------------------------------------------------");
+                Logger.LogInfo(Logger.LOG_PRODUCTION, "BarracksAI.ProduceGoods -- BarracksApartmentFamily: {0}", string.Join(", ", Array.ConvertAll(BarracksApartmentFamily, item => item.ToString())));
 
                 foreach (uint familyMember in BarracksApartmentFamily) 
                 {
                     if(familyMember != 0)
                     {
-                        Logger.LogInfo(LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving Out: {0}", familyMember);
+                        Logger.LogInfo(Logger.LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving Out: {0}", familyMember);
                         citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, 0, 0);
                     }
                 }

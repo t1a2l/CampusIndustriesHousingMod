@@ -7,9 +7,23 @@ namespace CampusIndustriesHousingMod
     {
         private static readonly string Prefix = "CampusIndustriesHousingMod: ";
 
+        public static readonly bool LOG_INITIALIZER = true;
+        public static readonly bool LOG_SERIALIZATION = true;
+        public static readonly bool LOG_CHANCES = true;
         public static readonly bool LOG_OPTIONS = true;
+        public static readonly bool LOG_DATA = true;
         public static readonly bool LOG_CAPACITY_MANAGEMENT = true;
         public static readonly bool LOG_INCOME = true;
+
+        public static readonly bool LOG_PRODUCTION = true;
+        public static readonly bool LOG_SIMULATION = true;
+        public static readonly bool LOG_CAMPUS = true;
+        public static readonly bool LOG_INDUSTRY = true;
+
+        public static readonly bool LOG_STUDENTS = true;
+        public static readonly bool LOG_WORKERS = true;
+
+
 
         public static void LogInfo(bool shouldLog, string message, params object[] args) 
         {
@@ -19,7 +33,7 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        internal static void logInfo(object lOG_OPTIONS, string v) 
+        internal static void LogInfo(object LOG_OPTIONS, string v) 
         {
             throw new NotImplementedException();
         }

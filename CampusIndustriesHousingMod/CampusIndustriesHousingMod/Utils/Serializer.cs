@@ -15,9 +15,6 @@ namespace CampusIndustriesHousingMod.Utils
         // Unique data ID.
         private readonly string dataID = "CampusIndustriesHousingMod";
 
-        private const bool LOG_DATA = false;
-
-
         /// <summary>
         /// Serializes data to the savegame.
         /// Called by the game on save.
@@ -40,7 +37,7 @@ namespace CampusIndustriesHousingMod.Utils
                     // Write to savegame.
                     serializableDataManager.SaveData(dataID, stream.ToArray());
 
-                    Logger.LogInfo(LOG_DATA, "wrote ", stream.Length);
+                    Logger.LogInfo(Logger.LOG_DATA, "wrote ", stream.Length);
                 }
             }
         }
@@ -66,19 +63,19 @@ namespace CampusIndustriesHousingMod.Utils
                     {
                         // Read version.
                         int version = reader.ReadInt32();
-                        Logger.LogInfo(LOG_DATA, "found data version ", version);
+                        Logger.LogInfo(Logger.LOG_DATA, "found data version ", version);
 
                         // Deserialise building settings.
                         HousingManagerSerializer.Deserialize(reader);
 
-                        Logger.LogInfo(LOG_DATA, "read ", stream.Length);
+                        Logger.LogInfo(Logger.LOG_DATA, "read ", stream.Length);
                     }
                 }
             }
             else
             {
                 // No data read.
-                Logger.LogInfo(LOG_DATA, "no data read");
+                Logger.LogInfo(Logger.LOG_DATA, "no data read");
             }
         }
     }

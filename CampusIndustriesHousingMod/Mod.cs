@@ -8,7 +8,7 @@ namespace CampusIndustriesHousingMod
 {
     public class Mod : LoadingExtensionBase, IUserMod, ISerializableData  
     {
-        private const bool LOG_BASE = true;
+        private const bool Logger.LOG_BASE = true;
 
         private GameObject campusIndustriesHousingInitializerObj;
         private CampusIndustriesHousingInitializer campusIndustriesHousingInitializer;
@@ -54,7 +54,7 @@ namespace CampusIndustriesHousingMod
 
         public override void OnCreated(ILoading loading) 
         {
-            Logger.logInfo(LOG_BASE, "CampusIndustriesHousingMod Created");
+            Logger.logInfo(Logger.LOG_BASE, "CampusIndustriesHousingMod Created");
             instance = this;
             base.OnCreated(loading);
             if (campusIndustriesHousingInitializerObj == null) 

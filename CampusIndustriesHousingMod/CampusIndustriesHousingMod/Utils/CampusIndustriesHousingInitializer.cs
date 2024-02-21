@@ -11,8 +11,6 @@ namespace CampusIndustriesHousingMod.Utils
 {
     public class CampusIndustriesHousingInitializer : MonoBehaviour 
     {
-        private const bool LOG_INITIALIZER = true;
-
         public const int LOADED_LEVEL_GAME = 6;
         public const int LOADED_LEVEL_ASSET_EDITOR = 19;
 
@@ -41,19 +39,19 @@ namespace CampusIndustriesHousingMod.Utils
 
         public void Start() 
         {
-            Logger.LogInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer Starting");
+            Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer Starting");
         }
 
         public void OnLevelWasLoaded(int level) 
         {
             this.loadedLevel = level;
-            Logger.LogInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.OnLevelWasLoaded: {0}", level);
+            Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.OnLevelWasLoaded: {0}", level);
         }
 
         public void OnLevelUnloading() 
         {
             this.loadedLevel = -1;
-            Logger.LogInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.OnLevelUnloading: {0}", this.loadedLevel);
+            Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.OnLevelUnloading: {0}", this.loadedLevel);
         }
 
         public int getLoadedLevel() 
@@ -109,7 +107,7 @@ namespace CampusIndustriesHousingMod.Utils
             }
 
             // Start loading
-            Logger.logInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.attemptInitialization -- Attempting Initialization");
+            Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.attemptInitialization -- Attempting Initialization");
             Singleton<LoadingManager>.instance.QueueLoadingAction(ActionWrapper(() => 
             {
                 try 
@@ -156,7 +154,7 @@ namespace CampusIndustriesHousingMod.Utils
             }
 
             // Start loading
-            Logger.logInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.attemptInitialization -- Attempting Initialization");
+            Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.attemptInitialization -- Attempting Initialization");
             Singleton<LoadingManager>.instance.QueueLoadingAction(ActionWrapper(() => 
             {
                 try 
@@ -207,13 +205,13 @@ namespace CampusIndustriesHousingMod.Utils
             }
 
             // Attempt to find a suitable Campus Dorm building that can be used as a template
-            Logger.LogInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.findCampusDormBuildingInfo -- Couldn't find the Campus Dorm asset after {0} tries, attempting to search for any Building with a CampusBuildingAI", this.numTimesSearchedForDorm);
+            Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.findCampusDormBuildingInfo -- Couldn't find the Campus Dorm asset after {0} tries, attempting to search for any Building with a CampusBuildingAI", this.numTimesSearchedForDorm);
             for (uint i=0; (long) PrefabCollection<BuildingInfo>.LoadedCount() > (long) i; ++i) 
             {
                 BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(i);
                 if (buildingInfo != null && buildingInfo.GetService() == ItemClass.Service.PlayerEducation && !buildingInfo.m_buildingAI.IsWonder() && buildingInfo.m_buildingAI is CampusBuildingAI && buildingInfo.name.Contains("Dormitory")) 
                 {
-                    Logger.LogInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.findCampusDormBuildingInfo -- Using the {0} as a template instead of the Dorms", buildingInfo);
+                    Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.findCampusDormBuildingInfo -- Using the {0} as a template instead of the Dorms", buildingInfo);
                     return buildingInfo;
                 }
             }
@@ -238,13 +236,13 @@ namespace CampusIndustriesHousingMod.Utils
             }
 
             // Attempt to find a suitable Industrial Barracks building that can be used as a template
-            Logger.LogInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.findIndustrialBarracksBuildingInfo -- Couldn't find the Industrial Barracks asset after {0} tries, attempting to search for any Building with a AuxiliaryBuildingAI", this.numTimesSearchedForBarracks);
+            Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.findIndustrialBarracksBuildingInfo -- Couldn't find the Industrial Barracks asset after {0} tries, attempting to search for any Building with a AuxiliaryBuildingAI", this.numTimesSearchedForBarracks);
             for (uint i=0; (long) PrefabCollection<BuildingInfo>.LoadedCount() > (long) i; ++i) 
             {
                 BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(i);
                 if (buildingInfo != null && buildingInfo.GetService() == ItemClass.Service.PlayerIndustry && !buildingInfo.m_buildingAI.IsWonder() && buildingInfo.m_buildingAI is AuxiliaryBuildingAI && (buildingInfo.name.Contains("Barracks") || buildingInfo.name.Contains("Residential"))) 
                 {
-                    Logger.LogInfo(LOG_INITIALIZER, "NursingHomeInitializer.findIndustrialBarracksBuildingInfo -- Using the {0} as a template instead of the Barracks", buildingInfo);
+                    Logger.LogInfo(Logger.LOG_INITIALIZER, "NursingHomeInitializer.findIndustrialBarracksBuildingInfo -- Using the {0} as a template instead of the Barracks", buildingInfo);
                     return buildingInfo;
                 }
             }
@@ -255,14 +253,14 @@ namespace CampusIndustriesHousingMod.Utils
 
         private IEnumerator InitCampusHousing() 
         {
-            Logger.LogInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.initCampusHousing");
+            Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.initCampusHousing");
             float capcityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
             uint index = 0U;
             int i = 0;
             BuildingInfo campusDormsBuildingInfo = this.FindDormsBuildingInfo();
             while (!Singleton<LoadingManager>.instance.m_loadingComplete || i++ < 2) 
             {
-                Logger.LogInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.initCampusHousing -- Iteration: {0}", i);
+                Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.initCampusHousing -- Iteration: {0}", i);
                 for (; PrefabCollection<BuildingInfo>.LoadedCount() > index; ++index) 
                 {
                     BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(index);
@@ -289,14 +287,14 @@ namespace CampusIndustriesHousingMod.Utils
         }
 
         private IEnumerator InitIndustriesHousing() {
-            Logger.LogInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.initIndustriesHousing");
+            Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.initIndustriesHousing");
             float capcityModifier = Mod.getInstance().getOptionsManager().getBarracksCapacityModifier();
             uint index = 0U;
             int i = 0;
             BuildingInfo industriesHousingBuildingInfo = this.FindDormsBuildingInfo();
             while (!Singleton<LoadingManager>.instance.m_loadingComplete || i++ < 2) 
             {
-                Logger.LogInfo(LOG_INITIALIZER, "CampusIndustriesHousingInitializer.initIndustriesHousing -- Iteration: {0}", i);
+                Logger.LogInfo(Logger.LOG_INITIALIZER, "CampusIndustriesHousingInitializer.initIndustriesHousing -- Iteration: {0}", i);
                 for (; PrefabCollection<BuildingInfo>.LoadedCount() > index; ++index) 
                 {
                     BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(index);

@@ -6,8 +6,6 @@ namespace CampusIndustriesHousingMod.Utils
 
 	public static class HousingManagerSerializer 
 	{
-        private static readonly bool LOG_SERIALIZATION = true;
-
 		/// <summary>
         /// Serializes savegame data.
         /// </summary>
@@ -42,7 +40,7 @@ namespace CampusIndustriesHousingMod.Utils
 
                 writer.Write(buildingRecord.DefaultValues);
 
-                Logger.LogInfo(LOG_SERIALIZATION, "wrote entry ", entry.Key);
+                Logger.LogInfo(Logger.LOG_SERIALIZATION, "wrote entry ", entry.Key);
             }
 
             // Write length of list.
@@ -65,7 +63,7 @@ namespace CampusIndustriesHousingMod.Utils
 
                 writer.Write(prefabRecord.WorkPlaceCount3);
 
-                Logger.LogInfo(LOG_SERIALIZATION, "wrote entry ", prefabRecord.Name);
+                Logger.LogInfo(Logger.LOG_SERIALIZATION, "wrote entry ", prefabRecord.Name);
             }
         }
 
@@ -103,7 +101,7 @@ namespace CampusIndustriesHousingMod.Utils
                 // Drop any empty entries.
                 if (buildingRecord.BuildingAI == null)
                 {
-                    Logger.LogInfo(LOG_SERIALIZATION, "dropping empty entry for building ", buildingID);
+                    Logger.LogInfo(Logger.LOG_SERIALIZATION, "dropping empty entry for building ", buildingID);
                     continue;
                 }
 
@@ -111,11 +109,11 @@ namespace CampusIndustriesHousingMod.Utils
                 if (!HousingManager.BuildingRecords.ContainsKey(buildingID))
                 {
                     HousingManager.BuildingRecords.Add(buildingID, buildingRecord);
-                    Logger.LogInfo(LOG_SERIALIZATION, "read entry for building ", buildingID);
+                    Logger.LogInfo(Logger.LOG_SERIALIZATION, "read entry for building ", buildingID);
                 }
                 else
                 {
-                    Logger.LogError(LOG_SERIALIZATION, "duplicate buildingRecord key for building ", buildingID);
+                    Logger.LogError(Logger.LOG_SERIALIZATION, "duplicate buildingRecord key for building ", buildingID);
                 }
             }
 
@@ -137,7 +135,7 @@ namespace CampusIndustriesHousingMod.Utils
                 // Drop any empty entries.
                 if (prefabgRecord.Name == null && prefabgRecord.BuildingAI == null)
                 {
-                    Logger.LogInfo(LOG_SERIALIZATION, "dropping empty entry for prefab ", prefabgRecord.Name);
+                    Logger.LogInfo(Logger.LOG_SERIALIZATION, "dropping empty entry for prefab ", prefabgRecord.Name);
                     continue;
                 }
 
@@ -145,11 +143,11 @@ namespace CampusIndustriesHousingMod.Utils
                 if (!HousingManager.PrefabRecords.Contains(prefabgRecord))
                 {
                     HousingManager.PrefabRecords.Add(prefabgRecord);
-                    Logger.LogInfo(LOG_SERIALIZATION, "read entry for prefab ", prefabgRecord.Name);
+                    Logger.LogInfo(Logger.LOG_SERIALIZATION, "read entry for prefab ", prefabgRecord.Name);
                 }
                 else
                 {
-                    Logger.LogError(LOG_SERIALIZATION, "duplicate prefabgRecord setting for prefab ", prefabgRecord.Name);
+                    Logger.LogError(Logger.LOG_SERIALIZATION, "duplicate prefabgRecord setting for prefab ", prefabgRecord.Name);
                 }
             }
         }
