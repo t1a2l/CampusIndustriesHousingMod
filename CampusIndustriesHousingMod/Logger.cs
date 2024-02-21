@@ -7,6 +7,8 @@ namespace CampusIndustriesHousingMod
     {
         private static readonly string Prefix = "CampusIndustriesHousingMod: ";
 
+        public static readonly bool LOG_BASE = true;
+
         public static readonly bool LOG_INITIALIZER = true;
         public static readonly bool LOG_SERIALIZATION = true;
         public static readonly bool LOG_CHANCES = true;
