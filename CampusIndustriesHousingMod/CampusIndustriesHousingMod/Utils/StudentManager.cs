@@ -58,7 +58,7 @@ namespace CampusIndustriesHousingMod.Utils
 
             this.studentsMovingOutTradeSchool = new uint[numCitizenUnits];
 
-            this.studentsBeingProcessed = new HashSet<uint>();
+            this.studentsBeingProcessed = [];
 
             this.numFamiliesWithStudents = 0;
 
