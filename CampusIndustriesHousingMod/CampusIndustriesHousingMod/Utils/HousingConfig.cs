@@ -1,22 +1,19 @@
-﻿using ColossalFramework;
-using ColossalFramework.Plugins;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml.Serialization;
 
 namespace CampusIndustriesHousingMod.Utils
 {
     public class HousingConfig
     {
-        public List<Housing> HousingSettings = new List<Housing>();
+        public List<Housing> HousingSettings = [];
 
         private const string optionsFileName = "CampusIndustriesHousingMod.xml";
 
         public bool ShowPanel { get; set; } = false;
 
-        static XmlSerializer ser_ => new XmlSerializer(typeof(HousingConfig));
+        static XmlSerializer Ser_ => new(typeof(HousingConfig));
 
         static HousingConfig config_;
         static public HousingConfig Config => config_ ??= Deserialize() ?? new HousingConfig(); 
@@ -60,11 +57,9 @@ namespace CampusIndustriesHousingMod.Utils
             {
                 if (File.Exists(GetXMLPath()))
 			    {
-				    using (FileStream stream = new FileStream(GetXMLPath(), FileMode.Open, FileAccess.Read))
-				    {
-					    return ser_.Deserialize(stream) as HousingConfig;
-				    }
-			    }
+                    using FileStream stream = new(GetXMLPath(), FileMode.Open, FileAccess.Read);
+                    return Ser_.Deserialize(stream) as HousingConfig;
+                }
             } 
             catch (Exception ex) 
             { 
@@ -78,7 +73,7 @@ namespace CampusIndustriesHousingMod.Utils
             try 
             {
                 using FileStream stream = new FileStream(GetXMLPath(), FileMode.Create, FileAccess.Write);
-			    ser_.Serialize(stream, this);   
+			    Ser_.Serialize(stream, this);   
             } 
             catch(Exception ex) 
             { 
@@ -88,35 +83,12 @@ namespace CampusIndustriesHousingMod.Utils
 
         public static string GetXMLPath()
         {
-            string file_path = "";
-
 		    string fileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-		    string CO_path = Path.Combine(fileName, "Collosal Order");
+		    string CO_path = Path.Combine(fileName, "Colossal Order");
             string CS_path = Path.Combine(CO_path, "Cities_Skylines");
-            string Addons_path = Path.Combine(CS_path, "Addons");
-		    string mods_path = Path.Combine(Addons_path, "Mods");
-
-            if (!Directory.Exists(mods_path))
-            {
-                IEnumerable<PluginManager.PluginInfo> plugins = PluginManager.instance.GetPluginsInfo();
-                string assemblyPath = plugins.First().modPath;
-
-                if (!assemblyPath.IsNullOrWhiteSpace())
-			    {
-				    string fullPath = Path.GetFullPath(Path.Combine(assemblyPath, "..\\"));
-				    mods_path = Path.Combine(fullPath, "2854004833");
-			    }
-            }
-
-            if (Directory.Exists(mods_path))
-            {
-                string folder_path = Path.Combine(mods_path, "CampusIndustriesHousingMod");
-                file_path = Path.Combine(folder_path, optionsFileName);
-            }
-
-		    return file_path;
+            string file_path = Path.Combine(CS_path, optionsFileName);
+            return file_path;
         }
-
 
     }
 
