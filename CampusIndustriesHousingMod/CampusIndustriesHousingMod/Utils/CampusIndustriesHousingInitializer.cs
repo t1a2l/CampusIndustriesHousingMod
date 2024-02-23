@@ -300,7 +300,7 @@ namespace CampusIndustriesHousingMod.Utils
                     BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(index);
 
                     // Check for replacement of AI
-                    if (buildingInfo != null && buildingInfo.GetAI() is AuxiliaryBuildingAI && buildingInfo.name.Contains("Barracks"))
+                    if (buildingInfo != null && buildingInfo.GetAI() is AuxiliaryBuildingAI && (buildingInfo.name.Contains("Barracks") || buildingInfo.name.Contains("Residential")))
                     {
                         // custom assets get the workers barracks info
                         if(buildingInfo.m_isCustomContent)
