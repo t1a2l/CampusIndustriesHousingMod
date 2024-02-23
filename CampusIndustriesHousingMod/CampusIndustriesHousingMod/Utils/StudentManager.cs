@@ -34,6 +34,10 @@ namespace CampusIndustriesHousingMod.Utils
         private int refreshTimer;
         private int running;
 
+        private const int StepMask = 0xFF;
+        private const int BuildingStepSize = 192;
+        private ushort studentCheckStep;
+
         public StudentManager() 
         {
             Logger.LogInfo(Logger.LOG_STUDENTS, "StudentManager Created");
@@ -81,8 +85,11 @@ namespace CampusIndustriesHousingMod.Utils
                     return;
                 }
 
+                ushort step = studentCheckStep;
+                studentCheckStep = (ushort)((step + 1) & StepMask);
+
                 // Refresh the Students Array
-                this.refreshStudents();
+                this.refreshStudents(step);
 
                 // Reset the timer and running flag
                 this.refreshTimer = 1;
@@ -90,46 +97,71 @@ namespace CampusIndustriesHousingMod.Utils
             }
         }
 
-        private void refreshStudents() 
+        private void refreshStudents(uint step) 
         {
-            CitizenUnit[] citizenUnits = this.citizenManager.m_units.m_buffer;
+            CitizenManager instance = Singleton<CitizenManager>.instance;
             this.numFamiliesWithStudents = 0;
             this.numStudentsMoveOutUniversity = 0;
             this.numStudentsMoveOutLiberalArts = 0;
             this.numStudentsMoveOutTradeSchool = 0;
-            for (uint i = 0; i < citizenUnits.Length; i++) 
+
+            ushort first = (ushort)(step * BuildingStepSize);
+            ushort last = (ushort)((step + 1) * BuildingStepSize - 1);
+
+            for (ushort i = first; i <= last; ++i)
             {
-                CitizenUnit citizenUnit = citizenUnits[i];
-                if((citizenUnit.m_flags & CitizenUnit.Flags.Created) == 0 || citizenUnit.Empty())
+                var building = buildingManager.m_buildings.m_buffer[i];
+                if (building.Info.GetAI() is not ResidentialBuildingAI && building.Info.GetAI() is not DormsAI)
                 {
                     continue;
                 }
-                for (int j = 0; j < 5; j++) 
+                if ((building.m_flags & Building.Flags.Created) == 0)
                 {
-                    uint citizenId = citizenUnit.GetCitizen(j);
-                    Citizen citizen = citizenManager.m_citizens.m_buffer[citizenId];
-                    if (citizen.m_flags.IsFlagSet(Citizen.Flags.Created) && this.validateStudent(citizenId)) 
+                    continue;
+                }
+
+                uint num = building.m_citizenUnits;
+                int num2 = 0;
+                while (num != 0)
+                {
+                    var citizenUnit = instance.m_units.m_buffer[num];
+                    uint nextUnit = citizenUnit.m_nextUnit;
+                    if ((instance.m_units.m_buffer[num].m_flags & CitizenUnit.Flags.Home) != 0)
                     {
-                        if(this.isMovingIn(citizenId))
+                        for (int j = 0; j < 5; j++)
                         {
-                            this.familiesWithStudents[this.numFamiliesWithStudents++] = i;
-                            break;
+                            uint citizenId = citizenUnit.GetCitizen(j);
+                            Citizen citizen = citizenManager.m_citizens.m_buffer[citizenId];
+                            if (citizen.m_flags.IsFlagSet(Citizen.Flags.Created) && this.validateStudent(citizenId))
+                            {
+                                if (this.isMovingIn(citizenId))
+                                {
+                                    this.familiesWithStudents[this.numFamiliesWithStudents++] = i;
+                                    break;
+                                }
+                                else if (this.isMovingOutUniversity(citizenId))
+                                {
+                                    this.studentsMovingOutUniversity[this.numStudentsMoveOutUniversity++] = i;
+                                    break;
+                                }
+                                else if (this.isMovingOutLiberalArts(citizenId))
+                                {
+                                    this.studentsMovingOutLiberalArts[this.numStudentsMoveOutLiberalArts++] = i;
+                                    break;
+                                }
+                                else if (this.isMovingOutTradeSchool(citizenId))
+                                {
+                                    this.studentsMovingOutTradeSchool[this.numStudentsMoveOutTradeSchool++] = i;
+                                    break;
+                                }
+                            }
                         }
-                        else if(this.isMovingOutUniversity(citizenId))
-                        {
-                            this.studentsMovingOutUniversity[this.numStudentsMoveOutUniversity++] = i;
-                            break;
-                        }
-                        else if(this.isMovingOutLiberalArts(citizenId))
-                        {
-                            this.studentsMovingOutLiberalArts[this.numStudentsMoveOutLiberalArts++] = i;
-                            break;
-                        }
-                        else if(this.isMovingOutTradeSchool(citizenId))
-                        {
-                            this.studentsMovingOutTradeSchool[this.numStudentsMoveOutTradeSchool++] = i;
-                            break;
-                        }
+                    }
+                    num = nextUnit;
+                    if (++num2 > 524288)
+                    {
+                        CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+                        break;
                     }
                 }
             }

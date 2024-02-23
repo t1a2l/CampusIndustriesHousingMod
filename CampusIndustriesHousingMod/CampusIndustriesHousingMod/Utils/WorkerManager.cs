@@ -36,6 +36,10 @@ namespace CampusIndustriesHousingMod.Utils
         private int refreshTimer;
         private int running;
 
+        private const int StepMask = 0xFF;
+        private const int BuildingStepSize = 192;
+        private ushort workerCheckStep;
+
         public WorkerManager() 
         {
             Logger.LogInfo(Logger.LOG_WORKERS, "WorkerManager Created");
@@ -87,8 +91,11 @@ namespace CampusIndustriesHousingMod.Utils
                     return;
                 }
 
+                ushort step = workerCheckStep;
+                workerCheckStep = (ushort)((step + 1) & StepMask);
+
                 // Refresh the Workers Array
-                this.refreshWorkers();
+                this.refreshWorkers(step);
 
                 // Reset the timer and running flag
                 this.refreshTimer = 1;
@@ -96,64 +103,90 @@ namespace CampusIndustriesHousingMod.Utils
             }
         }
 
-        private void refreshWorkers() 
+        private void refreshWorkers(uint step) 
         {
-            CitizenUnit[] citizenUnits = this.citizenManager.m_units.m_buffer;
+            CitizenManager instance = Singleton<CitizenManager>.instance;
             this.numFamiliesWithWorkers = 0;
             this.numFarmingBarracksFamilies = 0;
             this.numForestryBarracksFamilies = 0;
             this.numOilBarracksFamilies = 0;
             this.numOreBarracksFamilies = 0;
             uint[] family;
-            for (uint i = 0; i < citizenUnits.Length; i++) 
+
+            ushort first = (ushort)(step * BuildingStepSize);
+            ushort last = (ushort)((step + 1) * BuildingStepSize - 1);
+
+            for (ushort i = first; i <= last; ++i)
             {
-                CitizenUnit citizenUnit = citizenUnits[i];
-                if((citizenUnit.m_flags & CitizenUnit.Flags.Created) == 0 || citizenUnit.Empty())
+                var building = buildingManager.m_buildings.m_buffer[i];
+                if(building.Info.GetAI() is not ResidentialBuildingAI && building.Info.GetAI() is not BarracksAI)
                 {
                     continue;
                 }
-                family = new uint[5];
-                for (int j = 0; j < 5; j++)
+                if ((building.m_flags & Building.Flags.Created) == 0)
                 {
-                    uint citizenId = citizenUnit.GetCitizen(j);
-                    if(citizenManager.m_citizens.m_buffer[citizenId].m_flags.IsFlagSet(Citizen.Flags.Created))
-                    {
-                        family[j] = citizenId;
-                    }
+                    continue;
                 }
 
-                bool move_in = false;
-                if(this.validateFamily(family))
+                uint num = building.m_citizenUnits;
+                int num2 = 0;
+                while (num != 0)
                 {
-                    for (int k = 0; k < family.Length; k++) 
+                    var citizenUnit = instance.m_units.m_buffer[num];
+                    uint nextUnit = citizenUnit.m_nextUnit;
+                    if ((instance.m_units.m_buffer[num].m_flags & CitizenUnit.Flags.Home) != 0)
                     {
-                        uint familyMember = family[k];
-                        if (familyMember != 0 && this.isMovingIn(familyMember)) 
+                        family = new uint[5];
+                        for (int j = 0; j < 5; j++)
                         {
-                            this.familiesWithWorkers[this.numFamiliesWithWorkers++] = i;
-                            move_in = true; // moving in, so not moving out
-                            break;  
+                            uint citizenId = citizenUnit.GetCitizen(j);
+                            if (citizenManager.m_citizens.m_buffer[citizenId].m_flags.IsFlagSet(Citizen.Flags.Created))
+                            {
+                                family[j] = citizenId;
+                            }
+                        }
+
+                        bool move_in = false;
+
+                        if (this.validateFamily(family))
+                        {
+                            for (int k = 0; k < family.Length; k++)
+                            {
+                                uint familyMember = family[k];
+                                if (familyMember != 0 && this.isMovingIn(familyMember))
+                                {
+                                    this.familiesWithWorkers[this.numFamiliesWithWorkers++] = i;
+                                    move_in = true; // moving in, so not moving out
+                                    break;
+                                }
+                            }
+                            if (!move_in)
+                            {
+                                if (this.isMovingOutFarming(family))
+                                {
+                                    this.farmingBarracksFamilies[this.numFarmingBarracksFamilies++] = i;
+                                }
+                                else if (this.isMovingOutForestry(family))
+                                {
+                                    this.forestryBarracksFamilies[this.numForestryBarracksFamilies++] = i;
+                                }
+                                else if (this.isMovingOutOil(family))
+                                {
+                                    this.oilBarracksFamilies[this.numOilBarracksFamilies++] = i;
+                                }
+                                else if (this.isMovingOutOre(family))
+                                {
+                                    this.oreBarracksFamilies[this.numOreBarracksFamilies++] = i;
+                                }
+                            }
                         }
                     }
-                    if(!move_in) 
+                    num = nextUnit;
+                    if (++num2 > 524288)
                     {
-                        if(this.isMovingOutFarming(family))
-                        {
-                            this.farmingBarracksFamilies[this.numFarmingBarracksFamilies++] = i;
-                        }
-                        else if(this.isMovingOutForestry(family))
-                        {
-                            this.forestryBarracksFamilies[this.numForestryBarracksFamilies++] = i;
-                        }
-                        else if(this.isMovingOutOil(family))
-                        {
-                            this.oilBarracksFamilies[this.numOilBarracksFamilies++] = i;
-                        }
-                        else if(this.isMovingOutOre(family))
-                        {
-                            this.oreBarracksFamilies[this.numOreBarracksFamilies++] = i;
-                        }
-                    } 
+                        CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+                        break;
+                    }
                 }
             }
         }
