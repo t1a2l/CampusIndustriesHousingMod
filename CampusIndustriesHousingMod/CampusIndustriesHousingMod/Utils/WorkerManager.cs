@@ -17,19 +17,13 @@ namespace CampusIndustriesHousingMod.Utils
         private readonly BuildingManager buildingManager;
         private readonly CitizenManager citizenManager;
 
-        private readonly uint[] familiesWithWorkers;
-        private readonly uint[] farmingBarracksFamilies;
-        private readonly uint[] forestryBarracksFamilies;
-        private readonly uint[] oilBarracksFamilies;
-        private readonly uint[] oreBarracksFamilies;
+        private readonly List<uint> familiesWithWorkers;
+        private readonly List<uint> farmingBarracksFamilies;
+        private readonly List<uint> forestryBarracksFamilies;
+        private readonly List<uint> oilBarracksFamilies;
+        private readonly List<uint> oreBarracksFamilies;
 
         private readonly HashSet<uint[]> familiesBeingProcessed;
-
-        private uint numFamiliesWithWorkers;
-        private uint numFarmingBarracksFamilies;
-        private uint numForestryBarracksFamilies;
-        private uint numOilBarracksFamilies;
-        private uint numOreBarracksFamilies;
 
         private Randomizer randomizer;
 
@@ -50,29 +44,18 @@ namespace CampusIndustriesHousingMod.Utils
             this.citizenManager = Singleton<CitizenManager>.instance;
             this.buildingManager = Singleton<BuildingManager>.instance;
 
-            uint numCitizenUnits = this.citizenManager.m_units.m_size;
+            this.familiesWithWorkers = [];
 
-            this.familiesWithWorkers = new uint[numCitizenUnits];
+            this.farmingBarracksFamilies = [];
 
-            this.farmingBarracksFamilies = new uint[numCitizenUnits];
+            this.forestryBarracksFamilies = [];
 
-            this.forestryBarracksFamilies = new uint[numCitizenUnits];
+            this.oilBarracksFamilies = [];
 
-            this.oilBarracksFamilies = new uint[numCitizenUnits];
-
-            this.oreBarracksFamilies = new uint[numCitizenUnits];
+            this.oreBarracksFamilies = [];
 
             this.familiesBeingProcessed = [];
 
-            this.numFamiliesWithWorkers = 0;
-
-            this.numFarmingBarracksFamilies = 0;
-
-            this.numForestryBarracksFamilies = 0;
-
-            this.numOilBarracksFamilies = 0;
-
-            this.numOreBarracksFamilies = 0;
         }
 
         public static WorkerManager getInstance() 
@@ -120,11 +103,6 @@ namespace CampusIndustriesHousingMod.Utils
         private void RefreshWorkers(uint step) 
         {
             CitizenManager instance = Singleton<CitizenManager>.instance;
-            this.numFamiliesWithWorkers = 0;
-            this.numFarmingBarracksFamilies = 0;
-            this.numForestryBarracksFamilies = 0;
-            this.numOilBarracksFamilies = 0;
-            this.numOreBarracksFamilies = 0;
             uint[] family;
 
             ushort first = (ushort)(step * BuildingStepSize);
@@ -169,7 +147,7 @@ namespace CampusIndustriesHousingMod.Utils
                                 uint familyMember = family[k];
                                 if (familyMember != 0 && this.isMovingIn(familyMember))
                                 {
-                                    this.familiesWithWorkers[this.numFamiliesWithWorkers++] = num;
+                                    this.familiesWithWorkers.Add(num);
                                     move_in = true; // moving in, so not moving out
                                     break;
                                 }
@@ -178,19 +156,19 @@ namespace CampusIndustriesHousingMod.Utils
                             {
                                 if (this.isMovingOutFarming(family))
                                 {
-                                    this.farmingBarracksFamilies[this.numFarmingBarracksFamilies++] = num;
+                                    this.farmingBarracksFamilies.Add(num);
                                 }
                                 else if (this.isMovingOutForestry(family))
                                 {
-                                    this.forestryBarracksFamilies[this.numForestryBarracksFamilies++] = num;
+                                    this.forestryBarracksFamilies.Add(num);
                                 }
                                 else if (this.isMovingOutOil(family))
                                 {
-                                    this.oilBarracksFamilies[this.numOilBarracksFamilies++] = num;
+                                    this.oilBarracksFamilies.Add(num);
                                 }
                                 else if (this.isMovingOutOre(family))
                                 {
-                                    this.oreBarracksFamilies[this.numOreBarracksFamilies++] = num;
+                                    this.oreBarracksFamilies.Add(num);
                                 }
                             }
                         }
@@ -365,13 +343,15 @@ namespace CampusIndustriesHousingMod.Utils
 
         private uint fetchRandomFamilyWithWorkers() 
         {
-            if (this.numFamiliesWithWorkers <= 0) 
+            if (this.familiesWithWorkers.Count == 0) 
             {
                 return 0;
             }
 
-            int index = this.randomizer.Int32(this.numFamiliesWithWorkers);
-            return this.familiesWithWorkers[index];
+            int index = this.randomizer.Int32((uint)this.familiesWithWorkers.Count);
+            var family = this.familiesWithWorkers[index];
+            this.familiesWithWorkers.RemoveAt(index);
+            return family;
         }
 
         private uint fetchRandomBarracksApartment(Building buildingData) 
@@ -380,43 +360,51 @@ namespace CampusIndustriesHousingMod.Utils
             {
                 if(barracksAI.m_industryType == DistrictPark.ParkType.Farming)
                 {
-                    if (this.numFarmingBarracksFamilies <= 0) 
+                    if (this.farmingBarracksFamilies.Count == 0)
                     {
                         return 0;
                     }
 
-                    int index = this.randomizer.Int32(this.numFarmingBarracksFamilies);
-                    return this.farmingBarracksFamilies[index];
+                    int index = this.randomizer.Int32((uint)this.farmingBarracksFamilies.Count);
+                    var family = this.farmingBarracksFamilies[index];
+                    this.farmingBarracksFamilies.RemoveAt(index);
+                    return family;
                 }
                 if(barracksAI.m_industryType == DistrictPark.ParkType.Forestry)
                 {
-                    if (this.numForestryBarracksFamilies <= 0) 
+                    if (this.forestryBarracksFamilies.Count == 0)
                     {
                         return 0;
                     }
 
-                    int index = this.randomizer.Int32(this.numForestryBarracksFamilies);
-                    return this.forestryBarracksFamilies[index];
+                    int index = this.randomizer.Int32((uint)this.forestryBarracksFamilies.Count);
+                    var family = this.forestryBarracksFamilies[index];
+                    this.forestryBarracksFamilies.RemoveAt(index);
+                    return family;
                 }
                 if(barracksAI.m_industryType == DistrictPark.ParkType.Oil)
                 {
-                    if (this.numOilBarracksFamilies <= 0) 
+                    if (this.oilBarracksFamilies.Count == 0)
                     {
                         return 0;
                     }
 
-                    int index = this.randomizer.Int32(this.numOilBarracksFamilies);
-                    return this.oilBarracksFamilies[index];
+                    int index = this.randomizer.Int32((uint)this.oilBarracksFamilies.Count);
+                    var family = this.oilBarracksFamilies[index];
+                    this.oilBarracksFamilies.RemoveAt(index);
+                    return family;
                 }
                 if(barracksAI.m_industryType == DistrictPark.ParkType.Ore)
                 {
-                    if (this.numOreBarracksFamilies <= 0) 
+                    if (this.oreBarracksFamilies.Count == 0)
                     {
                         return 0;
                     }
 
-                    int index = this.randomizer.Int32(this.numOreBarracksFamilies);
-                    return this.oreBarracksFamilies[index];
+                    int index = this.randomizer.Int32((uint)this.oreBarracksFamilies.Count);
+                    var family = this.oreBarracksFamilies[index];
+                    this.oreBarracksFamilies.RemoveAt(index);
+                    return family;
                 }
             } 
          

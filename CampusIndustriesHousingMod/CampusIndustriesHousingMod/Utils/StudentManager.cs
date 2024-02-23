@@ -17,17 +17,12 @@ namespace CampusIndustriesHousingMod.Utils
         private readonly BuildingManager buildingManager;
         private readonly CitizenManager citizenManager;
 
-        private readonly uint[] familiesWithStudents;
-        private readonly uint[] studentsMovingOutUniversity;
-        private readonly uint[] studentsMovingOutLiberalArts;
-        private readonly uint[] studentsMovingOutTradeSchool;
+        private readonly List<uint> familiesWithStudents;
+        private readonly List<uint> studentsMovingOutUniversity;
+        private readonly List<uint> studentsMovingOutLiberalArts;
+        private readonly List<uint> studentsMovingOutTradeSchool;
 
         private readonly HashSet<uint> studentsBeingProcessed;
-        private uint numFamiliesWithStudents;
-
-        private uint numStudentsMoveOutUniversity;
-        private uint numStudentsMoveOutLiberalArts;
-        private uint numStudentsMoveOutTradeSchool;
 
         private Randomizer randomizer;
 
@@ -48,25 +43,15 @@ namespace CampusIndustriesHousingMod.Utils
             this.citizenManager = Singleton<CitizenManager>.instance;
             this.buildingManager = Singleton<BuildingManager>.instance;
 
-            uint numCitizenUnits = this.citizenManager.m_units.m_size;
+            this.familiesWithStudents = [];
 
-            this.familiesWithStudents = new uint[numCitizenUnits];
+            this.studentsMovingOutUniversity = [];
 
-            this.studentsMovingOutUniversity = new uint[numCitizenUnits];
+            this.studentsMovingOutLiberalArts = [];
 
-            this.studentsMovingOutLiberalArts = new uint[numCitizenUnits];
-
-            this.studentsMovingOutTradeSchool = new uint[numCitizenUnits];
+            this.studentsMovingOutTradeSchool = [];
 
             this.studentsBeingProcessed = [];
-
-            this.numFamiliesWithStudents = 0;
-
-            this.numStudentsMoveOutUniversity = 0;
-
-            this.numStudentsMoveOutLiberalArts = 0;
-
-            this.numStudentsMoveOutTradeSchool = 0;
         }
 
         public static StudentManager getInstance() 
@@ -114,11 +99,6 @@ namespace CampusIndustriesHousingMod.Utils
         private void RefreshStudents(uint step) 
         {
             CitizenManager instance = Singleton<CitizenManager>.instance;
-            this.numFamiliesWithStudents = 0;
-            this.numStudentsMoveOutUniversity = 0;
-            this.numStudentsMoveOutLiberalArts = 0;
-            this.numStudentsMoveOutTradeSchool = 0;
-
             ushort first = (ushort)(step * BuildingStepSize);
             ushort last = (ushort)((step + 1) * BuildingStepSize - 1);
 
@@ -150,22 +130,22 @@ namespace CampusIndustriesHousingMod.Utils
                             {
                                 if (this.isMovingIn(citizenId))
                                 {
-                                    this.familiesWithStudents[this.numFamiliesWithStudents++] = num;
+                                    this.familiesWithStudents.Add(num);
                                     break;
                                 }
                                 else if (this.isMovingOutUniversity(citizenId))
                                 {
-                                    this.studentsMovingOutUniversity[this.numStudentsMoveOutUniversity++] = num;
+                                    this.studentsMovingOutUniversity.Add(num);
                                     break;
                                 }
                                 else if (this.isMovingOutLiberalArts(citizenId))
                                 {
-                                    this.studentsMovingOutLiberalArts[this.numStudentsMoveOutLiberalArts++] = num;
+                                    this.studentsMovingOutLiberalArts.Add(num);
                                     break;
                                 }
                                 else if (this.isMovingOutTradeSchool(citizenId))
                                 {
-                                    this.studentsMovingOutTradeSchool[this.numStudentsMoveOutTradeSchool++] = num;
+                                    this.studentsMovingOutTradeSchool.Add(num);
                                     break;
                                 }
                             }
@@ -350,13 +330,15 @@ namespace CampusIndustriesHousingMod.Utils
 
         private uint fetchRandomFamilyWithStudents() 
         {
-            if (this.numFamiliesWithStudents <= 0) 
+            if (this.familiesWithStudents.Count == 0)
             {
                 return 0;
             }
 
-            int index = this.randomizer.Int32(this.numFamiliesWithStudents);
-            return this.familiesWithStudents[index];
+            int index = this.randomizer.Int32((uint)this.familiesWithStudents.Count);
+            var family = this.familiesWithStudents[index];
+            this.familiesWithStudents.RemoveAt(index);
+            return family;
         }
 
         private uint fetchRandomDormApartment(Building buildingData) 
@@ -365,33 +347,39 @@ namespace CampusIndustriesHousingMod.Utils
             {
                 if(dormsAI.m_campusType == DistrictPark.ParkType.University)
                 {
-                    if (this.numStudentsMoveOutUniversity <= 0) 
+                    if (this.studentsMovingOutUniversity.Count == 0)
                     {
                         return 0;
                     }
 
-                    int index = this.randomizer.Int32(this.numStudentsMoveOutUniversity);
-                    return this.studentsMovingOutUniversity[index];
+                    int index = this.randomizer.Int32((uint)this.studentsMovingOutUniversity.Count);
+                    var family = this.studentsMovingOutUniversity[index];
+                    this.studentsMovingOutUniversity.RemoveAt(index);
+                    return family;
                 }
                 if(dormsAI.m_campusType == DistrictPark.ParkType.LiberalArts)
                 {
-                    if (this.numStudentsMoveOutLiberalArts <= 0) 
+                    if (this.studentsMovingOutLiberalArts.Count == 0)
                     {
                         return 0;
                     }
 
-                    int index = this.randomizer.Int32(this.numStudentsMoveOutLiberalArts);
-                    return this.studentsMovingOutLiberalArts[index];
+                    int index = this.randomizer.Int32((uint)this.studentsMovingOutLiberalArts.Count);
+                    var family = this.studentsMovingOutLiberalArts[index];
+                    this.studentsMovingOutLiberalArts.RemoveAt(index);
+                    return family;
                 }
                 if(dormsAI.m_campusType == DistrictPark.ParkType.TradeSchool)
                 {
-                    if (this.numStudentsMoveOutTradeSchool <= 0) 
+                    if (this.studentsMovingOutTradeSchool.Count == 0)
                     {
                         return 0;
                     }
 
-                    int index = this.randomizer.Int32(this.numStudentsMoveOutTradeSchool);
-                    return this.studentsMovingOutTradeSchool[index];
+                    int index = this.randomizer.Int32((uint)this.studentsMovingOutTradeSchool.Count);
+                    var family = this.studentsMovingOutTradeSchool[index];
+                    this.studentsMovingOutTradeSchool.RemoveAt(index);
+                    return family;
                 }
             }
             
