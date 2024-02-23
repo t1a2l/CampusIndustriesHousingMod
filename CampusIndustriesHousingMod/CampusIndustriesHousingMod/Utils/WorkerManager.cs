@@ -33,12 +33,13 @@ namespace CampusIndustriesHousingMod.Utils
 
         private Randomizer randomizer;
 
-        private int refreshTimer;
         private int running;
 
         private const int StepMask = 0xFF;
         private const int BuildingStepSize = 192;
         private ushort workerCheckStep;
+
+        private int workerCheckCounter;
 
         public WorkerManager() 
         {
@@ -61,7 +62,7 @@ namespace CampusIndustriesHousingMod.Utils
 
             this.oreBarracksFamilies = new uint[numCitizenUnits];
 
-            this.familiesBeingProcessed = new HashSet<uint[]>();
+            this.familiesBeingProcessed = [];
 
             this.numFamiliesWithWorkers = 0;
 
@@ -79,31 +80,44 @@ namespace CampusIndustriesHousingMod.Utils
             return instance;
         }
 
-        public override void OnBeforeSimulationTick() 
+        public override void OnBeforeSimulationFrame()
         {
-            // Refresh every every so often
-            if (this.refreshTimer++ % 600 == 0) 
+            uint currentFrame = SimulationManager.instance.m_currentFrameIndex;
+            ProcessFrame(currentFrame);
+        }
+
+        public void ProcessFrame(uint frameIndex)
+        {
+            RefreshWorkers();
+
+            if ((frameIndex & StepMask) != 0)
             {
-                // Make sure refresh can occur, otherwise set the timer so it will trigger again next try
-                if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) 
-                {
-                    this.refreshTimer = 0;
-                    return;
-                }
-
-                ushort step = workerCheckStep;
-                workerCheckStep = (ushort)((step + 1) & StepMask);
-
-                // Refresh the Workers Array
-                this.refreshWorkers(step);
-
-                // Reset the timer and running flag
-                this.refreshTimer = 1;
-                this.running = 0;
+                return;
             }
         }
 
-        private void refreshWorkers(uint step) 
+        private void RefreshWorkers()
+        {
+            if (workerCheckCounter > 0)
+            {
+                --workerCheckCounter;
+                return;
+            }
+
+            if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1)
+            {
+                return;
+            }
+
+            ushort step = workerCheckStep;
+            workerCheckStep = (ushort)((step + 1) & StepMask);
+
+            RefreshWorkers(step);
+
+            this.running = 0;
+        }
+
+        private void RefreshWorkers(uint step) 
         {
             CitizenManager instance = Singleton<CitizenManager>.instance;
             this.numFamiliesWithWorkers = 0;
@@ -134,7 +148,7 @@ namespace CampusIndustriesHousingMod.Utils
                 {
                     var citizenUnit = instance.m_units.m_buffer[num];
                     uint nextUnit = citizenUnit.m_nextUnit;
-                    if ((instance.m_units.m_buffer[num].m_flags & CitizenUnit.Flags.Home) != 0)
+                    if ((instance.m_units.m_buffer[num].m_flags & CitizenUnit.Flags.Home) != 0 && !citizenUnit.Empty())
                     {
                         family = new uint[5];
                         for (int j = 0; j < 5; j++)
@@ -155,7 +169,7 @@ namespace CampusIndustriesHousingMod.Utils
                                 uint familyMember = family[k];
                                 if (familyMember != 0 && this.isMovingIn(familyMember))
                                 {
-                                    this.familiesWithWorkers[this.numFamiliesWithWorkers++] = i;
+                                    this.familiesWithWorkers[this.numFamiliesWithWorkers++] = num;
                                     move_in = true; // moving in, so not moving out
                                     break;
                                 }
@@ -164,19 +178,19 @@ namespace CampusIndustriesHousingMod.Utils
                             {
                                 if (this.isMovingOutFarming(family))
                                 {
-                                    this.farmingBarracksFamilies[this.numFarmingBarracksFamilies++] = i;
+                                    this.farmingBarracksFamilies[this.numFarmingBarracksFamilies++] = num;
                                 }
                                 else if (this.isMovingOutForestry(family))
                                 {
-                                    this.forestryBarracksFamilies[this.numForestryBarracksFamilies++] = i;
+                                    this.forestryBarracksFamilies[this.numForestryBarracksFamilies++] = num;
                                 }
                                 else if (this.isMovingOutOil(family))
                                 {
-                                    this.oilBarracksFamilies[this.numOilBarracksFamilies++] = i;
+                                    this.oilBarracksFamilies[this.numOilBarracksFamilies++] = num;
                                 }
                                 else if (this.isMovingOutOre(family))
                                 {
-                                    this.oreBarracksFamilies[this.numOreBarracksFamilies++] = i;
+                                    this.oreBarracksFamilies[this.numOreBarracksFamilies++] = num;
                                 }
                             }
                         }

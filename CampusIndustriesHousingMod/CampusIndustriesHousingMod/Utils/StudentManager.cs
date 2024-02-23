@@ -31,12 +31,13 @@ namespace CampusIndustriesHousingMod.Utils
 
         private Randomizer randomizer;
 
-        private int refreshTimer;
         private int running;
 
         private const int StepMask = 0xFF;
         private const int BuildingStepSize = 192;
         private ushort studentCheckStep;
+
+        private int studentCheckCounter;
 
         public StudentManager() 
         {
@@ -73,31 +74,44 @@ namespace CampusIndustriesHousingMod.Utils
             return instance;
         }
 
-        public override void OnBeforeSimulationTick() 
+        public override void OnBeforeSimulationFrame()
         {
-            // Refresh every every so often
-            if (this.refreshTimer++ % 600 == 0) 
+            uint currentFrame = SimulationManager.instance.m_currentFrameIndex;
+            ProcessFrame(currentFrame);
+        }
+
+        public void ProcessFrame(uint frameIndex)
+        {
+            RefreshStudents();
+
+            if ((frameIndex & StepMask) != 0)
             {
-                // Make sure refresh can occur, otherwise set the timer so it will trigger again next try
-                if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1) 
-                {
-                    this.refreshTimer = 0;
-                    return;
-                }
-
-                ushort step = studentCheckStep;
-                studentCheckStep = (ushort)((step + 1) & StepMask);
-
-                // Refresh the Students Array
-                this.refreshStudents(step);
-
-                // Reset the timer and running flag
-                this.refreshTimer = 1;
-                this.running = 0;
+                return;
             }
         }
 
-        private void refreshStudents(uint step) 
+        private void RefreshStudents()
+        {
+            if (studentCheckCounter > 0)
+            {
+                --studentCheckCounter;
+                return;
+            }
+
+            if (Interlocked.CompareExchange(ref this.running, 1, 0) == 1)
+            {
+                return;
+            }
+
+            ushort step = studentCheckStep;
+            studentCheckStep = (ushort)((step + 1) & StepMask);
+
+            RefreshStudents(step);
+
+            this.running = 0;
+        }
+
+        private void RefreshStudents(uint step) 
         {
             CitizenManager instance = Singleton<CitizenManager>.instance;
             this.numFamiliesWithStudents = 0;
@@ -126,7 +140,7 @@ namespace CampusIndustriesHousingMod.Utils
                 {
                     var citizenUnit = instance.m_units.m_buffer[num];
                     uint nextUnit = citizenUnit.m_nextUnit;
-                    if ((instance.m_units.m_buffer[num].m_flags & CitizenUnit.Flags.Home) != 0)
+                    if ((instance.m_units.m_buffer[num].m_flags & CitizenUnit.Flags.Home) != 0 && !citizenUnit.Empty())
                     {
                         for (int j = 0; j < 5; j++)
                         {
@@ -136,22 +150,22 @@ namespace CampusIndustriesHousingMod.Utils
                             {
                                 if (this.isMovingIn(citizenId))
                                 {
-                                    this.familiesWithStudents[this.numFamiliesWithStudents++] = i;
+                                    this.familiesWithStudents[this.numFamiliesWithStudents++] = num;
                                     break;
                                 }
                                 else if (this.isMovingOutUniversity(citizenId))
                                 {
-                                    this.studentsMovingOutUniversity[this.numStudentsMoveOutUniversity++] = i;
+                                    this.studentsMovingOutUniversity[this.numStudentsMoveOutUniversity++] = num;
                                     break;
                                 }
                                 else if (this.isMovingOutLiberalArts(citizenId))
                                 {
-                                    this.studentsMovingOutLiberalArts[this.numStudentsMoveOutLiberalArts++] = i;
+                                    this.studentsMovingOutLiberalArts[this.numStudentsMoveOutLiberalArts++] = num;
                                     break;
                                 }
                                 else if (this.isMovingOutTradeSchool(citizenId))
                                 {
-                                    this.studentsMovingOutTradeSchool[this.numStudentsMoveOutTradeSchool++] = i;
+                                    this.studentsMovingOutTradeSchool[this.numStudentsMoveOutTradeSchool++] = num;
                                     break;
                                 }
                             }
