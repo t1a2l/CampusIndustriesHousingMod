@@ -123,7 +123,7 @@ namespace CampusIndustriesHousingMod.AI
             this.validateCapacity(buildingID, ref data, false);
 
 		    int workCount =  m_workPlaceCount0 + m_workPlaceCount1 + m_workPlaceCount2 + m_workPlaceCount3;
-		    EnsureCitizenUnits(buildingID, ref data, getModifiedCapacity(buildingID, ref data), workCount, 0, 0);
+		    EnsureCitizenUnits(buildingID, ref data, getModifiedCapacity(buildingID, ref data), workCount, 0, StudentCount * 5 / 4);
 	    }
 
         public override void EndRelocating(ushort buildingID, ref Building data)
@@ -136,7 +136,7 @@ namespace CampusIndustriesHousingMod.AI
             this.validateCapacity(buildingID, ref data, false);
 
 		    int workCount = m_workPlaceCount0 + m_workPlaceCount1 + m_workPlaceCount2 + m_workPlaceCount3;
-		    EnsureCitizenUnits(buildingID, ref data, getModifiedCapacity(buildingID, ref data), workCount, 0, 0);
+		    EnsureCitizenUnits(buildingID, ref data, getModifiedCapacity(buildingID, ref data), workCount, 0, StudentCount * 5 / 4);
 	    }
 
         public override void SimulationStep(ushort buildingID, ref Building buildingData, ref Building.Frame frameData) 
