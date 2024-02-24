@@ -3,6 +3,7 @@ using CitiesHarmony.API;
 using UnityEngine;
 using CampusIndustriesHousingMod.Utils;
 using System;
+using CampusIndustriesHousingMod.Managers;
 
 namespace CampusIndustriesHousingMod
 {
@@ -47,6 +48,15 @@ namespace CampusIndustriesHousingMod
         {
             Logger.LogInfo(Logger.LOG_BASE, "CampusIndustriesHousingMod Created");
             instance = this;
+            try
+            {
+                HousingManager.Init();
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.Message);
+                HousingManager.Deinit();
+            }
         }
 
         public byte[] LoadData(string id) 

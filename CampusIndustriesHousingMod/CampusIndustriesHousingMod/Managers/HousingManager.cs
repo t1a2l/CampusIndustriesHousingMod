@@ -45,14 +45,14 @@ namespace CampusIndustriesHousingMod.Managers
 
         public static void Init()
         {
-			BuildingRecords ??= new();
-			PrefabRecords ??= new();
+			BuildingRecords ??= [];
+			PrefabRecords ??= [];
         }
 
         public static void Deinit()
         {
-            BuildingRecords = new();
-            PrefabRecords = new();
+            BuildingRecords = [];
+            PrefabRecords = [];
         }
 
         public static bool BuildingRecordExist(ushort buildingID)
