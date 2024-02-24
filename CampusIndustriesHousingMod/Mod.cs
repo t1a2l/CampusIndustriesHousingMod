@@ -8,9 +8,7 @@ namespace CampusIndustriesHousingMod
 {
     public class Mod : LoadingExtensionBase, IUserMod, ISerializableData  
     {
-        private GameObject campusIndustriesHousingInitializerObj;
-        private CampusIndustriesHousingInitializer campusIndustriesHousingInitializer;
-        private OptionsManager optionsManager = new OptionsManager();
+        private OptionsManager optionsManager = new();
 
         public new IManagers managers { get; }
 
@@ -34,11 +32,6 @@ namespace CampusIndustriesHousingMod
             return instance;
         }
 
-        public CampusIndustriesHousingInitializer getCampusIndustriesHousingInitializer()
-	    {
-		    return campusIndustriesHousingInitializer;
-	    }
-
         public OptionsManager getOptionsManager() 
         {
             return optionsManager;
@@ -54,55 +47,6 @@ namespace CampusIndustriesHousingMod
         {
             Logger.LogInfo(Logger.LOG_BASE, "CampusIndustriesHousingMod Created");
             instance = this;
-            base.OnCreated(loading);
-            if (campusIndustriesHousingInitializerObj == null) 
-            {
-                campusIndustriesHousingInitializerObj = new GameObject("CampusIndustriesHousing");
-                campusIndustriesHousingInitializer = campusIndustriesHousingInitializerObj.AddComponent<CampusIndustriesHousingInitializer>();
-            }
-            try
-            {
-                HousingManager.Init();
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e.Message);
-                HousingManager.Deinit();
-            }
-
-        }
-
-        public override void OnLevelUnloading()
-	    {
-		    base.OnLevelUnloading();
-		    campusIndustriesHousingInitializer?.OnLevelUnloading();
-	    }
-
-        public override void OnLevelLoaded(LoadMode mode) 
-        {
-            Logger.LogInfo(true, "CampusIndustriesHousingMod Level Loaded: {0}", mode);
-		    base.OnLevelLoaded(mode);
-            if(mode == LoadMode.NewGame || mode == LoadMode.LoadGame || mode == LoadMode.NewGameFromScenario)
-            {
-                campusIndustriesHousingInitializer?.OnLevelWasLoaded(6);
-            }
-            if(mode == LoadMode.NewAsset || mode == LoadMode.LoadAsset)
-            {
-                campusIndustriesHousingInitializer?.OnLevelWasLoaded(19);
-            }
-        }
-
-        public override void OnReleased() 
-        {
-            base.OnReleased();
-            if (!HarmonyHelper.IsHarmonyInstalled)
-            {
-                return;
-            }
-            if (campusIndustriesHousingInitializerObj != null) 
-            {
-                UnityEngine.Object.Destroy(campusIndustriesHousingInitializerObj);
-            }
         }
 
         public byte[] LoadData(string id) 

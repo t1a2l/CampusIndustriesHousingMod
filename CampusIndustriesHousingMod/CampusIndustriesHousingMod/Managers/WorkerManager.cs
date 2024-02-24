@@ -6,7 +6,7 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using ICities;
 
-namespace CampusIndustriesHousingMod.Utils  
+namespace CampusIndustriesHousingMod.Managers
 {
     public class WorkerManager : ThreadingExtensionBase 
     {

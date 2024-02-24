@@ -1,7 +1,7 @@
 ﻿using CampusIndustriesHousingMod.AI;
 using System.Collections.Generic;
 
-namespace CampusIndustriesHousingMod.Utils
+namespace CampusIndustriesHousingMod.Managers
 {
     public static class HousingManager
     {

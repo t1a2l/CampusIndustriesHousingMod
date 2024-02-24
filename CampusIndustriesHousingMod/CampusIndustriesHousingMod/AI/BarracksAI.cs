@@ -5,6 +5,7 @@ using ColossalFramework.Math;
 using UnityEngine;
 using System.Threading;
 using CampusIndustriesHousingMod.Utils;
+using CampusIndustriesHousingMod.CampusIndustriesHousingMod.Managers;
 
 namespace CampusIndustriesHousingMod.AI
 {

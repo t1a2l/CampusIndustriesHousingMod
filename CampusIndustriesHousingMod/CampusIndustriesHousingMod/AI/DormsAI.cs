@@ -6,6 +6,7 @@ using UnityEngine;
 using System.Threading;
 using System.Collections.Generic;
 using CampusIndustriesHousingMod.Utils;
+using CampusIndustriesHousingMod.Managers;
 
 namespace CampusIndustriesHousingMod.AI
 {

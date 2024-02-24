@@ -23,23 +23,19 @@ namespace CampusIndustriesHousingMod.Utils
         {
             base.OnSaveData();
 
-            using (MemoryStream stream = new MemoryStream())
-            {
-                // Serialise savegame settings.
-                using (BinaryWriter writer = new BinaryWriter(stream))
-                {
-                    // Write version.
-                    writer.Write(DataVersion);
+            using MemoryStream stream = new();
+            // Serialise savegame settings.
+            using BinaryWriter writer = new(stream);
+            // Write version.
+            writer.Write(DataVersion);
 
-                    // Serialize building data.
-                    HousingManagerSerializer.Serialize(writer);
+            // Serialize building data.
+            HousingManagerSerializer.Serialize(writer);
 
-                    // Write to savegame.
-                    serializableDataManager.SaveData(dataID, stream.ToArray());
+            // Write to savegame.
+            serializableDataManager.SaveData(dataID, stream.ToArray());
 
-                    Logger.LogInfo(Logger.LOG_DATA, "wrote ", stream.Length);
-                }
-            }
+            Logger.LogInfo(Logger.LOG_DATA, "wrote ", stream.Length);
         }
 
         /// <summary>
@@ -57,20 +53,16 @@ namespace CampusIndustriesHousingMod.Utils
             if (data != null && data.Length != 0)
             {
                 // Data was read - go ahead and deserialise.
-                using (MemoryStream stream = new MemoryStream(data))
-                {
-                    using (BinaryReader reader = new BinaryReader(stream))
-                    {
-                        // Read version.
-                        int version = reader.ReadInt32();
-                        Logger.LogInfo(Logger.LOG_DATA, "found data version ", version);
+                using MemoryStream stream = new(data);
+                using BinaryReader reader = new(stream);
+                // Read version.
+                int version = reader.ReadInt32();
+                Logger.LogInfo(Logger.LOG_DATA, "found data version ", version);
 
-                        // Deserialise building settings.
-                        HousingManagerSerializer.Deserialize(reader);
+                // Deserialise building settings.
+                HousingManagerSerializer.Deserialize(reader);
 
-                        Logger.LogInfo(Logger.LOG_DATA, "read ", stream.Length);
-                    }
-                }
+                Logger.LogInfo(Logger.LOG_DATA, "read ", stream.Length);
             }
             else
             {
