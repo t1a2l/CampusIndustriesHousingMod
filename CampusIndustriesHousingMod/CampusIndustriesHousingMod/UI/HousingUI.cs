@@ -1,5 +1,6 @@
 ﻿using CampusIndustriesHousingMod.AI;
 using CampusIndustriesHousingMod.Utils;
+using CampusIndustriesHousingMod.Managers;
 using ColossalFramework;
 using ColossalFramework.UI;
 using System;
