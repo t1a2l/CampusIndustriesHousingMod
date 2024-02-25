@@ -7,6 +7,7 @@ using System.Threading;
 using System.Collections.Generic;
 using CampusIndustriesHousingMod.Utils;
 using CampusIndustriesHousingMod.Managers;
+using CampusIndustriesHousingMod.UI;
 
 namespace CampusIndustriesHousingMod.AI
 {
@@ -110,35 +111,20 @@ namespace CampusIndustriesHousingMod.AI
         public override void CreateBuilding(ushort buildingID, ref Building data)
 	    {
 		    base.CreateBuilding(buildingID, ref data);
-		    int workCount = m_workPlaceCount0 + m_workPlaceCount1 + m_workPlaceCount2 + m_workPlaceCount3;
-		    Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, getModifiedCapacity(buildingID, ref data), workCount, 0, 0, StudentCount * 5 / 4);
+            HousingUIPanel.LoadSettings(buildingID, ref data, true);
         }
 
         public override void BuildingLoaded(ushort buildingID, ref Building data, uint version)
 	    {
 		    base.BuildingLoaded(buildingID, ref data, version);
-           
-            // Validate the capacity and adjust accordingly - but don't create new units, that will be done by EnsureCitizenUnits
-            float capcityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
-            this.updateCapacity(capcityModifier);
-            this.validateCapacity(buildingID, ref data, false);
-
-		    int workCount =  m_workPlaceCount0 + m_workPlaceCount1 + m_workPlaceCount2 + m_workPlaceCount3;
-		    EnsureCitizenUnits(buildingID, ref data, getModifiedCapacity(buildingID, ref data), workCount, 0, StudentCount * 5 / 4);
-	    }
+            HousingUIPanel.LoadSettings(buildingID, ref data, false);
+        }
 
         public override void EndRelocating(ushort buildingID, ref Building data)
 	    {
 		    base.EndRelocating(buildingID, ref data);
-
-            // Validate the capacity and adjust accordingly - but don't create new units, that will be done by EnsureCitizenUnits
-            float capacityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
-            this.updateCapacity(capacityModifier);
-            this.validateCapacity(buildingID, ref data, false);
-
-		    int workCount = m_workPlaceCount0 + m_workPlaceCount1 + m_workPlaceCount2 + m_workPlaceCount3;
-		    EnsureCitizenUnits(buildingID, ref data, getModifiedCapacity(buildingID, ref data), workCount, 0, StudentCount * 5 / 4);
-	    }
+            HousingUIPanel.LoadSettings(buildingID, ref data, false);
+        }
 
         public override void SimulationStep(ushort buildingID, ref Building buildingData, ref Building.Frame frameData) 
         {

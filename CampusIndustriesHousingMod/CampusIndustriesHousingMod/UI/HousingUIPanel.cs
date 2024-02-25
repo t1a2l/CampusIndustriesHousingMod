@@ -133,6 +133,7 @@ namespace CampusIndustriesHousingMod.UI
             ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
             Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
             PrefabAI buildingAI = building.Info.GetAI();
+            int studentCount = 0;
             if (buildingAI is not BarracksAI && buildingAI is not DormsAI)
 			{
                 m_settingsCheckBox.Hide();
@@ -150,8 +151,9 @@ namespace CampusIndustriesHousingMod.UI
                 {
                     buildingAIstr = "BarracksAI";
                 }
-                else if(buildingAI is DormsAI)
+                else if(buildingAI is DormsAI dormsAI)
                 {
+                    studentCount = dormsAI.StudentCount;
                     buildingAIstr = "DormsAI";
                 }
 
@@ -258,6 +260,8 @@ namespace CampusIndustriesHousingMod.UI
                     }
                 }
                 UpdateHouse(buildingID, ref building, numOfApartments, WorkPlaceCount0, WorkPlaceCount1, WorkPlaceCount2, WorkPlaceCount3);
+                int workCount = WorkPlaceCount0 + WorkPlaceCount1 + WorkPlaceCount2 + WorkPlaceCount3;
+                CreateOrEnsure(false, buildingID, ref building, numOfApartments, workCount, studentCount);
                 m_settingsCheckBox.Show();
                 if(m_settingsCheckBox.isChecked)
                 {
@@ -298,7 +302,6 @@ namespace CampusIndustriesHousingMod.UI
 	    {
             // Validate the capacity and adjust accordingly - but don't create new units, that will be done by EnsureCitizenUnits
             float capacityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
-            var NumOfApartments = capacityModifier > 0 ? (int) (numOfApartments * capacityModifier) : numOfApartments;
             if(data.Info.GetAI() is BarracksAI barracksAI)
             {
                 barracksAI.updateCapacity(capacityModifier);
@@ -319,8 +322,6 @@ namespace CampusIndustriesHousingMod.UI
                 dormsAI.m_workPlaceCount2 = WorkPlaceCount2;
                 dormsAI.m_workPlaceCount3 = WorkPlaceCount3;
             }
-            int workCount = WorkPlaceCount0 + WorkPlaceCount1 + WorkPlaceCount2 + WorkPlaceCount3;
-            EnsureCitizenUnits(buildingID, ref data, NumOfApartments, workCount, 0, 0);
 	    }
 
         private static void EnsureCitizenUnits(ushort buildingID, ref Building data, int homeCount = 0, int workCount = 0, int visitCount = 0, int studentCount = 0, int hotelCount = 0)
@@ -541,6 +542,105 @@ namespace CampusIndustriesHousingMod.UI
             RefreshData();
         }
 
+        public static void CreateOrEnsure(bool is_new, ushort buildingID, ref Building data, int numOfApartments, int workCount, int studentCount)
+        {
+            if(is_new)
+            {
+                Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, numOfApartments, workCount, 0, 0, studentCount * 5 / 4);
+            }
+            else
+            {
+                EnsureCitizenUnits(buildingID, ref data, numOfApartments, workCount, 0, studentCount * 5 / 4);
+            }
+        }
+
+
+        public static void LoadSettings(ushort buildingID, ref Building data, bool is_new)
+        {
+            BuildingInfo buildingInfo = data.Info;
+            PrefabAI buildingAI = buildingInfo.GetAI();
+            var studentCount = 0;
+            string buildingAIstr = "";
+            int numOfApartments = 0;
+            int WorkPlaceCount0 = 0;
+            int WorkPlaceCount1 = 0;
+            int WorkPlaceCount2 = 0;
+            int WorkPlaceCount3 = 0;
+
+            if (buildingAI is BarracksAI)
+            {
+                buildingAIstr = "BarracksAI";
+            }
+            else if (buildingAI is DormsAI dormsAI)
+            {
+                studentCount = dormsAI.StudentCount;
+                buildingAIstr = "DormsAI";
+            }
+
+            var res = HousingManager.BuildingRecords.TryGetValue(buildingID, out HousingManager.BuildingRecord buildingRecord);
+            if (res)
+            {
+                numOfApartments = buildingRecord.NumOfApartments;
+                WorkPlaceCount0 = buildingRecord.WorkPlaceCount0;
+                WorkPlaceCount1 = buildingRecord.WorkPlaceCount1;
+                WorkPlaceCount2 = buildingRecord.WorkPlaceCount2;
+                WorkPlaceCount3 = buildingRecord.WorkPlaceCount3;
+            }
+            else
+            {
+                var prefab_index = HousingManager.PrefabRecords.FindIndex(item => item.Name == buildingInfo.name && item.BuildingAI == buildingAIstr);
+                if (prefab_index != -1)
+                {
+                    var prefabRecord = HousingManager.PrefabRecords[prefab_index];
+                    numOfApartments = prefabRecord.NumOfApartments;
+                    WorkPlaceCount0 = prefabRecord.WorkPlaceCount0;
+                    WorkPlaceCount1 = prefabRecord.WorkPlaceCount1;
+                    WorkPlaceCount2 = prefabRecord.WorkPlaceCount2;
+                    WorkPlaceCount3 = prefabRecord.WorkPlaceCount3;
+                }
+                else
+                {
+                    var global_index = HousingConfig.Config.HousingSettings.FindIndex(item => item.Name == buildingInfo.name && item.BuildingAI == buildingAIstr);
+                    if (global_index != -1)
+                    {
+                            
+                        var saved_config = HousingConfig.Config.HousingSettings[global_index];
+                        numOfApartments = saved_config.NumOfApartments;
+                        WorkPlaceCount0 = saved_config.WorkPlaceCount0;
+                        WorkPlaceCount1 = saved_config.WorkPlaceCount1;
+                        WorkPlaceCount2 = saved_config.WorkPlaceCount2;
+                        WorkPlaceCount3 = saved_config.WorkPlaceCount3;
+                    }
+                    else
+                    {
+                        if (buildingAIstr == "BarracksAI")
+                        {
+                            BarracksAI barracksAI = buildingAI as BarracksAI;
+                            barracksAI = HousingManager.DefaultBarracksValues(barracksAI);
+                            numOfApartments = barracksAI.numApartments;
+                            WorkPlaceCount0 = barracksAI.m_workPlaceCount0;
+                            WorkPlaceCount1 = barracksAI.m_workPlaceCount1;
+                            WorkPlaceCount2 = barracksAI.m_workPlaceCount2;
+                            WorkPlaceCount3 = barracksAI.m_workPlaceCount3;
+                        }
+                        else if (buildingAIstr == "DormsAI")
+                        {
+                            DormsAI dormsAI = buildingAI as DormsAI;
+                            dormsAI = HousingManager.DefaultDormsValues(dormsAI);
+                            numOfApartments = dormsAI.numApartments;
+                            WorkPlaceCount0 = dormsAI.m_workPlaceCount0;
+                            WorkPlaceCount1 = dormsAI.m_workPlaceCount1;
+                            WorkPlaceCount2 = dormsAI.m_workPlaceCount2;
+                            WorkPlaceCount3 = dormsAI.m_workPlaceCount3;
+                        }
+                    }
+                }
+            }
+
+            UpdateHouse(buildingID, ref data, numOfApartments, WorkPlaceCount0, WorkPlaceCount1, WorkPlaceCount2, WorkPlaceCount3);
+            int workCount = WorkPlaceCount0 + WorkPlaceCount1 + WorkPlaceCount2 + WorkPlaceCount3;
+            CreateOrEnsure(is_new, buildingID, ref data, numOfApartments, workCount, studentCount);
+        }
     }
 
 }
