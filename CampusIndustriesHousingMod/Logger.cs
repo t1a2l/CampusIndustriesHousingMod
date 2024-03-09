@@ -9,10 +9,10 @@ namespace CampusIndustriesHousingMod
 
         public static readonly bool LOG_BASE = true;
 
-        public static readonly bool LOG_INITIALIZER = true;
+        public static readonly bool LOG_INITIALIZER = false;
         public static readonly bool LOG_SERIALIZATION = false;
         public static readonly bool LOG_CHANCES = false;
-        public static readonly bool LOG_OPTIONS = true;
+        public static readonly bool LOG_OPTIONS = false;
         public static readonly bool LOG_DATA = false;
         public static readonly bool LOG_CAPACITY_MANAGEMENT = false;
         public static readonly bool LOG_INCOME = false;
