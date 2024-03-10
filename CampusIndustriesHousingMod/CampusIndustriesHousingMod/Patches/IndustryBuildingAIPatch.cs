@@ -20,7 +20,14 @@ namespace CampusIndustriesHousingMod.Patches
 		private delegate void PlayerBuildingAIEndRelocatingDelegate(PlayerBuildingAI __instance, ushort buildingID, ref Building data);
         private static PlayerBuildingAIEndRelocatingDelegate BaseEndRelocating = AccessTools.MethodDelegate<PlayerBuildingAIEndRelocatingDelegate>(typeof(PlayerBuildingAI).GetMethod("EndRelocating", BindingFlags.Instance | BindingFlags.Public), null, false);
 
-		[HarmonyPatch(typeof(IndustryBuildingAI), "CreateBuilding")]
+        private delegate void CommonBuildingAIHandleCrimeDelegate(CommonBuildingAI __instance, ushort buildingID, ref Building data, int crimeAccumulation, int citizenCount);
+        private static CommonBuildingAIHandleCrimeDelegate BaseHandleCrime = AccessTools.MethodDelegate<CommonBuildingAIHandleCrimeDelegate>(typeof(CommonBuildingAI).GetMethod("HandleCrime", BindingFlags.Instance | BindingFlags.NonPublic), null, true);
+
+        private delegate bool PlayerBuildingAIFindRoadAccessDelegate(PlayerBuildingAI __instance, ushort buildingID, ref Building data, Vector3 position, out ushort segmentID, bool mostCloser = false, bool untouchable = true);
+        private static PlayerBuildingAIFindRoadAccessDelegate BaseFindRoadAccesse = AccessTools.MethodDelegate<PlayerBuildingAIFindRoadAccessDelegate>(typeof(PlayerBuildingAI).GetMethod("FindRoadAccess", BindingFlags.Instance | BindingFlags.Public), null, true);
+
+
+        [HarmonyPatch(typeof(IndustryBuildingAI), "CreateBuilding")]
         [HarmonyPrefix]
         public static bool CreateBuilding(IndustryBuildingAI __instance, ushort buildingID, ref Building data, ref Dictionary<uint, FastList<IndustryBuildingAI>> ___m_searchTable, ref Dictionary<uint, int> ___m_lastTableIndex)
         {
@@ -147,7 +154,86 @@ namespace CampusIndustriesHousingMod.Patches
 			}
 			return false;
 		}
-		private static void AddAreaNotification(ushort buildingID, ref Building data)
+
+        [HarmonyPatch(typeof(IndustryBuildingAI), "HandleCrime")]
+        [HarmonyPrefix]
+        public static bool HandleCrime(IndustryBuildingAI __instance, ushort buildingID, ref Building data, int crimeAccumulation, int citizenCount)
+        {
+            DistrictManager instance = Singleton<DistrictManager>.instance;
+            BuildingManager instance2 = Singleton<BuildingManager>.instance;
+            byte b = instance.GetPark(data.m_position);
+            if (b != 0)
+            {
+                if (!instance.m_parks.m_buffer[b].IsIndustry)
+                {
+                    b = 0;
+                }
+                else if (__instance.m_industryType == DistrictPark.ParkType.Industry || __instance.m_industryType != instance.m_parks.m_buffer[b].m_parkType)
+                {
+                    b = 0;
+                }
+            }
+            ushort num = 0;
+            if (b != 0)
+            {
+                num = instance.m_parks.m_buffer[b].m_randomGate;
+                if (num == 0)
+                {
+                    num = instance.m_parks.m_buffer[b].m_mainGate;
+                }
+            }
+            if (num == 0 || BaseFindRoadAccesse(__instance, buildingID, ref data, data.CalculateSidewalkPosition(), out var _))
+            {
+                BaseHandleCrime(__instance, buildingID, ref data, crimeAccumulation, citizenCount);
+                return false;
+            }
+            bool flag = (instance2.m_buildings.m_buffer[num].m_flags & Building.Flags.Active) == 0;
+            bool flag2 = (instance2.m_buildings.m_buffer[num].m_flags & Building.Flags.RateReduced) != 0;
+            if (crimeAccumulation != 0)
+            {
+                if (Singleton<SimulationManager>.instance.m_isNightTime)
+                {
+                    crimeAccumulation = crimeAccumulation * 5 >> 2;
+                }
+                if (data.m_eventIndex != 0)
+                {
+                    EventManager instance3 = Singleton<EventManager>.instance;
+                    EventInfo info = instance3.m_events.m_buffer[data.m_eventIndex].Info;
+                    crimeAccumulation = info.m_eventAI.GetCrimeAccumulation(data.m_eventIndex, ref instance3.m_events.m_buffer[data.m_eventIndex], crimeAccumulation);
+                }
+                crimeAccumulation = Singleton<SimulationManager>.instance.m_randomizer.Int32((uint)crimeAccumulation);
+                crimeAccumulation = UniqueFacultyAI.DecreaseByBonus(UniqueFacultyAI.FacultyBonus.Law, crimeAccumulation);
+                if (!Singleton<UnlockManager>.instance.Unlocked(ItemClass.Service.PoliceDepartment))
+                {
+                    crimeAccumulation = 0;
+                }
+            }
+            data.m_crimeBuffer = (ushort)Mathf.Min(citizenCount * 100, data.m_crimeBuffer + crimeAccumulation);
+            ushort num2 = (ushort)Mathf.Min(data.m_crimeBuffer, 65535 - instance2.m_buildings.m_buffer[num].m_crimeBuffer);
+            if (flag)
+            {
+                num2 = 0;
+            }
+            else if (flag2)
+            {
+                num2 = (ushort)Mathf.Min(num2, crimeAccumulation >> 1);
+            }
+            instance2.m_buildings.m_buffer[num].m_crimeBuffer += num2;
+            data.m_crimeBuffer -= num2;
+            Notification.ProblemStruct problemStruct = Notification.RemoveProblems(data.m_problems, Notification.Problem1.Crime);
+            if (data.m_crimeBuffer > citizenCount * 90)
+            {
+                problemStruct = Notification.AddProblems(problemStruct, Notification.Problem1.Crime | Notification.Problem1.MajorProblem);
+            }
+            else if (data.m_crimeBuffer > citizenCount * 60)
+            {
+                problemStruct = Notification.AddProblems(problemStruct, Notification.Problem1.Crime);
+            }
+            data.m_problems = problemStruct;
+			return false;
+        }
+
+        private static void AddAreaNotification(ushort buildingID, ref Building data)
 		{
 			Notification.ProblemStruct problems = data.m_problems;
 			Notification.ProblemStruct problemStruct = Notification.AddProblems(data.m_problems, Notification.Problem1.NotInIndustryArea);

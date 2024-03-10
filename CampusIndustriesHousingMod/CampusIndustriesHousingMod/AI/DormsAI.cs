@@ -111,18 +111,30 @@ namespace CampusIndustriesHousingMod.AI
         public override void CreateBuilding(ushort buildingID, ref Building data)
 	    {
 		    base.CreateBuilding(buildingID, ref data);
+            m_workPlaceCount0 = 0;
+            m_workPlaceCount1 = 0;
+            m_workPlaceCount2 = 0;
+            m_workPlaceCount3 = 0;
             HousingUIPanel.LoadSettings(buildingID, ref data, true);
         }
 
         public override void BuildingLoaded(ushort buildingID, ref Building data, uint version)
 	    {
 		    base.BuildingLoaded(buildingID, ref data, version);
+            m_workPlaceCount0 = 0;
+            m_workPlaceCount1 = 0;
+            m_workPlaceCount2 = 0;
+            m_workPlaceCount3 = 0;
             HousingUIPanel.LoadSettings(buildingID, ref data, false);
         }
 
         public override void EndRelocating(ushort buildingID, ref Building data)
 	    {
 		    base.EndRelocating(buildingID, ref data);
+            m_workPlaceCount0 = 0;
+            m_workPlaceCount1 = 0;
+            m_workPlaceCount2 = 0;
+            m_workPlaceCount3 = 0;
             HousingUIPanel.LoadSettings(buildingID, ref data, false);
         }
 
@@ -133,29 +145,22 @@ namespace CampusIndustriesHousingMod.AI
 
         protected  override void SimulationStepActive(ushort buildingID, ref Building buildingData, ref Building.Frame frameData)
 	    {
-			Citizen.BehaviourData behaviour = default(Citizen.BehaviourData);
+			Citizen.BehaviourData behaviour = default;
 			int aliveCount = 0;
 			int totalCount = 0;
             int homeCount = 0;
-            int aliveWorkerCount = 0;
-	        int totalWorkerCount = 0;
             int aliveHomeCount = 0;
             int emptyHomeCount = 0;
 
             GetHomeBehaviour(buildingID, ref buildingData, ref behaviour, ref aliveCount, ref totalCount, ref homeCount, ref aliveHomeCount, ref emptyHomeCount);
-            GetWorkBehaviour(buildingID, ref buildingData, ref behaviour, ref aliveWorkerCount, ref totalWorkerCount);
 
             DistrictManager districtManager = Singleton<DistrictManager>.instance;
             byte district = districtManager.GetDistrict(buildingData.m_position);
-            DistrictPolicies.Services policies = districtManager.m_districts.m_buffer[(int) district].m_servicePolicies;
+            DistrictPolicies.Services policies = districtManager.m_districts.m_buffer[district].m_servicePolicies;
 
-            DistrictPolicies.Taxation taxationPolicies = districtManager.m_districts.m_buffer[(int) district].m_taxationPolicies;
-            DistrictPolicies.CityPlanning cityPlanning = districtManager.m_districts.m_buffer[(int) district].m_cityPlanningPolicies;
-            DistrictPolicies.Special special = districtManager.m_districts.m_buffer[(int) district].m_specialPolicies;
+            districtManager.m_districts.m_buffer[district].m_servicePoliciesEffect |= policies & (DistrictPolicies.Services.PowerSaving | DistrictPolicies.Services.WaterSaving | DistrictPolicies.Services.SmokeDetectors | DistrictPolicies.Services.PetBan | DistrictPolicies.Services.Recycling | DistrictPolicies.Services.SmokingBan | DistrictPolicies.Services.ExtraInsulation | DistrictPolicies.Services.NoElectricity | DistrictPolicies.Services.OnlyElectricity);
 
-            districtManager.m_districts.m_buffer[(int) district].m_servicePoliciesEffect |= policies & (DistrictPolicies.Services.PowerSaving | DistrictPolicies.Services.WaterSaving | DistrictPolicies.Services.SmokeDetectors | DistrictPolicies.Services.PetBan | DistrictPolicies.Services.Recycling | DistrictPolicies.Services.SmokingBan | DistrictPolicies.Services.ExtraInsulation | DistrictPolicies.Services.NoElectricity | DistrictPolicies.Services.OnlyElectricity);
-
-            this.GetConsumptionRates(new Randomizer((int) buildingID), 100, out int electricityConsumption, out int waterConsumption, out int sewageAccumulation, out int garbageAccumulation, out int incomeAccumulation);
+            this.GetConsumptionRates(new Randomizer(buildingID), 100, out int electricityConsumption, out int waterConsumption, out int sewageAccumulation, out int garbageAccumulation, out _);
 
             int modifiedElectricityConsumption = 1 + (electricityConsumption * behaviour.m_electricityConsumption + 9999) / 10000;
             waterConsumption = 1 + (waterConsumption * behaviour.m_waterConsumption + 9999) / 10000;
@@ -172,7 +177,9 @@ namespace CampusIndustriesHousingMod.AI
                     heatingConsumption = Mathf.Max(1, modifiedElectricityConsumption * 3 + 8 >> 4);
                 } 
                 else
+                {
                     heatingConsumption = Mathf.Max(1, modifiedElectricityConsumption + 2 >> 2);
+                } 
             }
 
             // Handle Recylcing and Pets
@@ -181,16 +188,18 @@ namespace CampusIndustriesHousingMod.AI
                 if ((policies & DistrictPolicies.Services.Recycling) != DistrictPolicies.Services.None) {
                     garbageAccumulation = (policies & DistrictPolicies.Services.PetBan) == DistrictPolicies.Services.None ? Mathf.Max(1, garbageAccumulation * 85 / 100) : Mathf.Max(1, garbageAccumulation * 7650 / 10000);
                     modifiedIncomeAccumulation = modifiedIncomeAccumulation * 95 / 100;
-                } else if ((policies & DistrictPolicies.Services.PetBan) != DistrictPolicies.Services.None) {
+                } 
+                else if ((policies & DistrictPolicies.Services.PetBan) != DistrictPolicies.Services.None) 
+                {
                     garbageAccumulation = Mathf.Max(1, garbageAccumulation * 90 / 100);
                 }
             }
 
-            if ((int) buildingData.m_fireIntensity == 0) 
+            if (buildingData.m_fireIntensity == 0) 
             {
                 int maxMail = 100;
                 int mailAccumulation = 1;
-                int commonConsumptionValue = this.HandleCommonConsumption(buildingID, ref buildingData, ref frameData, ref modifiedElectricityConsumption, ref heatingConsumption, ref waterConsumption, ref modifiedSewageAccumulation, ref garbageAccumulation, ref mailAccumulation, maxMail, policies);
+                HandleCommonConsumption(buildingID, ref buildingData, ref frameData, ref modifiedElectricityConsumption, ref heatingConsumption, ref waterConsumption, ref modifiedSewageAccumulation, ref garbageAccumulation, ref mailAccumulation, maxMail, policies);
                 buildingData.m_flags |= Building.Flags.Active;
             } 
             else 
@@ -208,7 +217,7 @@ namespace CampusIndustriesHousingMod.AI
 
             buildingData.m_customBuffer1 = (ushort)aliveCount;
             int health = 0;
-            float radius = (float) (buildingData.Width + buildingData.Length) * 2.5f;
+            float radius = (buildingData.Width + buildingData.Length) * 2.5f;
             if (behaviour.m_healthAccumulation != 0) 
             {
                 if (aliveCount != 0) 
@@ -259,8 +268,8 @@ namespace CampusIndustriesHousingMod.AI
             buildingData.m_adults = (byte) behaviour.m_adultCount;
             buildingData.m_seniors = (byte) behaviour.m_seniorCount;
 
-            HandleSick(buildingID, ref buildingData, ref behaviour, totalWorkerCount + totalCount);
-            HandleDead(buildingID, ref buildingData, ref behaviour, totalWorkerCount + totalCount);
+            HandleSick(buildingID, ref buildingData, ref behaviour, totalCount);
+            HandleDead2(buildingID, ref buildingData, ref behaviour, totalCount);
 
             // Handle Crime and Fire Factors
             int crimeAccumulation = behaviour.m_crimeAccumulation / (3 * getModifiedCapacity(buildingID, ref buildingData));
@@ -268,23 +277,23 @@ namespace CampusIndustriesHousingMod.AI
             {
                 crimeAccumulation = crimeAccumulation * 3 + 3 >> 2;
             }
-            this.HandleCrime(buildingID, ref buildingData, crimeAccumulation, aliveCount);
-            int crimeBuffer = (int) buildingData.m_crimeBuffer;
+            HandleCrime(buildingID, ref buildingData, crimeAccumulation, aliveCount);
+            int crimeBuffer = buildingData.m_crimeBuffer;
             int crimeRate;
             if (aliveCount != 0) 
             {
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Density, aliveCount, buildingData.m_position, radius);
                 // num1
                 int fireFactor = (behaviour.m_educated0Count * 30 + behaviour.m_educated1Count * 15 + behaviour.m_educated2Count * 10) / aliveCount + 50;
-                if ((int) buildingData.m_crimeBuffer > aliveCount * 40) 
+                if (buildingData.m_crimeBuffer > aliveCount * 40) 
                 {
                     fireFactor += 30;
                 } 
-                else if ((int) buildingData.m_crimeBuffer > aliveCount * 15) 
+                else if (buildingData.m_crimeBuffer > aliveCount * 15) 
                 {
                     fireFactor += 15;
                 } 
-                else if ((int) buildingData.m_crimeBuffer > aliveCount * 5) 
+                else if (buildingData.m_crimeBuffer > aliveCount * 5) 
                 {
                     fireFactor += 10;
                 }
@@ -293,11 +302,11 @@ namespace CampusIndustriesHousingMod.AI
             } 
             else 
             {
-                buildingData.m_fireHazard = (byte) 0;
-                crimeRate = 0;
+                buildingData.m_fireHazard = 0;
+                crimeRate = 0;  
             }
 
-            districtManager.m_districts.m_buffer[(int) district].AddResidentialData(ref behaviour, aliveCount, health, happiness, crimeRate, homeCount, aliveHomeCount, emptyHomeCount, (int) this.m_info.m_class.m_level, modifiedElectricityConsumption, heatingConsumption, waterConsumption, modifiedSewageAccumulation, garbageAccumulation, modifiedIncomeAccumulation, Mathf.Min(100, (int) buildingData.m_garbageBuffer / 50), (int) buildingData.m_waterPollution * 100 / (int) byte.MaxValue, this.m_info.m_class.m_subService);
+            districtManager.m_districts.m_buffer[district].AddResidentialData(ref behaviour, aliveCount, health, happiness, crimeRate, homeCount, aliveHomeCount, emptyHomeCount, (int)m_info.m_class.m_level, modifiedElectricityConsumption, heatingConsumption, waterConsumption, modifiedSewageAccumulation, garbageAccumulation, modifiedIncomeAccumulation, Mathf.Min(100, buildingData.m_garbageBuffer / 50), buildingData.m_waterPollution * 100 / byte.MaxValue, m_info.m_class.m_subService);
 
             // Handle custom maintenance in addition to the standard maintenance handled in the base class
             handleAdditionalMaintenanceCost(buildingID, ref buildingData);
@@ -386,11 +395,6 @@ namespace CampusIndustriesHousingMod.AI
         public override string GetLocalizedStats(ushort buildingID, ref Building data) 
         {
             getOccupancyDetails(ref data, out int numResidents, out int numApartmentsOccupied);
-            // Get Worker Data
-            Citizen.BehaviourData workerBehaviourData = new Citizen.BehaviourData();
-            int aliveWorkerCount = 0;
-            int totalWorkerCount = 0;
-            GetWorkBehaviour(buildingID, ref data, ref workerBehaviourData, ref aliveWorkerCount, ref totalWorkerCount);
 		    GetStudentCount(buildingID, ref data, out var count, out var capacity, out var global);
             StringBuilder stringBuilder = new();
 		    if (capacity != 0)
@@ -409,7 +413,7 @@ namespace CampusIndustriesHousingMod.AI
 			    {
 				    int academicWorkBaseChance = Singleton<DistrictManager>.instance.m_properties.m_parkProperties.m_campusProperties.m_academicWorkBaseChance;
 				    instance2.m_parks.m_buffer[park].CalculateAcademicWorkChance(out var academicStaffProjectedChance, out var buildingsChance);
-				    string text2 = Mathf.RoundToInt((float)academicWorkBaseChance + academicStaffProjectedChance + buildingsChance) + "%";
+				    string text2 = Mathf.RoundToInt(academicWorkBaseChance + academicStaffProjectedChance + buildingsChance) + "%";
                     stringBuilder.Append(LocaleFormatter.FormatGeneric("AIINFO_ACADEMICWORKSCHANCE", text2));
                     stringBuilder.Append(Environment.NewLine);
 			    }
@@ -418,26 +422,6 @@ namespace CampusIndustriesHousingMod.AI
             stringBuilder.Append(Environment.NewLine);
             stringBuilder.Append(string.Format("Number of Residents: {0}", numResidents));
             stringBuilder.Append(Environment.NewLine);
-            stringBuilder.Append(Environment.NewLine);
-            if(m_workPlaceCount0 > 0)
-            {
-                stringBuilder.Append(string.Format("Uneducated Workers: {0} of {1}", workerBehaviourData.m_educated0Count, m_workPlaceCount0));
-                stringBuilder.Append(Environment.NewLine);
-            }
-            if(m_workPlaceCount1 > 0)
-            {
-                stringBuilder.Append(string.Format("Educated Workers: {0} of {1}", workerBehaviourData.m_educated1Count, m_workPlaceCount1));
-                stringBuilder.Append(Environment.NewLine);
-            }
-            if(m_workPlaceCount2 > 0)
-            {
-                stringBuilder.Append(string.Format("Well Educated Workers: {0} of {1}", workerBehaviourData.m_educated2Count, m_workPlaceCount2));
-                stringBuilder.Append(Environment.NewLine);
-            }
-            if(m_workPlaceCount3 > 0)
-            {
-                stringBuilder.Append(string.Format("Highly Educated Workers: {0} of {1}", workerBehaviourData.m_educated3Count, m_workPlaceCount3));
-            }
             return stringBuilder.ToString();
         }
 
@@ -935,5 +919,87 @@ namespace CampusIndustriesHousingMod.AI
             citizenManager.m_citizens.m_buffer[citizen].m_vehicle = 0;
         }
 
+        public void HandleSick2(ushort buildingID, ref Building buildingData, ref Citizen.BehaviourData behaviour, int citizenCount)
+        {
+            Notification.ProblemStruct problemStruct = Notification.RemoveProblems(buildingData.m_problems, Notification.Problem1.DirtyWater | Notification.Problem1.Pollution | Notification.Problem1.Noise);
+            if (behaviour.m_sickCount != 0 && Singleton<UnlockManager>.instance.Unlocked(ItemClass.Service.HealthCare))
+            {
+                DistrictManager instance = Singleton<DistrictManager>.instance;
+                BuildingManager instance2 = Singleton<BuildingManager>.instance;
+                byte b = instance.GetPark(buildingData.m_position);
+                if (b == 0 || !Singleton<DistrictManager>.instance.m_parks.m_buffer[b].IsCampus || m_campusType != Singleton<DistrictManager>.instance.m_parks.m_buffer[b].m_parkType)
+                {
+                    b = 0;
+                }
+                ushort num = 0;
+                if (b != 0)
+                {
+                    num = instance.m_parks.m_buffer[b].m_randomGate;
+                    if (num == 0)
+                    {
+                        num = instance.m_parks.m_buffer[b].m_mainGate;
+                    }
+                }
+                if (num == 0 || base.FindRoadAccess(buildingID, ref buildingData, buildingData.CalculateSidewalkPosition(), out var _))
+                {
+                    HandleSick(buildingID, ref buildingData, ref behaviour, citizenCount);
+                    return;
+                }
+                bool flag = (instance2.m_buildings.m_buffer[num].m_flags & Building.Flags.Active) == 0;
+                bool flag2 = (instance2.m_buildings.m_buffer[num].m_flags & Building.Flags.RateReduced) != 0;
+
+                Singleton<NaturalResourceManager>.instance.CheckPollution(buildingData.m_position, out var groundPollution);
+                Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(ImmaterialResourceManager.Resource.NoisePollution, buildingData.m_position, out var local);
+                int num1 = buildingData.m_waterPollution * 2;
+                int num2 = groundPollution * 100 / 255;
+                int num3 = local * 100 / 255;
+                int num4 = ((num1 >= 35) ? (num1 * 2 - 35) : num1);
+                if (num4 > 10 && num4 > num2 && num4 > num3)
+                {
+                    buildingData.m_healthProblemTimer = (byte)Mathf.Min(255, buildingData.m_healthProblemTimer + 1);
+                    if (buildingData.m_healthProblemTimer >= 96)
+                    {
+                        problemStruct = Notification.AddProblems(problemStruct, Notification.Problem1.DirtyWater | Notification.Problem1.MajorProblem);
+                    }
+                    else if (buildingData.m_healthProblemTimer >= 32)
+                    {
+                        problemStruct = Notification.AddProblems(problemStruct, Notification.Problem1.DirtyWater);
+                    }
+                }
+                else if (num2 > 10 && num2 > num3)
+                {
+                    buildingData.m_healthProblemTimer = (byte)Mathf.Min(255, buildingData.m_healthProblemTimer + 1);
+                    if (buildingData.m_healthProblemTimer >= 96)
+                    {
+                        problemStruct = Notification.AddProblems(problemStruct, Notification.Problem1.Pollution | Notification.Problem1.MajorProblem);
+                    }
+                    else if (buildingData.m_healthProblemTimer >= 32)
+                    {
+                        problemStruct = Notification.AddProblems(problemStruct, Notification.Problem1.Pollution);
+                    }
+                }
+                else if (num3 > 10)
+                {
+                    buildingData.m_healthProblemTimer = (byte)Mathf.Min(255, buildingData.m_healthProblemTimer + 1);
+                    if (buildingData.m_healthProblemTimer >= 96)
+                    {
+                        problemStruct = Notification.AddProblems(problemStruct, Notification.Problem1.Noise | Notification.Problem1.MajorProblem);
+                    }
+                    else if (buildingData.m_healthProblemTimer >= 32)
+                    {
+                        problemStruct = Notification.AddProblems(problemStruct, Notification.Problem1.Noise);
+                    }
+                }
+                else
+                {
+                    buildingData.m_healthProblemTimer = 0;
+                }
+            }
+            else
+            {
+                buildingData.m_healthProblemTimer = 0;
+            }
+            buildingData.m_problems = problemStruct;
+        }
     }
 }

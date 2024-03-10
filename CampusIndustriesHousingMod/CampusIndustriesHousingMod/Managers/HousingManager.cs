@@ -15,14 +15,6 @@ namespace CampusIndustriesHousingMod.Managers
 
             public int NumOfApartments;
 
-            public int WorkPlaceCount0;
-
-            public int WorkPlaceCount1;
-
-            public int WorkPlaceCount2;
-
-            public int WorkPlaceCount3;
-
             public bool DefaultValues;
         }
 
@@ -33,14 +25,6 @@ namespace CampusIndustriesHousingMod.Managers
             public string BuildingAI;
 
             public int NumOfApartments;
-
-            public int WorkPlaceCount0;
-
-            public int WorkPlaceCount1;
-
-            public int WorkPlaceCount2;
-
-            public int WorkPlaceCount3;
         }
 
         public static void Init()
@@ -145,34 +129,18 @@ namespace CampusIndustriesHousingMod.Managers
             if(barracks.m_industryType == DistrictPark.ParkType.Farming)
             {
                 barracks.numApartments = 2;
-                barracks.m_workPlaceCount0 = 5;
-                barracks.m_workPlaceCount1 = 0;
-                barracks.m_workPlaceCount2 = 0;
-                barracks.m_workPlaceCount3 = 0;
             }
             else if(barracks.m_industryType == DistrictPark.ParkType.Forestry)
             {
                 barracks.numApartments = 10;
-                barracks.m_workPlaceCount0 = 5;
-                barracks.m_workPlaceCount1 = 2;
-                barracks.m_workPlaceCount2 = 0;
-                barracks.m_workPlaceCount3 = 0;
             }
             else if(barracks.m_industryType == DistrictPark.ParkType.Oil)
             {
                 barracks.numApartments = 50;
-                barracks.m_workPlaceCount0 = 5;
-                barracks.m_workPlaceCount1 = 2;
-                barracks.m_workPlaceCount2 = 0;
-                barracks.m_workPlaceCount3 = 0;
             }
             else if(barracks.m_industryType == DistrictPark.ParkType.Ore)
             {
                 barracks.numApartments = 48;
-                barracks.m_workPlaceCount0 = 5;
-                barracks.m_workPlaceCount1 = 2;
-                barracks.m_workPlaceCount2 = 0;
-                barracks.m_workPlaceCount3 = 0;
             }
 
             return barracks;
@@ -183,26 +151,14 @@ namespace CampusIndustriesHousingMod.Managers
             if(dorms.m_campusType == DistrictPark.ParkType.University)
             {
                 dorms.numApartments = 60;
-                dorms.m_workPlaceCount0 = 3;
-                dorms.m_workPlaceCount1 = 3;
-                dorms.m_workPlaceCount2 = 0;
-                dorms.m_workPlaceCount3 = 0;
             }
             else if(dorms.m_campusType == DistrictPark.ParkType.LiberalArts)
             {
                 dorms.numApartments = 60;
-                dorms.m_workPlaceCount0 = 3;
-                dorms.m_workPlaceCount1 = 3;
-                dorms.m_workPlaceCount2 = 0;
-                dorms.m_workPlaceCount3 = 0;
             }
             else if(dorms.m_campusType == DistrictPark.ParkType.TradeSchool)
             {
                 dorms.numApartments = 60;
-                dorms.m_workPlaceCount0 = 3;
-                dorms.m_workPlaceCount1 = 3;
-                dorms.m_workPlaceCount2 = 0;
-                dorms.m_workPlaceCount3 = 0;
             }
 
             return dorms;

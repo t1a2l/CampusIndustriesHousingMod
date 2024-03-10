@@ -103,18 +103,6 @@ namespace CampusIndustriesHousingMod.Utils
 
         [XmlAttribute("numOfApartments")]
         public int NumOfApartments { get; set; }
-
-        [XmlAttribute("WorkPlaceCount0")]
-        public int WorkPlaceCount0 { get; set; }
-
-        [XmlAttribute("WorkPlaceCount1")]
-        public int WorkPlaceCount1 { get; set; }
-
-        [XmlAttribute("WorkPlaceCount2")]
-        public int WorkPlaceCount2 { get; set; }
-
-        [XmlAttribute("WorkPlaceCount3")]
-        public int WorkPlaceCount3 { get; set; }
     }
 
 }

@@ -21,10 +21,6 @@ namespace CampusIndustriesHousingMod.UI
         private static UICheckBox m_settingsCheckBox;
 
         private static UIPanel ApartmentNumberPanel;
-        private static UIPanel WorkPlaceCount0Panel;
-        private static UIPanel WorkPlaceCount1Panel;
-        private static UIPanel WorkPlaceCount2Panel;
-        private static UIPanel WorkPlaceCount3Panel;
 
         private static UIButton SaveBuildingSettingsBtn;
         private static UIButton ClearBuildingSettingsBtn;
@@ -91,18 +87,6 @@ namespace CampusIndustriesHousingMod.UI
 
                 ApartmentNumberPanel = UiUtils.UIServiceBar(m_uiMainPanel, "ApartmentNumber", "", "Number of apartments: ", "number of apartments");
                 ApartmentNumberPanel.relativePosition = new Vector3(10f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f));
-
-                WorkPlaceCount0Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount0", "", "Uneducated Workers: ", "number of uneducated workers");
-                WorkPlaceCount0Panel.relativePosition = new Vector3(10f, 60f + 4 * (DEFAULT_HEIGHT * 0.8f + 2f));
-
-                WorkPlaceCount1Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount1", "", "Educated Workers: ", "number of educated workers");
-                WorkPlaceCount1Panel.relativePosition = new Vector3(10f, 60f + 6 * (DEFAULT_HEIGHT * 0.8f + 2f));
-
-                WorkPlaceCount2Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount2", "", "Well Educated Workers: ", "number of well educated workers");
-                WorkPlaceCount2Panel.relativePosition = new Vector3(10f, 60f + 8 * (DEFAULT_HEIGHT * 0.8f + 2f));
-
-                WorkPlaceCount3Panel = UiUtils.UIServiceBar(m_uiMainPanel, "WorkPlaceCount3", "", "Highly Educated Workers: ", "number of highly educated workers");
-                WorkPlaceCount3Panel.relativePosition = new Vector3(10f, 60f + 10 * (DEFAULT_HEIGHT * 0.8f + 2f));
                 
                 SaveBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f), "SaveBuildingSettings", "save building settings", "first priority - will override prefab and global settings create a record for this building");
                 SaveBuildingSettingsBtn.eventClicked += SaveBuildingSettings;
@@ -143,10 +127,6 @@ namespace CampusIndustriesHousingMod.UI
 			{
                 string buildingAIstr = "";
                 int numOfApartments = 0;
-                int WorkPlaceCount0 = 0;
-                int WorkPlaceCount1 = 0;
-                int WorkPlaceCount2 = 0;
-                int WorkPlaceCount3 = 0;
                 if(buildingAI is BarracksAI)
                 {
                     buildingAIstr = "BarracksAI";
@@ -157,12 +137,7 @@ namespace CampusIndustriesHousingMod.UI
                     buildingAIstr = "DormsAI";
                 }
 
-                var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
-                var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.Find<UITextField>("WorkPlaceCount0TextField");
-                var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.Find<UITextField>("WorkPlaceCount1TextField");
-                var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.Find<UITextField>("WorkPlaceCount2TextField");
-                var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.Find<UITextField>("WorkPlaceCount3TextField");
-                
+                var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");               
 
                 var res = HousingManager.BuildingRecords.TryGetValue(buildingID, out HousingManager.BuildingRecord buildingRecord);
                 if(res)
@@ -177,15 +152,7 @@ namespace CampusIndustriesHousingMod.UI
                     }
 
                     m_apartmentsNumTextfield.text = buildingRecord.NumOfApartments.ToString();
-                    m_workPlaceCount0Textfield.text = buildingRecord.WorkPlaceCount0.ToString();
-                    m_workPlaceCount1Textfield.text = buildingRecord.WorkPlaceCount1.ToString();
-                    m_workPlaceCount2Textfield.text = buildingRecord.WorkPlaceCount2.ToString();
-                    m_workPlaceCount3Textfield.text = buildingRecord.WorkPlaceCount3.ToString();
                     numOfApartments = buildingRecord.NumOfApartments;
-                    WorkPlaceCount0 = buildingRecord.WorkPlaceCount0;
-                    WorkPlaceCount1 = buildingRecord.WorkPlaceCount1;
-                    WorkPlaceCount2 = buildingRecord.WorkPlaceCount2;
-                    WorkPlaceCount3 = buildingRecord.WorkPlaceCount3;
                 } 
                 else
                 {
@@ -195,15 +162,7 @@ namespace CampusIndustriesHousingMod.UI
                         m_settingsStatus.text = "This Building is using prefab settings";
                         var prefabRecord = HousingManager.PrefabRecords[prefab_index];
                         m_apartmentsNumTextfield.text = prefabRecord.NumOfApartments.ToString();
-                        m_workPlaceCount0Textfield.text = prefabRecord.WorkPlaceCount0.ToString();
-                        m_workPlaceCount1Textfield.text = prefabRecord.WorkPlaceCount1.ToString();
-                        m_workPlaceCount2Textfield.text = prefabRecord.WorkPlaceCount2.ToString();
-                        m_workPlaceCount3Textfield.text = prefabRecord.WorkPlaceCount3.ToString();
                         numOfApartments = prefabRecord.NumOfApartments;
-                        WorkPlaceCount0 = prefabRecord.WorkPlaceCount0;
-                        WorkPlaceCount1 = prefabRecord.WorkPlaceCount1;
-                        WorkPlaceCount2 = prefabRecord.WorkPlaceCount2;
-                        WorkPlaceCount3 = prefabRecord.WorkPlaceCount3;
                     }
                     else
                     {
@@ -213,15 +172,7 @@ namespace CampusIndustriesHousingMod.UI
                             m_settingsStatus.text = "This Building is using global settings";
                             var saved_config = HousingConfig.Config.HousingSettings[global_index];
                             m_apartmentsNumTextfield.text = saved_config.NumOfApartments.ToString();
-                            m_workPlaceCount0Textfield.text = saved_config.WorkPlaceCount0.ToString();
-                            m_workPlaceCount1Textfield.text = saved_config.WorkPlaceCount1.ToString();
-                            m_workPlaceCount2Textfield.text = saved_config.WorkPlaceCount2.ToString();
-                            m_workPlaceCount3Textfield.text = saved_config.WorkPlaceCount3.ToString();
 							numOfApartments = saved_config.NumOfApartments;
-                            WorkPlaceCount0 = saved_config.WorkPlaceCount0;
-                            WorkPlaceCount1 = saved_config.WorkPlaceCount1;
-                            WorkPlaceCount2 = saved_config.WorkPlaceCount2;
-                            WorkPlaceCount3 = saved_config.WorkPlaceCount3;
                         }
                         else
                         {
@@ -231,37 +182,20 @@ namespace CampusIndustriesHousingMod.UI
                                 BarracksAI barracksAI = buildingAI as BarracksAI;
                                 barracksAI = HousingManager.DefaultBarracksValues(barracksAI);
                                 m_apartmentsNumTextfield.text = barracksAI.numApartments.ToString();
-                                m_workPlaceCount0Textfield.text = barracksAI.m_workPlaceCount0.ToString();
-                                m_workPlaceCount1Textfield.text = barracksAI.m_workPlaceCount1.ToString();
-                                m_workPlaceCount2Textfield.text = barracksAI.m_workPlaceCount2.ToString();
-                                m_workPlaceCount3Textfield.text = barracksAI.m_workPlaceCount3.ToString();
                                 numOfApartments = barracksAI.numApartments;
-                                WorkPlaceCount0 = barracksAI.m_workPlaceCount0;
-                                WorkPlaceCount1 = barracksAI.m_workPlaceCount1;
-                                WorkPlaceCount2 = barracksAI.m_workPlaceCount2;
-                                WorkPlaceCount3 = barracksAI.m_workPlaceCount3;
                             }
                             else if(buildingAIstr == "DormsAI")
                             {
                                 DormsAI dormsAI = buildingAI as DormsAI;
                                 dormsAI = HousingManager.DefaultDormsValues(dormsAI);
                                 m_apartmentsNumTextfield.text = dormsAI.numApartments.ToString();
-                                m_workPlaceCount0Textfield.text = dormsAI.m_workPlaceCount0.ToString();
-                                m_workPlaceCount1Textfield.text = dormsAI.m_workPlaceCount1.ToString();
-                                m_workPlaceCount2Textfield.text = dormsAI.m_workPlaceCount2.ToString();
-                                m_workPlaceCount3Textfield.text = dormsAI.m_workPlaceCount3.ToString();
                                 numOfApartments = dormsAI.numApartments;
-                                WorkPlaceCount0 = dormsAI.m_workPlaceCount0;
-                                WorkPlaceCount1 = dormsAI.m_workPlaceCount1;
-                                WorkPlaceCount2 = dormsAI.m_workPlaceCount2;
-                                WorkPlaceCount3 = dormsAI.m_workPlaceCount3;
                             }
                         }
                     }
                 }
-                UpdateHouse(buildingID, ref building, numOfApartments, WorkPlaceCount0, WorkPlaceCount1, WorkPlaceCount2, WorkPlaceCount3);
-                int workCount = WorkPlaceCount0 + WorkPlaceCount1 + WorkPlaceCount2 + WorkPlaceCount3;
-                CreateOrEnsure(false, buildingID, ref building, numOfApartments, workCount, studentCount);
+                UpdateHouse(buildingID, ref building, numOfApartments);
+                CreateOrEnsure(false, buildingID, ref building, numOfApartments, 0, studentCount);
                 m_settingsCheckBox.Show();
                 if(m_settingsCheckBox.isChecked)
                 {
@@ -298,7 +232,7 @@ namespace CampusIndustriesHousingMod.UI
             SaveSettings(false, false, false, true);
         }
 
-        private static void UpdateHouse(ushort buildingID, ref Building data, int numOfApartments, int WorkPlaceCount0, int WorkPlaceCount1, int WorkPlaceCount2, int WorkPlaceCount3)
+        private static void UpdateHouse(ushort buildingID, ref Building data, int numOfApartments)
 	    {
             // Validate the capacity and adjust accordingly - but don't create new units, that will be done by EnsureCitizenUnits
             float capacityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
@@ -307,20 +241,12 @@ namespace CampusIndustriesHousingMod.UI
                 barracksAI.updateCapacity(capacityModifier);
                 barracksAI.validateCapacity(buildingID, ref data, false);
                 barracksAI.numApartments = numOfApartments;
-                barracksAI.m_workPlaceCount0 = WorkPlaceCount0;
-                barracksAI.m_workPlaceCount1 = WorkPlaceCount1;
-                barracksAI.m_workPlaceCount2 = WorkPlaceCount2;
-                barracksAI.m_workPlaceCount3 = WorkPlaceCount3;
             }
             else if(data.Info.GetAI() is DormsAI dormsAI)
             {
                 dormsAI.updateCapacity(capacityModifier);
                 dormsAI.validateCapacity(buildingID, ref data, false);
                 dormsAI.numApartments = numOfApartments;
-                dormsAI.m_workPlaceCount0 = WorkPlaceCount0;
-                dormsAI.m_workPlaceCount1 = WorkPlaceCount1;
-                dormsAI.m_workPlaceCount2 = WorkPlaceCount2;
-                dormsAI.m_workPlaceCount3 = WorkPlaceCount3;
             }
 	    }
 
@@ -404,10 +330,6 @@ namespace CampusIndustriesHousingMod.UI
             }
 
             var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
-            var m_workPlaceCount0Textfield = WorkPlaceCount0Panel.Find<UITextField>("WorkPlaceCount0TextField");
-            var m_workPlaceCount1Textfield = WorkPlaceCount1Panel.Find<UITextField>("WorkPlaceCount1TextField");
-            var m_workPlaceCount2Textfield = WorkPlaceCount2Panel.Find<UITextField>("WorkPlaceCount2TextField");
-            var m_workPlaceCount3Textfield = WorkPlaceCount3Panel.Find<UITextField>("WorkPlaceCount3TextField");
 
             // if set to default
             if(setDefault)
@@ -416,19 +338,11 @@ namespace CampusIndustriesHousingMod.UI
                 {
                     barracksAI = HousingManager.DefaultBarracksValues(barracksAI);
                     m_apartmentsNumTextfield.text = barracksAI.numApartments.ToString();
-                    m_workPlaceCount0Textfield.text = barracksAI.m_workPlaceCount0.ToString();
-                    m_workPlaceCount1Textfield.text = barracksAI.m_workPlaceCount1.ToString();
-                    m_workPlaceCount2Textfield.text = barracksAI.m_workPlaceCount2.ToString();
-                    m_workPlaceCount3Textfield.text = barracksAI.m_workPlaceCount3.ToString();
                 }
                 else if(buildingAI is DormsAI dormsAI)
                 {
                     dormsAI = HousingManager.DefaultDormsValues(dormsAI);
                     m_apartmentsNumTextfield.text = dormsAI.numApartments.ToString();
-                    m_workPlaceCount0Textfield.text = dormsAI.m_workPlaceCount0.ToString();
-                    m_workPlaceCount1Textfield.text = dormsAI.m_workPlaceCount1.ToString();
-                    m_workPlaceCount2Textfield.text = dormsAI.m_workPlaceCount2.ToString();
-                    m_workPlaceCount3Textfield.text = dormsAI.m_workPlaceCount3.ToString();
                 }
             }
            
@@ -438,10 +352,6 @@ namespace CampusIndustriesHousingMod.UI
 
                 buildingRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
                 buildingRecord.BuildingAI = BuildingAIstr;
-                buildingRecord.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
-                buildingRecord.WorkPlaceCount1 = int.Parse(m_workPlaceCount1Textfield.text);
-                buildingRecord.WorkPlaceCount2 = int.Parse(m_workPlaceCount2Textfield.text);
-                buildingRecord.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
                 buildingRecord.DefaultValues = setDefault;
 
                 HousingManager.SetBuildingRecord(buildingID, buildingRecord);
@@ -452,10 +362,6 @@ namespace CampusIndustriesHousingMod.UI
 
                 prefabRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
                 prefabRecord.BuildingAI = BuildingAIstr;
-                prefabRecord.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
-                prefabRecord.WorkPlaceCount1 = int.Parse(m_workPlaceCount1Textfield.text);
-                prefabRecord.WorkPlaceCount2 = int.Parse(m_workPlaceCount2Textfield.text);
-                prefabRecord.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
 
                 HousingManager.SetPrefab(prefabRecord);
             }
@@ -466,10 +372,6 @@ namespace CampusIndustriesHousingMod.UI
                 housing.Name = buildingInfo.name;
                 housing.BuildingAI = BuildingAIstr;
                 housing.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
-                housing.WorkPlaceCount0 = int.Parse(m_workPlaceCount0Textfield.text);
-                housing.WorkPlaceCount1 = int.Parse(m_workPlaceCount1Textfield.text);
-                housing.WorkPlaceCount2 = int.Parse(m_workPlaceCount2Textfield.text);
-                housing.WorkPlaceCount3 = int.Parse(m_workPlaceCount3Textfield.text);
 
                 HousingConfig.Config.SetGlobalSettings(housing);
             }
@@ -562,10 +464,6 @@ namespace CampusIndustriesHousingMod.UI
             var studentCount = 0;
             string buildingAIstr = "";
             int numOfApartments = 0;
-            int WorkPlaceCount0 = 0;
-            int WorkPlaceCount1 = 0;
-            int WorkPlaceCount2 = 0;
-            int WorkPlaceCount3 = 0;
 
             if (buildingAI is BarracksAI)
             {
@@ -581,10 +479,6 @@ namespace CampusIndustriesHousingMod.UI
             if (res)
             {
                 numOfApartments = buildingRecord.NumOfApartments;
-                WorkPlaceCount0 = buildingRecord.WorkPlaceCount0;
-                WorkPlaceCount1 = buildingRecord.WorkPlaceCount1;
-                WorkPlaceCount2 = buildingRecord.WorkPlaceCount2;
-                WorkPlaceCount3 = buildingRecord.WorkPlaceCount3;
             }
             else
             {
@@ -593,10 +487,6 @@ namespace CampusIndustriesHousingMod.UI
                 {
                     var prefabRecord = HousingManager.PrefabRecords[prefab_index];
                     numOfApartments = prefabRecord.NumOfApartments;
-                    WorkPlaceCount0 = prefabRecord.WorkPlaceCount0;
-                    WorkPlaceCount1 = prefabRecord.WorkPlaceCount1;
-                    WorkPlaceCount2 = prefabRecord.WorkPlaceCount2;
-                    WorkPlaceCount3 = prefabRecord.WorkPlaceCount3;
                 }
                 else
                 {
@@ -606,10 +496,6 @@ namespace CampusIndustriesHousingMod.UI
                             
                         var saved_config = HousingConfig.Config.HousingSettings[global_index];
                         numOfApartments = saved_config.NumOfApartments;
-                        WorkPlaceCount0 = saved_config.WorkPlaceCount0;
-                        WorkPlaceCount1 = saved_config.WorkPlaceCount1;
-                        WorkPlaceCount2 = saved_config.WorkPlaceCount2;
-                        WorkPlaceCount3 = saved_config.WorkPlaceCount3;
                     }
                     else
                     {
@@ -618,28 +504,19 @@ namespace CampusIndustriesHousingMod.UI
                             BarracksAI barracksAI = buildingAI as BarracksAI;
                             barracksAI = HousingManager.DefaultBarracksValues(barracksAI);
                             numOfApartments = barracksAI.numApartments;
-                            WorkPlaceCount0 = barracksAI.m_workPlaceCount0;
-                            WorkPlaceCount1 = barracksAI.m_workPlaceCount1;
-                            WorkPlaceCount2 = barracksAI.m_workPlaceCount2;
-                            WorkPlaceCount3 = barracksAI.m_workPlaceCount3;
                         }
                         else if (buildingAIstr == "DormsAI")
                         {
                             DormsAI dormsAI = buildingAI as DormsAI;
                             dormsAI = HousingManager.DefaultDormsValues(dormsAI);
                             numOfApartments = dormsAI.numApartments;
-                            WorkPlaceCount0 = dormsAI.m_workPlaceCount0;
-                            WorkPlaceCount1 = dormsAI.m_workPlaceCount1;
-                            WorkPlaceCount2 = dormsAI.m_workPlaceCount2;
-                            WorkPlaceCount3 = dormsAI.m_workPlaceCount3;
                         }
                     }
                 }
             }
 
-            UpdateHouse(buildingID, ref data, numOfApartments, WorkPlaceCount0, WorkPlaceCount1, WorkPlaceCount2, WorkPlaceCount3);
-            int workCount = WorkPlaceCount0 + WorkPlaceCount1 + WorkPlaceCount2 + WorkPlaceCount3;
-            CreateOrEnsure(is_new, buildingID, ref data, numOfApartments, workCount, studentCount);
+            UpdateHouse(buildingID, ref data, numOfApartments);
+            CreateOrEnsure(is_new, buildingID, ref data, numOfApartments, 0, studentCount);
         }
     }
 

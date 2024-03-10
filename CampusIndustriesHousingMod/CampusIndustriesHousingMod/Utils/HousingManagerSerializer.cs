@@ -31,14 +31,6 @@ namespace CampusIndustriesHousingMod.Utils
 
                 writer.Write(buildingRecord.NumOfApartments);
 
-                writer.Write(buildingRecord.WorkPlaceCount0);
-
-                writer.Write(buildingRecord.WorkPlaceCount1);
-
-                writer.Write(buildingRecord.WorkPlaceCount2);
-
-                writer.Write(buildingRecord.WorkPlaceCount3);
-
                 writer.Write(buildingRecord.DefaultValues);
 
                 Logger.LogInfo(Logger.LOG_SERIALIZATION, "wrote entry ", entry.Key);
@@ -55,14 +47,6 @@ namespace CampusIndustriesHousingMod.Utils
                 writer.Write(prefabRecord.BuildingAI);
 
                 writer.Write(prefabRecord.NumOfApartments);
-
-                writer.Write(prefabRecord.WorkPlaceCount0);
-
-                writer.Write(prefabRecord.WorkPlaceCount1);
-
-                writer.Write(prefabRecord.WorkPlaceCount2);
-
-                writer.Write(prefabRecord.WorkPlaceCount3);
 
                 Logger.LogInfo(Logger.LOG_SERIALIZATION, "wrote entry ", prefabRecord.Name);
             }
@@ -92,10 +76,6 @@ namespace CampusIndustriesHousingMod.Utils
                 {
                     BuildingAI = reader.ReadString(),
                     NumOfApartments = reader.ReadInt32(),
-                    WorkPlaceCount0 = reader.ReadInt32(),
-                    WorkPlaceCount1 = reader.ReadInt32(),
-                    WorkPlaceCount2 = reader.ReadInt32(),
-                    WorkPlaceCount3 = reader.ReadInt32(),
                     DefaultValues = reader.ReadBoolean()
                 };
 
@@ -126,11 +106,7 @@ namespace CampusIndustriesHousingMod.Utils
                 {
                     Name =  reader.ReadString(),
                     BuildingAI = reader.ReadString(),
-                    NumOfApartments = reader.ReadInt32(),
-                    WorkPlaceCount0 = reader.ReadInt32(),
-                    WorkPlaceCount1 = reader.ReadInt32(),
-                    WorkPlaceCount2 = reader.ReadInt32(),
-                    WorkPlaceCount3 = reader.ReadInt32(),
+                    NumOfApartments = reader.ReadInt32()
                 };
 
                 // Drop any empty entries.

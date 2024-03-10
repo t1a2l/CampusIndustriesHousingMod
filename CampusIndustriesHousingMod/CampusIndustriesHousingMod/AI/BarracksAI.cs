@@ -110,18 +110,30 @@ namespace CampusIndustriesHousingMod.AI
         public override void CreateBuilding(ushort buildingID, ref Building data)
 	    {
 		    base.CreateBuilding(buildingID, ref data);
+            m_workPlaceCount0 = 0;
+            m_workPlaceCount1 = 0;
+            m_workPlaceCount2 = 0;
+            m_workPlaceCount3 = 0;
             HousingUIPanel.LoadSettings(buildingID, ref data, true);
         }
 
         public override void BuildingLoaded(ushort buildingID, ref Building data, uint version)
 	    {
 		    base.BuildingLoaded(buildingID, ref data, version);
+            m_workPlaceCount0 = 0;
+            m_workPlaceCount1 = 0;
+            m_workPlaceCount2 = 0;
+            m_workPlaceCount3 = 0;
             HousingUIPanel.LoadSettings(buildingID, ref data, false);
         }
 
         public override void EndRelocating(ushort buildingID, ref Building data)
 	    {
 		    base.EndRelocating(buildingID, ref data);
+            m_workPlaceCount0 = 0;
+            m_workPlaceCount1 = 0;
+            m_workPlaceCount2 = 0;
+            m_workPlaceCount3 = 0;
             HousingUIPanel.LoadSettings(buildingID, ref data, false);
         }
 
@@ -130,31 +142,24 @@ namespace CampusIndustriesHousingMod.AI
             base.SimulationStep(buildingID, ref buildingData, ref frameData);
         }
 
-        protected  override void SimulationStepActive(ushort buildingID, ref Building buildingData, ref Building.Frame frameData)
+        protected override void SimulationStepActive(ushort buildingID, ref Building buildingData, ref Building.Frame frameData)
 	    {
-			Citizen.BehaviourData behaviour = default(Citizen.BehaviourData);
+			Citizen.BehaviourData behaviour = default;
 			int aliveCount = 0;
 			int totalCount = 0;
             int homeCount = 0;
-            int aliveWorkerCount = 0;
-	        int totalWorkerCount = 0;
             int aliveHomeCount = 0;
             int emptyHomeCount = 0;
 
             GetHomeBehaviour(buildingID, ref buildingData, ref behaviour, ref aliveCount, ref totalCount, ref homeCount, ref aliveHomeCount, ref emptyHomeCount);
-            GetWorkBehaviour(buildingID, ref buildingData, ref behaviour, ref aliveWorkerCount, ref totalWorkerCount);
 
             DistrictManager districtManager = Singleton<DistrictManager>.instance;
             byte district = districtManager.GetDistrict(buildingData.m_position);
-            DistrictPolicies.Services policies = districtManager.m_districts.m_buffer[(int) district].m_servicePolicies;
+            DistrictPolicies.Services policies = districtManager.m_districts.m_buffer[district].m_servicePolicies;
 
-            DistrictPolicies.Taxation taxationPolicies = districtManager.m_districts.m_buffer[(int) district].m_taxationPolicies;
-            DistrictPolicies.CityPlanning cityPlanning = districtManager.m_districts.m_buffer[(int) district].m_cityPlanningPolicies;
-            DistrictPolicies.Special special = districtManager.m_districts.m_buffer[(int) district].m_specialPolicies;
+            districtManager.m_districts.m_buffer[district].m_servicePoliciesEffect |= policies & (DistrictPolicies.Services.PowerSaving | DistrictPolicies.Services.WaterSaving | DistrictPolicies.Services.SmokeDetectors | DistrictPolicies.Services.PetBan | DistrictPolicies.Services.Recycling | DistrictPolicies.Services.SmokingBan | DistrictPolicies.Services.ExtraInsulation | DistrictPolicies.Services.NoElectricity | DistrictPolicies.Services.OnlyElectricity);
 
-            districtManager.m_districts.m_buffer[(int) district].m_servicePoliciesEffect |= policies & (DistrictPolicies.Services.PowerSaving | DistrictPolicies.Services.WaterSaving | DistrictPolicies.Services.SmokeDetectors | DistrictPolicies.Services.PetBan | DistrictPolicies.Services.Recycling | DistrictPolicies.Services.SmokingBan | DistrictPolicies.Services.ExtraInsulation | DistrictPolicies.Services.NoElectricity | DistrictPolicies.Services.OnlyElectricity);
-
-            this.GetConsumptionRates(new Randomizer((int) buildingID), 100, out int electricityConsumption, out int waterConsumption, out int sewageAccumulation, out int garbageAccumulation, out int incomeAccumulation);
+            this.GetConsumptionRates(new Randomizer(buildingID), 100, out int electricityConsumption, out int waterConsumption, out int sewageAccumulation, out int garbageAccumulation, out _);
 
             int modifiedElectricityConsumption = 1 + (electricityConsumption * behaviour.m_electricityConsumption + 9999) / 10000;
             waterConsumption = 1 + (waterConsumption * behaviour.m_waterConsumption + 9999) / 10000;
@@ -171,7 +176,9 @@ namespace CampusIndustriesHousingMod.AI
                     heatingConsumption = Mathf.Max(1, modifiedElectricityConsumption * 3 + 8 >> 4);
                 } 
                 else
+                {
                     heatingConsumption = Mathf.Max(1, modifiedElectricityConsumption + 2 >> 2);
+                }
             }
 
             // Handle Recylcing and Pets
@@ -188,11 +195,11 @@ namespace CampusIndustriesHousingMod.AI
                 }
             }
 
-            if ((int) buildingData.m_fireIntensity == 0) 
+            if (buildingData.m_fireIntensity == 0) 
             {
                 int maxMail = 100;
                 int mailAccumulation = 1;
-                int commonConsumptionValue = this.HandleCommonConsumption(buildingID, ref buildingData, ref frameData, ref modifiedElectricityConsumption, ref heatingConsumption, ref waterConsumption, ref modifiedSewageAccumulation, ref garbageAccumulation, ref mailAccumulation, maxMail, policies);
+                this.HandleCommonConsumption(buildingID, ref buildingData, ref frameData, ref modifiedElectricityConsumption, ref heatingConsumption, ref waterConsumption, ref modifiedSewageAccumulation, ref garbageAccumulation, ref mailAccumulation, maxMail, policies);
                 buildingData.m_flags |= Building.Flags.Active;
             } 
             else 
@@ -210,7 +217,7 @@ namespace CampusIndustriesHousingMod.AI
 
             buildingData.m_customBuffer1 = (ushort)aliveCount;
             int health = 0;
-            float radius = (float) (buildingData.Width + buildingData.Length) * 2.5f;
+            float radius = (buildingData.Width + buildingData.Length) * 2.5f;
             if (behaviour.m_healthAccumulation != 0) 
             {
                 if (aliveCount != 0) 
@@ -262,8 +269,8 @@ namespace CampusIndustriesHousingMod.AI
             buildingData.m_adults = (byte) behaviour.m_adultCount;
             buildingData.m_seniors = (byte) behaviour.m_seniorCount;
 
-            HandleSick(buildingID, ref buildingData, ref behaviour, totalWorkerCount + totalCount);
-            HandleDead(buildingID, ref buildingData, ref behaviour, totalWorkerCount + totalCount);
+            HandleSick(buildingID, ref buildingData, ref behaviour, totalCount);
+            HandleDead2(buildingID, ref buildingData, ref behaviour, totalCount);
 
             // Handle Crime and Fire Factors
             int crimeAccumulation = behaviour.m_crimeAccumulation / (3 * getModifiedCapacity(buildingID, ref buildingData));
@@ -271,23 +278,23 @@ namespace CampusIndustriesHousingMod.AI
             {
                 crimeAccumulation = crimeAccumulation * 3 + 3 >> 2;
             }
-            this.HandleCrime(buildingID, ref buildingData, crimeAccumulation, aliveCount);
-            int crimeBuffer = (int) buildingData.m_crimeBuffer;
+            HandleCrime(buildingID, ref buildingData, crimeAccumulation, aliveCount);
+            int crimeBuffer = buildingData.m_crimeBuffer;
             int crimeRate;
             if (aliveCount != 0) 
             {
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Density, aliveCount, buildingData.m_position, radius);
                 // num1
                 int fireFactor = (behaviour.m_educated0Count * 30 + behaviour.m_educated1Count * 15 + behaviour.m_educated2Count * 10) / aliveCount + 50;
-                if ((int) buildingData.m_crimeBuffer > aliveCount * 40) 
+                if (buildingData.m_crimeBuffer > aliveCount * 40) 
                 {
                     fireFactor += 30;
                 } 
-                else if ((int) buildingData.m_crimeBuffer > aliveCount * 15) 
+                else if (buildingData.m_crimeBuffer > aliveCount * 15) 
                 {
                     fireFactor += 15;
                 } 
-                else if ((int) buildingData.m_crimeBuffer > aliveCount * 5) 
+                else if (buildingData.m_crimeBuffer > aliveCount * 5) 
                 {
                     fireFactor += 10;
                 }

@@ -57,7 +57,7 @@ namespace CampusIndustriesHousingMod.Patches
 
             Logger.LogInfo(Logger.LOG_INDUSTRY, "old Industry worker label: {0}", m_workersInfoLabel);
 
-            m_workersInfoLabel.text = m_workersInfoLabel.text + Environment.NewLine + barracks_capacity + Environment.NewLine;
+            m_workersInfoLabel.text = barracks_capacity + Environment.NewLine;
 
             Logger.LogInfo(Logger.LOG_INDUSTRY, "new Industry worker label: {0}", m_workersInfoLabel);
 
