@@ -166,11 +166,11 @@ namespace CampusIndustriesHousingMod.UI
             UILabel m_uiTextLabel = CreateLabel(m_uiPanel, label_name, text, prefix);
             m_uiTextLabel.textAlignment = UIHorizontalAlignment.Left;
             m_uiTextLabel.relativePosition = new Vector3(0, 0);
+            m_uiTextLabel.textScale = DEFAULT_SCALE;
 
             // value
             var text_name = name + "TextField";
             UITextField m_uiValueLabel = CreateTextField(m_uiPanel, text_name, tooltip);
-            m_uiValueLabel.textScale = DEFAULT_SCALE;
             m_uiValueLabel.relativePosition = new Vector3(180f, -6f);
 
             return m_uiPanel;
