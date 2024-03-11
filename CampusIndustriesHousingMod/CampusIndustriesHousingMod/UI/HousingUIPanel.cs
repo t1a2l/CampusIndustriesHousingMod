@@ -103,10 +103,10 @@ namespace CampusIndustriesHousingMod.UI
                 SaveGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 14 * (DEFAULT_HEIGHT * 0.8f + 2f), "SaveGlobalSettings", "save as global settings", "save settings for all buildings of the same type as this building - is cross save!");            
                 SaveGlobalSettingsBtn.eventClicked += SaveGlobalSettings;
                 
-                ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 13 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "apply prefab", "ignore all building records of the same type and deletes the records to apply prefab settings");
+                ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 5 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "apply prefab", "ignore all building records of the same type and deletes the records to apply prefab settings");
                 ApplyPrefabSettingsBtn.eventClicked += ApplyPrefabSettings;
 
-                ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 16 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "apply global", "ignore all building records and prefabs of the same type and deletes the records and prefabs to apply global settings");            
+                ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 8 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "apply global", "ignore all building records and prefabs of the same type and deletes the records and prefabs to apply global settings");            
                 ApplyGlobalSettingsBtn.eventClicked += ApplyGlobalSettings;
 
             }

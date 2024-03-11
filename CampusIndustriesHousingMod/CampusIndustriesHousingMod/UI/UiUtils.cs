@@ -132,11 +132,12 @@ namespace CampusIndustriesHousingMod.UI
             textField.color = new Color32(185, 221, 254, 255);
             textField.tooltip = tooltip;
             textField.size = new Vector2(50f, 27f);
-            textField.padding.top = 2;
+            textField.padding.top = 6;
             textField.numericalOnly = true;
             textField.allowNegative = false;
             textField.allowFloats = false;
             textField.multiline = false;
+            textField.textScale = 1.0f;
 
             return textField;
 		}
