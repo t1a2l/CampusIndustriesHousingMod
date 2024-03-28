@@ -391,11 +391,6 @@ namespace CampusIndustriesHousingMod.AI
         public override string GetLocalizedStats(ushort buildingID, ref Building data) 
         {
             getOccupancyDetails(ref data, out int numResidents, out int numApartmentsOccupied);
-            // Get Worker Data
-            Citizen.BehaviourData workerBehaviourData = new Citizen.BehaviourData();
-            int aliveWorkerCount = 0;
-            int totalWorkerCount = 0;
-            GetWorkBehaviour(buildingID, ref data, ref workerBehaviourData, ref aliveWorkerCount, ref totalWorkerCount);
             StringBuilder stringBuilder = new();
             DistrictManager instance = Singleton<DistrictManager>.instance;
 		    byte b = instance.GetPark(data.m_position);
@@ -435,25 +430,6 @@ namespace CampusIndustriesHousingMod.AI
             stringBuilder.Append(string.Format("Number of Residents: {0}", numResidents));
             stringBuilder.Append(Environment.NewLine);
             stringBuilder.Append(Environment.NewLine);
-            if(m_workPlaceCount0 > 0)
-            {
-                stringBuilder.Append(string.Format("Uneducated Workers: {0} of {1}", workerBehaviourData.m_educated0Count, m_workPlaceCount0));
-                stringBuilder.Append(Environment.NewLine);
-            }
-            if(m_workPlaceCount1 > 0)
-            {
-                stringBuilder.Append(string.Format("Educated Workers: {0} of {1}", workerBehaviourData.m_educated1Count, m_workPlaceCount1));
-                stringBuilder.Append(Environment.NewLine);
-            }
-            if(m_workPlaceCount2 > 0)
-            {
-                stringBuilder.Append(string.Format("Well Educated Workers: {0} of {1}", workerBehaviourData.m_educated2Count, m_workPlaceCount2));
-                stringBuilder.Append(Environment.NewLine);
-            }
-            if(m_workPlaceCount3 > 0)
-            {
-                stringBuilder.Append(string.Format("Highly Educated Workers: {0} of {1}", workerBehaviourData.m_educated3Count, m_workPlaceCount3));
-            }
             return stringBuilder.ToString();
         }
 

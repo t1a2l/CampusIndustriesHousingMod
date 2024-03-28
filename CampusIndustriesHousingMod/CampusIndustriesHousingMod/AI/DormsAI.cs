@@ -115,6 +115,7 @@ namespace CampusIndustriesHousingMod.AI
             m_workPlaceCount1 = 0;
             m_workPlaceCount2 = 0;
             m_workPlaceCount3 = 0;
+            m_studentCount = 0;
             HousingUIPanel.LoadSettings(buildingID, ref data, true);
         }
 
@@ -125,6 +126,7 @@ namespace CampusIndustriesHousingMod.AI
             m_workPlaceCount1 = 0;
             m_workPlaceCount2 = 0;
             m_workPlaceCount3 = 0;
+            m_studentCount = 0;
             HousingUIPanel.LoadSettings(buildingID, ref data, false);
         }
 
@@ -135,6 +137,7 @@ namespace CampusIndustriesHousingMod.AI
             m_workPlaceCount1 = 0;
             m_workPlaceCount2 = 0;
             m_workPlaceCount3 = 0;
+            m_studentCount = 0;
             HousingUIPanel.LoadSettings(buildingID, ref data, false);
         }
 
@@ -395,16 +398,7 @@ namespace CampusIndustriesHousingMod.AI
         public override string GetLocalizedStats(ushort buildingID, ref Building data) 
         {
             getOccupancyDetails(ref data, out int numResidents, out int numApartmentsOccupied);
-		    GetStudentCount(buildingID, ref data, out var count, out var capacity, out var global);
             StringBuilder stringBuilder = new();
-		    if (capacity != 0)
-		    {
-			    stringBuilder.Append(LocaleFormatter.FormatGeneric("AIINFO_STUDENTS", count, capacity));
-                stringBuilder.Append(Environment.NewLine);
-			    string localeID = "AIINFO_UNIVERSITY_STUDENTCOUNT";
-			    stringBuilder.Append(LocaleFormatter.FormatGeneric(localeID, global));
-                stringBuilder.Append(Environment.NewLine);
-		    }
 		    if (m_bonusEffect == BonusEffects.Academics)
 		    {
 			    DistrictManager instance2 = Singleton<DistrictManager>.instance;

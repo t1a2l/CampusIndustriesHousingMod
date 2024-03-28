@@ -31,7 +31,7 @@ namespace CampusIndustriesHousingMod.UI
         private static UIButton ApplyPrefabSettingsBtn;
         private static UIButton ApplyGlobalSettingsBtn; 
 
-        private static float DEFAULT_HEIGHT = 18F;
+        private static readonly float DEFAULT_HEIGHT = 18F;
 
         public static void Init()
         {
@@ -117,7 +117,6 @@ namespace CampusIndustriesHousingMod.UI
             ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
             Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
             PrefabAI buildingAI = building.Info.GetAI();
-            int studentCount = 0;
             if (buildingAI is not BarracksAI && buildingAI is not DormsAI)
 			{
                 m_settingsCheckBox.Hide();
@@ -133,7 +132,6 @@ namespace CampusIndustriesHousingMod.UI
                 }
                 else if(buildingAI is DormsAI dormsAI)
                 {
-                    studentCount = dormsAI.StudentCount;
                     buildingAIstr = "DormsAI";
                 }
 
@@ -195,7 +193,7 @@ namespace CampusIndustriesHousingMod.UI
                     }
                 }
                 UpdateHouse(buildingID, ref building, numOfApartments);
-                CreateOrEnsure(false, buildingID, ref building, numOfApartments, 0, studentCount);
+                CreateOrEnsure(false, buildingID, ref building, numOfApartments, 0, 0);
                 m_settingsCheckBox.Show();
                 if(m_settingsCheckBox.isChecked)
                 {
@@ -448,11 +446,11 @@ namespace CampusIndustriesHousingMod.UI
         {
             if(is_new)
             {
-                Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, numOfApartments, workCount, 0, 0, studentCount * 5 / 4);
+                Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, numOfApartments, workCount, 0, 0, 0);
             }
             else
             {
-                EnsureCitizenUnits(buildingID, ref data, numOfApartments, workCount, 0, studentCount * 5 / 4);
+                EnsureCitizenUnits(buildingID, ref data, numOfApartments, workCount);
             }
         }
 
@@ -461,7 +459,6 @@ namespace CampusIndustriesHousingMod.UI
         {
             BuildingInfo buildingInfo = data.Info;
             PrefabAI buildingAI = buildingInfo.GetAI();
-            var studentCount = 0;
             string buildingAIstr = "";
             int numOfApartments = 0;
 
@@ -471,7 +468,6 @@ namespace CampusIndustriesHousingMod.UI
             }
             else if (buildingAI is DormsAI dormsAI)
             {
-                studentCount = dormsAI.StudentCount;
                 buildingAIstr = "DormsAI";
             }
 
@@ -516,7 +512,7 @@ namespace CampusIndustriesHousingMod.UI
             }
 
             UpdateHouse(buildingID, ref data, numOfApartments);
-            CreateOrEnsure(is_new, buildingID, ref data, numOfApartments, 0, studentCount);
+            CreateOrEnsure(is_new, buildingID, ref data, numOfApartments, 0, 0);
         }
     }
 
