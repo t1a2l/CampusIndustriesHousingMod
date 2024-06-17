@@ -17,11 +17,12 @@ namespace CampusIndustriesHousingMod.Patches
             "Caravan",
             "Unterkünfte",
             "Landwohnheim",
-            "Housing"
+            "Housing",
+            "Houses"
         ];
 
         private static readonly string[] DormsNames = [
-           "Dormitory",
+            "Dormitory",
             "Dorm",
             "Housing",
             "Dorms"
@@ -31,14 +32,14 @@ namespace CampusIndustriesHousingMod.Patches
         {
             try
             {
-                if (__instance.m_class.m_service == ItemClass.Service.PlayerIndustry && BarracksNames.Any(s => __instance.name.Equals(s)) && __instance.GetAI() is not BarracksAI)
+                if (__instance.m_class.m_service == ItemClass.Service.PlayerIndustry && BarracksNames.Any(s => __instance.name.Contains(s)) && __instance.GetAI() is not BarracksAI)
                 {
                     var oldAI = __instance.GetComponent<PrefabAI>();
                     Object.DestroyImmediate(oldAI);
                     var newAI = (PrefabAI)__instance.gameObject.AddComponent<BarracksAI>();
                     PrefabUtil.TryCopyAttributes(oldAI, newAI, false);
                 } 
-                else if (__instance.m_class.m_service == ItemClass.Service.PlayerEducation && DormsNames.Any(s => __instance.name.Equals(s)) && __instance.GetAI() is not DormsAI)
+                else if (__instance.m_class.m_service == ItemClass.Service.PlayerEducation && DormsNames.Any(s => __instance.name.Contains(s)) && __instance.GetAI() is not DormsAI)
                 {
                     var oldAI = __instance.GetComponent<PrefabAI>();
                     Object.DestroyImmediate(oldAI);
