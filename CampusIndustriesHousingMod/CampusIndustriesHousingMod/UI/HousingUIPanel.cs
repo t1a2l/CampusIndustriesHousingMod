@@ -67,7 +67,7 @@ namespace CampusIndustriesHousingMod.UI
                 m_settingsCheckBox.eventCheckChanged += (component, value) =>
                 {
                     m_uiMainPanel.isVisible = value;
-                    m_uiMainPanel.height = m_uiMainPanel.parent.height - 7f;
+                    m_uiMainPanel.height = 370f;
                     HousingConfig.Config.ShowPanel = value;
                     HousingConfig.Config.Serialize();
                 };
