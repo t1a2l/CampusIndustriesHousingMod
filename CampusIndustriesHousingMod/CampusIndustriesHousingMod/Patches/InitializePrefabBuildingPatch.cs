@@ -4,24 +4,41 @@ using CampusIndustriesHousingMod.AI;
 using CampusIndustriesHousingMod.Utils;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using System.Linq;
 
 namespace CampusIndustriesHousingMod.Patches
 {
     [HarmonyPatch(typeof(BuildingInfo), "InitializePrefab")]
     public static class InitializePrefabBuildingPatch
-    { 
+    {
+        private static readonly string[] BarracksNames = [
+            "Barracks",
+            "Residential",
+            "Caravan",
+            "Unterkünfte",
+            "Landwohnheim",
+            "Housing"
+        ];
+
+        private static readonly string[] DormsNames = [
+           "Dormitory",
+            "Dorm",
+            "Housing",
+            "Dorms"
+       ];
+
         public static void Prefix(BuildingInfo __instance)
         {
             try
             {
-                if (__instance.m_class.m_service == ItemClass.Service.PlayerIndustry && (__instance.name.Contains("Barracks") || __instance.name.Contains("Barracks")) && __instance.GetAI() is not BarracksAI)
+                if (__instance.m_class.m_service == ItemClass.Service.PlayerIndustry && BarracksNames.Any(s => __instance.name.Equals(s)) && __instance.GetAI() is not BarracksAI)
                 {
                     var oldAI = __instance.GetComponent<PrefabAI>();
                     Object.DestroyImmediate(oldAI);
                     var newAI = (PrefabAI)__instance.gameObject.AddComponent<BarracksAI>();
                     PrefabUtil.TryCopyAttributes(oldAI, newAI, false);
                 } 
-                else if (__instance.m_class.m_service == ItemClass.Service.PlayerEducation && (__instance.name.Contains("Dormitory") || __instance.name.Contains("Dorm")) && __instance.GetAI() is not DormsAI)
+                else if (__instance.m_class.m_service == ItemClass.Service.PlayerEducation && DormsNames.Any(s => __instance.name.Equals(s)) && __instance.GetAI() is not DormsAI)
                 {
                     var oldAI = __instance.GetComponent<PrefabAI>();
                     Object.DestroyImmediate(oldAI);
