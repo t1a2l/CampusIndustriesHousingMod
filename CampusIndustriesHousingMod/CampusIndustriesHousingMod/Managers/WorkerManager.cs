@@ -111,7 +111,7 @@ namespace CampusIndustriesHousingMod.Managers
             for (ushort i = first; i <= last; ++i)
             {
                 var building = buildingManager.m_buildings.m_buffer[i];
-                if(building.Info.GetAI() is not ResidentialBuildingAI && building.Info.GetAI() is not BarracksAI)
+                if(building.Info == null || (building.Info.GetAI() is not ResidentialBuildingAI && building.Info.GetAI() is not BarracksAI))
                 {
                     continue;
                 }
