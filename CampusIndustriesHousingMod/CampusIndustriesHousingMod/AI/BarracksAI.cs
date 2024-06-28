@@ -21,8 +21,7 @@ namespace CampusIndustriesHousingMod.AI
         public override Color GetColor(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode, InfoManager.SubInfoMode subInfoMode) 
         {
             // This is a copy from ResidentialBuildingAI
-            InfoManager.InfoMode infoModeCopy = infoMode;
-            switch (infoModeCopy) 
+            switch (infoMode) 
             {
                 case InfoManager.InfoMode.Health:
                     if (ShowConsumption(buildingId, ref data) && data.m_citizenCount != 0)
@@ -306,6 +305,11 @@ namespace CampusIndustriesHousingMod.AI
             HandleFire(buildingID, ref buildingData, ref frameData, policies);
 	    }
         
+        public void ProduceGoodsPublic(ushort buildingID, ref Building buildingData, ref Building.Frame frameData, int productionRate, int finalProductionRate, ref Citizen.BehaviourData behaviour, int aliveWorkerCount, int totalWorkerCount, int workPlaceCount, int aliveVisitorCount, int totalVisitorCount, int visitPlaceCount)
+        {
+            ProduceGoods(buildingID, ref buildingData, ref frameData, productionRate, finalProductionRate, ref behaviour, aliveWorkerCount, totalWorkerCount, workPlaceCount, aliveVisitorCount, totalVisitorCount, visitPlaceCount);
+        }
+
         protected override void ProduceGoods(ushort buildingID, ref Building buildingData, ref Building.Frame frameData, int productionRate, int finalProductionRate, ref Citizen.BehaviourData behaviour, int aliveWorkerCount, int totalWorkerCount, int workPlaceCount, int aliveVisitorCount, int totalVisitorCount, int visitPlaceCount)
         {
             base.ProduceGoods(buildingID, ref buildingData, ref frameData, productionRate, finalProductionRate, ref behaviour, aliveWorkerCount, totalWorkerCount, workPlaceCount, aliveVisitorCount, totalVisitorCount, visitPlaceCount);    
