@@ -25,8 +25,22 @@ namespace CampusIndustriesHousingMod.AI
             switch (infoModeCopy) 
             {
                 case InfoManager.InfoMode.Health:
-                    if (this.ShowConsumption(buildingId, ref data) && (int) data.m_citizenCount != 0)
-                        return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int) infoMode].m_negativeColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int) infoMode].m_targetColor, (float) Citizen.GetHealthLevel((int) data.m_health) * 0.2f);
+                    if (ShowConsumption(buildingId, ref data) && data.m_citizenCount != 0)
+                    {
+                        if (subInfoMode == InfoManager.SubInfoMode.WindPower && data.m_children + data.m_teens != 0)
+                        {
+                            return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_negativeColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_targetColor, (float)Citizen.GetHealthLevel(data.m_childHealth) * 0.2f);
+                        }
+                        if (subInfoMode == InfoManager.SubInfoMode.PipeWater && data.m_seniors != 0)
+                        {
+                            return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_negativeColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_targetColor, (float)Citizen.GetHealthLevel(data.m_seniorHealth) * 0.2f);
+                        }
+                        if (subInfoMode == InfoManager.SubInfoMode.Default || subInfoMode == InfoManager.SubInfoMode.WaterPower)
+                        {
+                            return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_negativeColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_targetColor, (float)Citizen.GetHealthLevel(data.m_health) * 0.2f);
+                        }
+                        return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
+                    }
                     return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
                 case InfoManager.InfoMode.Density:
                     if (ShowConsumption(buildingId, ref data) && data.m_citizenCount != 0)
@@ -49,62 +63,38 @@ namespace CampusIndustriesHousingMod.AI
 				        return Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_negativeColor;
 			        }
 			        return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
-                default:
-                    switch (infoModeCopy - 17) 
+                case InfoManager.InfoMode.Happiness:
+                    if (ShowConsumption(buildingId, ref data))
                     {
-                        case InfoManager.InfoMode.None:
-                            if (this.ShowConsumption(buildingId, ref data)) {
-                                return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_neutralColor, Color.Lerp(Singleton<ZoneManager>.instance.m_properties.m_zoneColors[2], Singleton<ZoneManager>.instance.m_properties.m_zoneColors[3], 0.5f) * 0.5f, (float) (0.200000002980232 + (double) Math.Max(0, 2) * 0.200000002980232));
-                            }
-                            return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
-                        case InfoManager.InfoMode.Water:
-                            if (!this.ShowConsumption(buildingId, ref data) || (int) data.m_citizenCount == 0)
-                                return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
-                            InfoManager.SubInfoMode currentSubMode = Singleton<InfoManager>.instance.CurrentSubMode;
-                            int num4;
-                            int num5;
-                            if (currentSubMode == InfoManager.SubInfoMode.Default) 
-                            {
-                                num4 = (int) data.m_education1 * 100;
-                                num5 = (int) data.m_teens + (int) data.m_youngs + (int) data.m_adults + (int) data.m_seniors;
-                            } 
-                            else if (currentSubMode == InfoManager.SubInfoMode.WaterPower) 
-                            {
-                                num4 = (int) data.m_education2 * 100;
-                                num5 = (int) data.m_youngs + (int) data.m_adults + (int) data.m_seniors;
-                            } 
-                            else 
-                            {
-                                num4 = (int) data.m_education3 * 100;
-                                num5 = (int) data.m_youngs * 2 / 3 + (int) data.m_adults + (int) data.m_seniors;
-                            }
-                            if (num5 != 0)
-                                num4 = (num4 + (num5 >> 1)) / num5;
-                            int num6 = Mathf.Clamp(num4, 0, 100);
-                            return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int) infoMode].m_negativeColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int) infoMode].m_targetColor, (float) num6 * 0.01f);
-                        default:
-                            return this.handleOtherColors(buildingId, ref data, infoMode, subInfoMode);
+                        return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_negativeColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_targetColor, (float)Citizen.GetHappinessLevel((int)data.m_happiness) * 0.25f);
                     }
+                    return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
+                case InfoManager.InfoMode.Post:
+                    if (ShowConsumption(buildingId, ref data))
+                    {
+                        int num = CalculateHomeCount((ItemClass.Level)data.m_level, new Randomizer(buildingId), data.Width, data.Length);
+                        if (num != 0)
+                        {
+                            return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_targetColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_negativeColor, Mathf.Min(100, data.m_mailBuffer * 2 / num) * 0.01f);
+                        }
+                    }
+                    return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
+                default:
+                    return base.GetColor(buildingId, ref data, infoMode, subInfoMode);
             }
         }
 
-        private Color handleOtherColors(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode, InfoManager.SubInfoMode subInfoMode) 
+        private int CalculateHomeCount(ItemClass.Level level, Randomizer r, int width, int length)
         {
-            switch (infoMode) 
+            int num = level switch
             {
-                case InfoManager.InfoMode.Happiness:
-                    if (ShowConsumption(buildingId, ref data)) 
-                    {
-                        return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int) infoMode].m_negativeColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int) infoMode].m_targetColor, (float) Citizen.GetHappinessLevel((int) data.m_happiness) * 0.25f);
-                    }
-                    return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
-                case InfoManager.InfoMode.Garbage:
-                    if (m_garbageAccumulation == 0)
-                        return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
-                    return base.GetColor(buildingId, ref data, infoMode, subInfoMode);
-                default:
-                    return base.GetColor(buildingId, ref data, infoMode, subInfoMode);
-            }
+                ItemClass.Level.Level1 => 60,
+                ItemClass.Level.Level2 => 100,
+                ItemClass.Level.Level3 => 130,
+                ItemClass.Level.Level4 => 150,
+                _ => 160,
+            };
+            return Mathf.Max(100, width * length * num + r.Int32(100u)) / 100;
         }
 
         public override void CreateBuilding(ushort buildingID, ref Building data)
