@@ -38,6 +38,11 @@ namespace CampusIndustriesHousingMod.Patches
                     Object.DestroyImmediate(oldAI);
                     var newAI = (PrefabAI)__instance.gameObject.AddComponent<BarracksAI>();
                     PrefabUtil.TryCopyAttributes(oldAI, newAI, false);
+                    if(newAI is BarracksAI barracksAI)
+                    {
+                        barracksAI.m_noiseAccumulation = 0;
+                        barracksAI.m_noiseRadius = 0;
+                    }
                 } 
                 else if (__instance.m_class.m_service == ItemClass.Service.PlayerEducation && DormsNames.Any(s => __instance.name.Contains(s)) && __instance.GetAI() is not DormsAI)
                 {
