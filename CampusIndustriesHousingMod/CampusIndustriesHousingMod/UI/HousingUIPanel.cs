@@ -149,8 +149,6 @@ namespace CampusIndustriesHousingMod.UI
             UnlockSettingsBtn.Hide();
         }
 
-
-
         public static void RefreshData()
         {
             ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
