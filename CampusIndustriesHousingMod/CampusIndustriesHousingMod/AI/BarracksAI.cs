@@ -6,7 +6,6 @@ using UnityEngine;
 using System.Threading;
 using CampusIndustriesHousingMod.Utils;
 using CampusIndustriesHousingMod.Managers;
-using CampusIndustriesHousingMod.UI;
 
 namespace CampusIndustriesHousingMod.AI
 {
@@ -94,36 +93,6 @@ namespace CampusIndustriesHousingMod.AI
                 _ => 160,
             };
             return Mathf.Max(100, width * length * num + r.Int32(100u)) / 100;
-        }
-
-        public override void CreateBuilding(ushort buildingID, ref Building data)
-	    {
-		    base.CreateBuilding(buildingID, ref data);
-            m_workPlaceCount0 = 0;
-            m_workPlaceCount1 = 0;
-            m_workPlaceCount2 = 0;
-            m_workPlaceCount3 = 0;
-            HousingUIPanel.LoadSettings(buildingID, ref data, true);
-        }
-
-        public override void BuildingLoaded(ushort buildingID, ref Building data, uint version)
-	    {
-		    base.BuildingLoaded(buildingID, ref data, version);
-            m_workPlaceCount0 = 0;
-            m_workPlaceCount1 = 0;
-            m_workPlaceCount2 = 0;
-            m_workPlaceCount3 = 0;
-            HousingUIPanel.LoadSettings(buildingID, ref data, false);
-        }
-
-        public override void EndRelocating(ushort buildingID, ref Building data)
-	    {
-		    base.EndRelocating(buildingID, ref data);
-            m_workPlaceCount0 = 0;
-            m_workPlaceCount1 = 0;
-            m_workPlaceCount2 = 0;
-            m_workPlaceCount3 = 0;
-            HousingUIPanel.LoadSettings(buildingID, ref data, false);
         }
 
         public override void SimulationStep(ushort buildingID, ref Building buildingData, ref Building.Frame frameData) 

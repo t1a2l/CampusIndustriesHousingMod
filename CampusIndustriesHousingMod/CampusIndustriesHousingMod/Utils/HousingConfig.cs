@@ -21,29 +21,33 @@ namespace CampusIndustriesHousingMod.Utils
         public static void Reset() => config_ = new HousingConfig();
 
 
-        public Housing GetGlobalSettings(string name, string buildingAI)
+        public Housing GetGlobalSettings(BuildingInfo buildingInfo)
         {
-            var index = HousingSettings.FindIndex(x => x.Name == name && x.BuildingAI == buildingAI);
+            string BuildingAIstr = buildingInfo.GetAI().GetType().Name;
+            var index = HousingSettings.FindIndex(x => x.Name == buildingInfo.name && x.BuildingAI == BuildingAIstr);
             if (index != -1)
             {
                 return HousingSettings[index];
             }
-            else
-            {
-				Housing newHousing = new()
-				{
-					Name = name,
-					BuildingAI = buildingAI
-				};
-				HousingSettings.Add(newHousing);
-                return newHousing;
-            }
+            return default;
         }
 
         public void SetGlobalSettings(Housing housing)
         {
             var index = HousingSettings.FindIndex(x => x.Name == housing.Name && x.BuildingAI == housing.BuildingAI);
-            HousingSettings[index] = housing;
+            if (index != -1)
+            {
+                HousingSettings[index] = housing;
+            }
+        }
+
+        public void CreateGlobalSettings(Housing housing)
+        {
+            var index = HousingSettings.FindIndex(x => x.Name == housing.Name && x.BuildingAI == housing.BuildingAI);
+            if (index == -1)
+            {
+                HousingSettings.Add(housing);
+            }
         }
 
         public void ClearGlobalSettings()

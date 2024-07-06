@@ -7,7 +7,6 @@ using System;
 using System.Linq;
 using UnityEngine;
 
-
 namespace CampusIndustriesHousingMod.UI
 {
     public static class HousingUIPanel
@@ -22,7 +21,7 @@ namespace CampusIndustriesHousingMod.UI
 
         private static UIPanel ApartmentNumberPanel;
 
-        private static UIButton ApplyBuildingSettingsBtn;
+        private static UIButton SaveBuildingSettingsBtn;
         private static UIButton ClearBuildingSettingsBtn;
         private static UIButton ReturnToDefaultBtn;
 
@@ -74,7 +73,7 @@ namespace CampusIndustriesHousingMod.UI
                     HousingConfig.Config.ShowPanel = value;
                     if(!value)
                     {
-                        ApplyBuildingSettingsBtn.Disable();
+                        SaveBuildingSettingsBtn.Disable();
                         ClearBuildingSettingsBtn.Disable();
                         ReturnToDefaultBtn.Disable();
                         ApplyPrefabSettingsBtn.Disable();
@@ -102,10 +101,10 @@ namespace CampusIndustriesHousingMod.UI
                 ApartmentNumberPanel = UiUtils.UIServiceBar(m_uiMainPanel, "ApartmentNumber", "", "Number of apartments: ", "number of apartments");
                 ApartmentNumberPanel.relativePosition = new Vector3(10f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f));
 
-                ApplyBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyBuildingSettings", "Apply building settings", "First priority - will override prefab and global settings create a record for this building");
-                ApplyBuildingSettingsBtn.eventClicked += ApplyBuildingSettings;
+                SaveBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f), "SaveBuildingSettings", "Save building settings", "First priority - will override prefab and global settings create a record for this building");
+                SaveBuildingSettingsBtn.eventClicked += SaveBuildingSettings;
 
-                ClearBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 5 * (DEFAULT_HEIGHT * 0.8f + 2f), "ClearBuildingSettings", "Clear building settings", "Clear tis building record - will get the values from prefab or global settings");
+                ClearBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 5 * (DEFAULT_HEIGHT * 0.8f + 2f), "ClearBuildingSettings", "Clear building settings", "Clear this building record - will get the values from prefab or global settings");
                 ClearBuildingSettingsBtn.eventClicked += ClearBuildingSettings;
 
                 ReturnToDefaultBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 8 * (DEFAULT_HEIGHT * 0.8f + 2f), "ReturnToDefault", "Back to default", "Will not delete the record just set a default flag on it - you need to clear settings for this building to get the prefab or global settings");
@@ -126,7 +125,7 @@ namespace CampusIndustriesHousingMod.UI
                 UnlockSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 55f + 0 * (DEFAULT_HEIGHT * 0.8f + 2f), "UnlockSettingsBtn", "Unlock Settings", "");
                 UnlockSettingsBtn.eventClicked += UnlockSettings;
 
-                ApplyBuildingSettingsBtn.Disable();
+                SaveBuildingSettingsBtn.Disable();
                 ClearBuildingSettingsBtn.Disable();
                 ReturnToDefaultBtn.Disable();
                 ApplyPrefabSettingsBtn.Disable();
@@ -138,7 +137,7 @@ namespace CampusIndustriesHousingMod.UI
 
         public static void UnlockSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
-            ApplyBuildingSettingsBtn.Enable();
+            SaveBuildingSettingsBtn.Enable();
             ClearBuildingSettingsBtn.Enable();
             ReturnToDefaultBtn.Enable();
             ApplyPrefabSettingsBtn.Enable();
@@ -161,26 +160,32 @@ namespace CampusIndustriesHousingMod.UI
 			}
             else
 			{
-                string buildingAIstr = "";
+                string buildingAIstr = buildingAI.GetType().Name;
                 int numOfApartments = 0;
-                if(buildingAI is BarracksAI)
+                var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
+
+                bool isBuilding = HousingManager.BuildingRecords.TryGetValue(buildingID, out HousingManager.BuildingRecord buildingRecord);
+                bool isPrefab = false;
+                bool isGlobal = false;
+                var prefabRecord = HousingManager.GetPrefab(building.Info);
+                if (!prefabRecord.Equals(default(HousingManager.PrefabRecord)))
                 {
-                    buildingAIstr = "BarracksAI";
+                    isPrefab = true;
+                    ApplyPrefabSettingsBtn.Enable();
                 }
-                else if(buildingAI is DormsAI dormsAI)
+                var globalRecord = HousingConfig.Config.GetGlobalSettings(building.Info);
+                if (!globalRecord.Equals(default(Housing)))
                 {
-                    buildingAIstr = "DormsAI";
+                    isGlobal = true;
+                    ApplyGlobalSettingsBtn.Enable();
                 }
 
-                var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");               
-
-                var res = HousingManager.BuildingRecords.TryGetValue(buildingID, out HousingManager.BuildingRecord buildingRecord);
-                if(res)
+                if (isBuilding)
                 {
-                    if(buildingRecord.DefaultValues)
+                    if (buildingRecord.DefaultValues)
                     {
                         m_settingsStatus.text = "This Building is using default settings";
-                    } 
+                    }
                     else
                     {
                         m_settingsStatus.text = "This Building is using his own settings";
@@ -188,45 +193,35 @@ namespace CampusIndustriesHousingMod.UI
 
                     m_apartmentsNumTextfield.text = buildingRecord.NumOfApartments.ToString();
                     numOfApartments = buildingRecord.NumOfApartments;
-                } 
+                }
+                else if (isPrefab)
+                {
+                    m_settingsStatus.text = "This Building is using type settings";
+                    m_apartmentsNumTextfield.text = prefabRecord.NumOfApartments.ToString();
+                    numOfApartments = prefabRecord.NumOfApartments;
+                }
+                else if(isGlobal)
+                {
+                    m_settingsStatus.text = "This Building is using global settings";
+                    m_apartmentsNumTextfield.text = globalRecord.NumOfApartments.ToString();
+                    numOfApartments = globalRecord.NumOfApartments;
+                }
                 else
                 {
-                    var prefab_index = HousingManager.PrefabRecords.FindIndex(item => item.Name == building.Info.name && item.BuildingAI == buildingAIstr);
-                    if(prefab_index != -1)
+                    m_settingsStatus.text = "This Building is using default settings";
+                    if (buildingAIstr == "BarracksAI")
                     {
-                        m_settingsStatus.text = "This Building is using prefab settings";
-                        var prefabRecord = HousingManager.PrefabRecords[prefab_index];
-                        m_apartmentsNumTextfield.text = prefabRecord.NumOfApartments.ToString();
-                        numOfApartments = prefabRecord.NumOfApartments;
+                        BarracksAI barracksAI = buildingAI as BarracksAI;
+                        barracksAI = HousingManager.DefaultBarracksValues(barracksAI);
+                        m_apartmentsNumTextfield.text = barracksAI.numApartments.ToString();
+                        numOfApartments = barracksAI.numApartments;
                     }
-                    else
+                    else if (buildingAIstr == "DormsAI")
                     {
-                        var global_index = HousingConfig.Config.HousingSettings.FindIndex(item => item.Name == building.Info.name && item.BuildingAI == buildingAIstr);
-                        if(global_index != -1)
-                        {
-                            m_settingsStatus.text = "This Building is using global settings";
-                            var saved_config = HousingConfig.Config.HousingSettings[global_index];
-                            m_apartmentsNumTextfield.text = saved_config.NumOfApartments.ToString();
-							numOfApartments = saved_config.NumOfApartments;
-                        }
-                        else
-                        {
-                            m_settingsStatus.text = "This Building is using default settings";
-                            if(buildingAIstr == "BarracksAI")
-                            {
-                                BarracksAI barracksAI = buildingAI as BarracksAI;
-                                barracksAI = HousingManager.DefaultBarracksValues(barracksAI);
-                                m_apartmentsNumTextfield.text = barracksAI.numApartments.ToString();
-                                numOfApartments = barracksAI.numApartments;
-                            }
-                            else if(buildingAIstr == "DormsAI")
-                            {
-                                DormsAI dormsAI = buildingAI as DormsAI;
-                                dormsAI = HousingManager.DefaultDormsValues(dormsAI);
-                                m_apartmentsNumTextfield.text = dormsAI.numApartments.ToString();
-                                numOfApartments = dormsAI.numApartments;
-                            }
-                        }
+                        DormsAI dormsAI = buildingAI as DormsAI;
+                        dormsAI = HousingManager.DefaultDormsValues(dormsAI);
+                        m_apartmentsNumTextfield.text = dormsAI.numApartments.ToString();
+                        numOfApartments = dormsAI.numApartments;
                     }
                 }
                 UpdateHouse(buildingID, ref building, numOfApartments);
@@ -240,7 +235,7 @@ namespace CampusIndustriesHousingMod.UI
 			}
         }
 
-        public static void ApplyBuildingSettings(UIComponent c, UIMouseEventParameter eventParameter)
+        public static void SaveBuildingSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
             ApplySettings(false, true, false, false);
         }
@@ -393,30 +388,27 @@ namespace CampusIndustriesHousingMod.UI
 			}
 			else if(isPrefab)
 			{
-                var prefabRecord = HousingManager.GetPrefab(buildingInfo.name, BuildingAIstr);
+                var prefabRecord = HousingManager.GetPrefab(buildingInfo);
 
-                prefabRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
-                prefabRecord.BuildingAI = BuildingAIstr;
-
-                HousingManager.SetPrefab(prefabRecord);
+                if (!prefabRecord.Equals(default(HousingManager.PrefabRecord)))
+                {
+                    m_apartmentsNumTextfield.text = prefabRecord.NumOfApartments.ToString();
+                }
             }
             else if(isGlobal)
             {
-                var housing = HousingConfig.Config.GetGlobalSettings(buildingInfo.name, BuildingAIstr);
+                var housing = HousingConfig.Config.GetGlobalSettings(buildingInfo);
 
-                housing.Name = buildingInfo.name;
-                housing.BuildingAI = BuildingAIstr;
-                housing.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
-
-                HousingConfig.Config.SetGlobalSettings(housing);
+                if (!housing.Equals(default(Housing)))
+                {
+                    m_apartmentsNumTextfield.text = housing.NumOfApartments.ToString();
+                }
             }
-
-            RefreshData();
         }
 
         public static void SetPrefabSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
-            ConfirmPanel.ShowModal("Set Prefab Settings", "This will update all building records of this type to the current number of apartments in this save!", (comp, ret) =>
+            ConfirmPanel.ShowModal("Set Type Settings", "This will update all building records of this type to the current number of apartments in this save!", (comp, ret) =>
             {
                 if (ret != 1)
                     return;
@@ -437,46 +429,94 @@ namespace CampusIndustriesHousingMod.UI
         private static void SetPrefabGlobalSettings(bool isGlobal)
         {
             ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
-            BuildingInfo buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
+            var buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
+            string BuildingAIstr = buildingInfo.GetAI().GetType().Name;
+            var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
 
-            var buildingAI = buildingInfo.GetAI();
-
-            var BuildingAIstr = "";
-
-            if(buildingAI is BarracksAI)
+            if (!isGlobal)
             {
-                BuildingAIstr = "BarracksAI";
-            }
-            else if(buildingAI is DormsAI)
-            {
-                BuildingAIstr = "DormsAI";
-            }
-           
-            var buildingsList = HousingManager.BuildingRecords.Where(item =>
-		    {
-                BuildingInfo Info = Singleton<BuildingManager>.instance.m_buildings.m_buffer[item.Key].Info;
-                return Info.name == buildingInfo.name && item.Value.BuildingAI == BuildingAIstr;
-            }).ToList();
+                // set new prefab settings according to the building current settings
+                var newPrefabRecord = new HousingManager.PrefabRecord
+                {
+                    Name = buildingInfo.name,
+                    BuildingAI = BuildingAIstr,
+                    NumOfApartments = int.Parse(m_apartmentsNumTextfield.text)
+                };
 
-            foreach( var item in buildingsList )
-            {
-                HousingManager.BuildingRecords.Remove(item.Key);
-            }
-
-            if(isGlobal)
-            {
-                var buildingsPrefabList = HousingManager.PrefabRecords.Where(item =>
-			    {
-                    return item.Name == buildingInfo.name && item.BuildingAI == BuildingAIstr;
+                // clear all individual building settings of this type
+                var buildingsList = HousingManager.BuildingRecords.Where(item =>
+                {
+                    var Info = Singleton<BuildingManager>.instance.m_buildings.m_buffer[item.Key].Info;
+                    return Info.name == buildingInfo.name && Info.GetAI().GetType().Name == BuildingAIstr;
                 }).ToList();
 
-                foreach( var item in buildingsPrefabList )
+                foreach (var item in buildingsList)
                 {
-                    HousingManager.PrefabRecords.Remove(item);
+                    HousingManager.RemoveBuildingRecord(item.Key);
+                }
+
+                // try get prefab settings and update them or create new prefab settings for this building type
+                // if not exist and apply the settings to all the individual buildings
+                var prefabRecord = HousingManager.GetPrefab(buildingInfo);
+
+                if (!prefabRecord.Equals(default(HousingManager.PrefabRecord)))
+                {
+                    prefabRecord.NumOfApartments = newPrefabRecord.NumOfApartments;
+
+                    HousingManager.SetPrefab(prefabRecord);
+                }
+                else
+                {
+                    HousingManager.CreatePrefab(newPrefabRecord);
                 }
             }
+            else
+            {
+                // set global settings
 
-            RefreshData();
+                // clear all individual building settings of this type
+                var buildingsList = HousingManager.BuildingRecords.Where(item =>
+                {
+                    var Info = Singleton<BuildingManager>.instance.m_buildings.m_buffer[item.Key].Info;
+                    return Info.name == buildingInfo.name && Info.GetAI().GetType().Name == BuildingAIstr;
+                }).ToList();
+
+                foreach (var item in buildingsList)
+                {
+                    HousingManager.RemoveBuildingRecord(item.Key);
+                }
+
+                // clear all prefab building settings of this type
+                var buildingsPrefabList = HousingManager.PrefabRecords.Where(item => item.Name == buildingInfo.name && item.BuildingAI == BuildingAIstr);
+
+                foreach (var item in buildingsPrefabList)
+                {
+                    HousingManager.RemovePrefab(item);
+                }
+
+                // set new global settings according to the building current settings
+                var newGlobalRecord = new Housing
+                {
+                    Name = buildingInfo.name,
+                    BuildingAI = BuildingAIstr,
+                    NumOfApartments = int.Parse(m_apartmentsNumTextfield.text)
+                };
+
+                // try get global settings and update them or create new global settings for this building type
+                // if not exist and apply the settings to all the individual buildings
+                var globalRecord = HousingConfig.Config.GetGlobalSettings(buildingInfo);
+
+                if (!globalRecord.Equals(default(Housing)))
+                {
+                    globalRecord.NumOfApartments = newGlobalRecord.NumOfApartments;
+
+                    HousingConfig.Config.SetGlobalSettings(globalRecord);
+                }
+                else
+                {
+                    HousingConfig.Config.CreateGlobalSettings(newGlobalRecord);
+                }
+            }
         }
 
         public static void CreateOrEnsure(bool is_new, ushort buildingID, ref Building data, int numOfApartments, int workCount, int studentCount)
@@ -491,66 +531,6 @@ namespace CampusIndustriesHousingMod.UI
             }
         }
 
-
-        public static void LoadSettings(ushort buildingID, ref Building data, bool is_new)
-        {
-            BuildingInfo buildingInfo = data.Info;
-            PrefabAI buildingAI = buildingInfo.GetAI();
-            string buildingAIstr = "";
-            int numOfApartments = 0;
-
-            if (buildingAI is BarracksAI)
-            {
-                buildingAIstr = "BarracksAI";
-            }
-            else if (buildingAI is DormsAI dormsAI)
-            {
-                buildingAIstr = "DormsAI";
-            }
-
-            var res = HousingManager.BuildingRecords.TryGetValue(buildingID, out HousingManager.BuildingRecord buildingRecord);
-            if (res)
-            {
-                numOfApartments = buildingRecord.NumOfApartments;
-            }
-            else
-            {
-                var prefab_index = HousingManager.PrefabRecords.FindIndex(item => item.Name == buildingInfo.name && item.BuildingAI == buildingAIstr);
-                if (prefab_index != -1)
-                {
-                    var prefabRecord = HousingManager.PrefabRecords[prefab_index];
-                    numOfApartments = prefabRecord.NumOfApartments;
-                }
-                else
-                {
-                    var global_index = HousingConfig.Config.HousingSettings.FindIndex(item => item.Name == buildingInfo.name && item.BuildingAI == buildingAIstr);
-                    if (global_index != -1)
-                    {
-                            
-                        var saved_config = HousingConfig.Config.HousingSettings[global_index];
-                        numOfApartments = saved_config.NumOfApartments;
-                    }
-                    else
-                    {
-                        if (buildingAIstr == "BarracksAI")
-                        {
-                            BarracksAI barracksAI = buildingAI as BarracksAI;
-                            barracksAI = HousingManager.DefaultBarracksValues(barracksAI);
-                            numOfApartments = barracksAI.numApartments;
-                        }
-                        else if (buildingAIstr == "DormsAI")
-                        {
-                            DormsAI dormsAI = buildingAI as DormsAI;
-                            dormsAI = HousingManager.DefaultDormsValues(dormsAI);
-                            numOfApartments = dormsAI.numApartments;
-                        }
-                    }
-                }
-            }
-
-            UpdateHouse(buildingID, ref data, numOfApartments);
-            CreateOrEnsure(is_new, buildingID, ref data, numOfApartments, 0, 0);
-        }
     }
 
 }
