@@ -57,17 +57,19 @@ namespace CampusIndustriesHousingMod.Managers
             {
                 return buildingRecord;
 			}
-            else
-            {
-                BuildingRecord newBuildingRecord = new();
-                BuildingRecords.Add(buildingID, newBuildingRecord);
-                return newBuildingRecord;
-            }
+            return default;
         }
 
         public static void SetBuildingRecord(ushort buildingID, BuildingRecord buildingRecord)
         {
             BuildingRecords[buildingID] = buildingRecord;
+        }
+
+        public static BuildingRecord CreateBuildingRecord(ushort buildingID)
+        {
+            BuildingRecord newBuildingRecord = new();
+            BuildingRecords.Add(buildingID, newBuildingRecord);
+            return newBuildingRecord;
         }
 
         public static void RemoveBuildingRecord(ushort buildingID)
@@ -167,8 +169,6 @@ namespace CampusIndustriesHousingMod.Managers
 
             return dorms;
         }
-
-        
 
     }
 }
