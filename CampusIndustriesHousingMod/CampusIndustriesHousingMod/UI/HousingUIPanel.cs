@@ -328,8 +328,8 @@ namespace CampusIndustriesHousingMod.UI
                 buildingRecord.NumOfApartments = int.Parse(m_apartmentsNumTextfield.text);
                 buildingRecord.BuildingAI = buildingAIstr;
                 buildingRecord.IsDefault = false;
-                buildingRecord.IsPrefab = false;
-                buildingRecord.IsGlobal = false;
+                buildingRecord.IsPrefab = isPrefab;
+                buildingRecord.IsGlobal = isGlobal;
             }
 			else if(isPrefab && HousingManager.PrefabExist(buildingInfo))
 			{
@@ -343,6 +343,9 @@ namespace CampusIndustriesHousingMod.UI
                 if (housingGlobal != null)
                 {
                     buildingRecord.NumOfApartments = housingGlobal.NumOfApartments;
+                    buildingRecord.IsDefault = false;
+                    buildingRecord.IsPrefab = isPrefab;
+                    buildingRecord.IsGlobal = isGlobal;
                 }
             }
             else
@@ -351,15 +354,23 @@ namespace CampusIndustriesHousingMod.UI
                 {
                     barracksAI = HousingManager.DefaultBarracksValues(barracksAI);
                     buildingRecord.NumOfApartments = barracksAI.numApartments;
+                    buildingRecord.IsDefault = true;
+                    buildingRecord.IsPrefab = isPrefab;
+                    buildingRecord.IsGlobal = isGlobal;
                 }
                 else if (buildingAI is DormsAI dormsAI)
                 {
                     dormsAI = HousingManager.DefaultDormsValues(dormsAI);
                     buildingRecord.NumOfApartments = dormsAI.numApartments;
+                    buildingRecord.IsDefault = true;
+                    buildingRecord.IsPrefab = isPrefab;
+                    buildingRecord.IsGlobal = isGlobal;
                 }
             }
 
             m_apartmentsNumTextfield.text = buildingRecord.NumOfApartments.ToString();
+
+            HousingManager.SetBuildingRecord(buildingID, buildingRecord);
 
             RefreshData();
         }
