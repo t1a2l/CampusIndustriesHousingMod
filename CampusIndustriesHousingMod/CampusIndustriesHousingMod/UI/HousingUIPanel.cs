@@ -12,8 +12,6 @@ namespace CampusIndustriesHousingMod.UI
     public class HousingUIPanel
     {
         public readonly UIPanel m_uiMainPanel;
-
-        private readonly CityServiceWorldInfoPanel m_cityServiceWorldInfoPanel;
         
         private readonly UILabel m_settingsHeader;
         private readonly UILabel m_settingsStatus;
@@ -36,7 +34,7 @@ namespace CampusIndustriesHousingMod.UI
 
         public HousingUIPanel(BuildingWorldInfoPanel buildingWorldInfoPanel, UIPanel uIPanel)
         {
-            m_uiMainPanel = m_cityServiceWorldInfoPanel.component.AddUIComponent<UIPanel>();
+            m_uiMainPanel = buildingWorldInfoPanel.component.AddUIComponent<UIPanel>();
             m_uiMainPanel.name = "HousingUIPanel";
             m_uiMainPanel.backgroundSprite = "SubcategoriesPanel";
             m_uiMainPanel.opacity = 0.90f;
@@ -50,7 +48,7 @@ namespace CampusIndustriesHousingMod.UI
             m_settingsCheckBox.label.textColor = new Color32(185, 221, 254, 255);
             m_settingsCheckBox.label.textScale = 0.8125f;
             m_settingsCheckBox.tooltip = "Indicators will show how well serviced the building is and what problems might prevent the building from leveling up.";
-            m_settingsCheckBox.AlignTo(m_cityServiceWorldInfoPanel.component, UIAlignAnchor.TopLeft);
+            m_settingsCheckBox.AlignTo(buildingWorldInfoPanel.component, UIAlignAnchor.TopLeft);
             m_settingsCheckBox.relativePosition = new Vector3(m_uiMainPanel.width - m_settingsCheckBox.width, 6f);
             m_settingsCheckBox.eventCheckChanged += (component, value) =>
             {
