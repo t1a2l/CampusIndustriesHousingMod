@@ -1,6 +1,5 @@
 ﻿using ICities;
 using CitiesHarmony.API;
-using UnityEngine;
 using CampusIndustriesHousingMod.Utils;
 using System;
 using CampusIndustriesHousingMod.Managers;
