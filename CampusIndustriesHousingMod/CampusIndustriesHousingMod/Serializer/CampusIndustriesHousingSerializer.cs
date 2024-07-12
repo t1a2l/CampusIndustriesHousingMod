@@ -36,7 +36,7 @@ namespace CampusIndustriesHousingMod.Serializer
 
                         SaveGameFileVersion = StorageData.ReadUInt16(Data, ref Index);
 
-                        Debug.Log("Data length: " + Data.Length.ToString() + "; Data Version: " + SaveGameFileVersion);
+                        Debug.Log("DataID: " + DataID + "; Data length: " + Data.Length.ToString() + "; Data Version: " + SaveGameFileVersion);
 
                         if (SaveGameFileVersion <= DataVersion)
                         {
