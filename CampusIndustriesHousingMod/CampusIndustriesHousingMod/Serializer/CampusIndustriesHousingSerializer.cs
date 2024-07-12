@@ -10,8 +10,8 @@ namespace CampusIndustriesHousingMod.Serializer
         private const uint uiTUPLE_START = 0xFEFEFEFE;
         private const uint uiTUPLE_END = 0xFAFAFAFA;
 
-        public const ushort DataVersion = 1;
-        public const string DataID = "RealTime";
+        public const ushort DataVersion = 2;
+        public const string DataID = "CampusIndustriesHousingMod";
 
         public static CampusIndustriesHousingSerializer instance = null;
         private ISerializableData m_serializableData = null;
@@ -42,10 +42,18 @@ namespace CampusIndustriesHousingMod.Serializer
                         {
                             while (Index < Data.Length)
                             {
-                                CheckStartTuple("HousingSerializer", SaveGameFileVersion, Data, ref Index);
-                                HousingSerializer.LoadData(SaveGameFileVersion, Data, ref Index);
-                                CheckEndTuple("HousingSerializer", SaveGameFileVersion, Data, ref Index);
-                                break;
+                                if(SaveGameFileVersion == 1)
+                                {
+                                    HousingSerializer.LoadData(SaveGameFileVersion, Data, ref Index);
+                                    break;
+                                }
+                                else
+                                {
+                                    CheckStartTuple("HousingSerializer", SaveGameFileVersion, Data, ref Index);
+                                    HousingSerializer.LoadData(SaveGameFileVersion, Data, ref Index);
+                                    CheckEndTuple("HousingSerializer", SaveGameFileVersion, Data, ref Index);
+                                    break;
+                                }
                             }
                         }
                         else
