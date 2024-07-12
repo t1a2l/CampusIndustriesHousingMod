@@ -1,20 +1,38 @@
 ﻿using CampusIndustriesHousingMod.UI;
+using ColossalFramework.UI;
 using HarmonyLib;
+using UnityEngine;
 
 namespace CampusIndustriesHousingMod.Patches
 {
     [HarmonyPatch(typeof(CityServiceWorldInfoPanel))]
 	public static class CityServiceWorldInfoPanelPatch
 	{
-		[HarmonyPatch(typeof(CityServiceWorldInfoPanel), "OnSetTarget")]
+        private static HousingUIPanel cityServiceHousingUIPanel;
+
+        [HarmonyPatch(typeof(CityServiceWorldInfoPanel), "OnSetTarget")]
         [HarmonyPostfix]
-        public static void OnSetTarget_Postfix()
+        private static void OnSetTarget()
         {
-            if(HousingUIPanel.m_uiMainPanel == null)
+            if (cityServiceHousingUIPanel == null)
             {
-                HousingUIPanel.Init();
+                CityServiceCreateUI();
             }
-            HousingUIPanel.RefreshData();
+            cityServiceHousingUIPanel.RefreshData();
         }
-	}
+
+        private static void CityServiceCreateUI()
+        {
+            var m_cityServiceWorldInfoPanel = GameObject.Find("(Library) CityServiceWorldInfoPanel").GetComponent<CityServiceWorldInfoPanel>();
+            var wrapper = m_cityServiceWorldInfoPanel?.Find("Wrapper");
+            var mainSectionPanel = wrapper?.Find("MainSectionPanel");
+            var mainBottom = mainSectionPanel?.Find("MainBottom");
+            var buttonPanels = mainBottom?.Find("ButtonPanels").GetComponent<UIPanel>();
+            if (buttonPanels == null)
+            {
+                return;
+            }
+            cityServiceHousingUIPanel = new HousingUIPanel(m_cityServiceWorldInfoPanel, buttonPanels);
+        }
+    }
 }
