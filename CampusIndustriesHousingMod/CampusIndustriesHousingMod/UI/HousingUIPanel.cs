@@ -30,8 +30,6 @@ namespace CampusIndustriesHousingMod.UI
 
         private readonly UIButton UnlockSettingsBtn;
 
-        private readonly float DEFAULT_HEIGHT = 18F;
-
         public HousingUIPanel(BuildingWorldInfoPanel buildingWorldInfoPanel, UIPanel uIPanel)
         {
             m_uiMainPanel = buildingWorldInfoPanel.component.AddUIComponent<UIPanel>();
@@ -40,16 +38,16 @@ namespace CampusIndustriesHousingMod.UI
             m_uiMainPanel.opacity = 0.90f;
             m_uiMainPanel.isVisible = HousingConfig.Config.ShowPanel;
             m_uiMainPanel.relativePosition = new Vector3(m_uiMainPanel.parent.width + 1f, 40f);
-            m_uiMainPanel.height = 370f;
+            m_uiMainPanel.height = 350f;
             m_uiMainPanel.width = 510f;
 
             m_settingsCheckBox = UiUtils.CreateCheckBox(uIPanel, "SettingsCheckBox", "settings", HousingConfig.Config.ShowPanel);
-            m_settingsCheckBox.width = 110f;
+            m_settingsCheckBox.width = 80f;
             m_settingsCheckBox.label.textColor = new Color32(185, 221, 254, 255);
             m_settingsCheckBox.label.textScale = 0.8125f;
-            m_settingsCheckBox.tooltip = "Indicators will show how well serviced the building is and what problems might prevent the building from leveling up.";
+            m_settingsCheckBox.tooltip = "Set the number of apartments to the dorms or the industry housing";
             m_settingsCheckBox.AlignTo(buildingWorldInfoPanel.component, UIAlignAnchor.TopLeft);
-            m_settingsCheckBox.relativePosition = new Vector3(m_uiMainPanel.width - m_settingsCheckBox.width, 6f);
+            m_settingsCheckBox.relativePosition = new Vector3(400f, 0f);
             m_settingsCheckBox.eventCheckChanged += (component, value) =>
             {
                 m_uiMainPanel.isVisible = value;
@@ -69,40 +67,42 @@ namespace CampusIndustriesHousingMod.UI
             };
             uIPanel.AttachUIComponent(m_settingsCheckBox.gameObject);
 
-            m_settingsHeader = UiUtils.CreateLabel(m_uiMainPanel, "SettingsPanelHeader", "Settings", "");
+            m_settingsHeader = UiUtils.CreateLabel(m_uiMainPanel, "SettingsPanelHeader", "Adjust Number of Apartments", "");
             m_settingsHeader.font = UiUtils.GetUIFont("OpenSans-Regular");
             m_settingsHeader.textAlignment = UIHorizontalAlignment.Center;
-            m_settingsHeader.relativePosition = new Vector3(10f, 60f + 0 * (DEFAULT_HEIGHT * 0.8f + 2f));
+            m_settingsHeader.textColor = new Color32(78, 184, 126, 255);
+            m_settingsHeader.relativePosition = new Vector3(100f, 20f);
+            m_settingsHeader.textScale = 1.2f;
 
             m_settingsStatus = UiUtils.CreateLabel(m_uiMainPanel, "SettingsStatus", "", "");
             m_settingsStatus.font = UiUtils.GetUIFont("OpenSans-Regular");
             m_settingsStatus.textAlignment = UIHorizontalAlignment.Center;
             m_settingsStatus.textColor = new Color32(240, 190, 199, 255);
-            m_settingsStatus.relativePosition = new Vector3(100f, 20f);
-            m_settingsStatus.textScale = 1.2f;
+            m_settingsStatus.relativePosition = new Vector3(110f, 95f);
+            m_settingsStatus.textScale = 0.9f;
 
             ApartmentNumberPanel = UiUtils.UIServiceBar(m_uiMainPanel, "ApartmentNumber", "", "Number of apartments: ", "number of apartments");
-            ApartmentNumberPanel.relativePosition = new Vector3(10f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f));
+            ApartmentNumberPanel.relativePosition = new Vector3(10f, 130f);
 
-            SaveBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 2 * (DEFAULT_HEIGHT * 0.8f + 2f), "SaveBuildingSettings", "Save building settings", "First priority - will override prefab and global settings create a record for this building");
+            SaveBuildingSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 190f, "SaveBuildingSettings", "Save building settings", "First priority - will override prefab and global settings create a record for this building");
             SaveBuildingSettingsBtn.eventClicked += SaveBuildingSettings;
 
-            ReturnToDefaultBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 8 * (DEFAULT_HEIGHT * 0.8f + 2f), "ReturnToDefault", "Back to default", "Will not delete the record just set a default flag on it - you need to clear settings for this building to get the prefab or global settings");
+            ReturnToDefaultBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 190f, "ReturnToDefault", "Back to default", "Will not delete the record just set a default flag on it - you need to clear settings for this building to get the prefab or global settings");
             ReturnToDefaultBtn.eventClicked += ReturnToDefault;
 
-            ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 11 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyPrefabSettings", "Apply type settings", "Apply settings for all buildings of the same type as this building - is not cross save!");
+            ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 240f, "ApplyPrefabSettings", "Apply type settings", "Apply settings for all buildings of the same type as this building - is not cross save!");
             ApplyPrefabSettingsBtn.eventClicked += ApplyPrefabSettings;
 
-            ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 60f + 14 * (DEFAULT_HEIGHT * 0.8f + 2f), "ApplyGlobalSettings", "Apply global settings", "Apply settings for all buildings of the same type as this building - is cross save!");
+            ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 290f, "ApplyGlobalSettings", "Apply global settings", "Apply settings for all buildings of the same type as this building - is cross save!");
             ApplyGlobalSettingsBtn.eventClicked += ApplyGlobalSettings;
                 
-            SetPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 5 * (DEFAULT_HEIGHT * 0.8f + 2f), "SetPrefabSettings", "Set new type", "This will update all building records of this type to the current number of apartments in this save");
+            SetPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 240f, "SetPrefabSettings", "Set new type", "This will update all building records of this type to the current number of apartments in this save");
             SetPrefabSettingsBtn.eventClicked += SetPrefabSettings;
 
-            SetGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 60f + 8 * (DEFAULT_HEIGHT * 0.8f + 2f), "SetGlobalSettings", "Set new global", "This will update all building records of this type to the current number of apartments across all saves");
+            SetGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 290f, "SetGlobalSettings", "Set new global", "This will update all building records of this type to the current number of apartments across all saves");
             SetGlobalSettingsBtn.eventClicked += SetGlobalSettings;
 
-            UnlockSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 55f + 0 * (DEFAULT_HEIGHT * 0.8f + 2f), "UnlockSettingsBtn", "Unlock Settings", "");
+            UnlockSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 130f, 55f, "UnlockSettingsBtn", "Unlock Settings", "");
             UnlockSettingsBtn.eventClicked += UnlockSettings;
 
             SaveBuildingSettingsBtn.Disable();
@@ -184,14 +184,16 @@ namespace CampusIndustriesHousingMod.UI
                 }
 
                 UpdateHouse(buildingID, ref building, numOfApartments);
-
                 CreateOrEnsure(false, buildingID, ref building, numOfApartments, 0, 0);
 
                 m_settingsCheckBox.Show();
+                m_settingsCheckBox.relativePosition = new Vector3(400f, 0f);
 
-                if(m_settingsCheckBox.isChecked)
+                ApartmentNumberPanel.relativePosition = new Vector3(10f, 130f);
+
+                if (m_settingsCheckBox.isChecked)
                 {
-                    m_uiMainPanel.height = 370f;
+                    m_uiMainPanel.height = 350f;
                     m_uiMainPanel.Show();
                 }
 			}

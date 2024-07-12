@@ -158,20 +158,20 @@ namespace CampusIndustriesHousingMod.UI
             // panel
             UIPanel m_uiPanel = parent.AddUIComponent<UIPanel>();
             m_uiPanel.name = name;
-            m_uiPanel.height = 20f;
-            m_uiPanel.width = 440f;
+            m_uiPanel.height = 30f;
+            m_uiPanel.width = 240f;
 
             // text
             var label_name = name + "Label";
             UILabel m_uiTextLabel = CreateLabel(m_uiPanel, label_name, text, prefix);
             m_uiTextLabel.textAlignment = UIHorizontalAlignment.Left;
-            m_uiTextLabel.relativePosition = new Vector3(0, 0);
+            m_uiTextLabel.relativePosition = new Vector3(5, 8);
             m_uiTextLabel.textScale = DEFAULT_SCALE;
 
             // value
             var text_name = name + "TextField";
             UITextField m_uiValueLabel = CreateTextField(m_uiPanel, text_name, tooltip);
-            m_uiValueLabel.relativePosition = new Vector3(180f, -6f);
+            m_uiValueLabel.relativePosition = new Vector3(180f, 1f);
 
             return m_uiPanel;
         }
