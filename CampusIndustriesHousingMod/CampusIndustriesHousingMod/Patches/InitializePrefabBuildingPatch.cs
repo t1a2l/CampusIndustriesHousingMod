@@ -67,7 +67,6 @@ namespace CampusIndustriesHousingMod.Patches
 
                 if(universityDormitoryBuildingInfo != null && farmWorkersBarracksBuildingInfo != null)
                 {
-                    Debug.Log("FarmFound");
                     float universityDormitoryCapcityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
                     float farmWorkersBarracksCapcityModifier = Mod.getInstance().getOptionsManager().getBarracksCapacityModifier();
 
