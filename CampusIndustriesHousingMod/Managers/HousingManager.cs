@@ -80,15 +80,13 @@ namespace CampusIndustriesHousingMod.Managers
                 IsLocked = true
             };
 
-            if (buildingAI is BarracksAI barracksAI)
+            if(buildingAI is BarracksAI barracksAI)
             {
-                barracksAI = DefaultBarracksValues(barracksAI);
-                newBuildingRecord.NumOfApartments = barracksAI.numApartments;
+                newBuildingRecord.NumOfApartments = DefaultValues(barracksAI.m_industryType);
             }
             else if (buildingAI is DormsAI dormsAI)
             {
-                dormsAI = DefaultDormsValues(dormsAI);
-                newBuildingRecord.NumOfApartments = dormsAI.numApartments;
+                newBuildingRecord.NumOfApartments = DefaultValues(dormsAI.m_campusType);
             }
 
             BuildingRecords.Add(buildingID, newBuildingRecord);
@@ -161,44 +159,37 @@ namespace CampusIndustriesHousingMod.Managers
             PrefabRecords.Clear();
         }
 
-        public static BarracksAI DefaultBarracksValues(BarracksAI barracks)
+        public static int DefaultValues(DistrictPark.ParkType parkType)
         {
-            if(barracks.m_industryType == DistrictPark.ParkType.Farming)
+            if(parkType == DistrictPark.ParkType.Farming)
             {
-                barracks.numApartments = 2;
+                return 2;
             }
-            else if(barracks.m_industryType == DistrictPark.ParkType.Forestry)
+            else if(parkType == DistrictPark.ParkType.Forestry)
             {
-                barracks.numApartments = 10;
+                return 10;
             }
-            else if(barracks.m_industryType == DistrictPark.ParkType.Oil)
+            else if(parkType == DistrictPark.ParkType.Oil)
             {
-                barracks.numApartments = 50;
+                return 50;
             }
-            else if(barracks.m_industryType == DistrictPark.ParkType.Ore)
+            else if(parkType == DistrictPark.ParkType.Ore)
             {
-                barracks.numApartments = 48;
+                return 48;
             }
-
-            return barracks;
-        }
-
-        public static DormsAI DefaultDormsValues(DormsAI dorms)
-        {
-            if(dorms.m_campusType == DistrictPark.ParkType.University)
+            else if (parkType == DistrictPark.ParkType.University)
             {
-                dorms.numApartments = 60;
+                return 60;
             }
-            else if(dorms.m_campusType == DistrictPark.ParkType.LiberalArts)
+            else if (parkType == DistrictPark.ParkType.LiberalArts)
             {
-                dorms.numApartments = 60;
+                return 60;
             }
-            else if(dorms.m_campusType == DistrictPark.ParkType.TradeSchool)
+            else if (parkType == DistrictPark.ParkType.TradeSchool)
             {
-                dorms.numApartments = 60;
+                return 60;
             }
-
-            return dorms;
+            return 0;
         }
 
     }
