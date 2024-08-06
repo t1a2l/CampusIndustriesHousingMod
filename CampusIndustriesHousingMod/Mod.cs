@@ -19,7 +19,8 @@ namespace CampusIndustriesHousingMod
         
         public void OnEnabled() 
         {
-             HarmonyHelper.DoOnHarmonyReady(() => Patcher.PatchAll());
+            HarmonyHelper.DoOnHarmonyReady(() => Patcher.PatchAll());
+            AtlasUtils.CreateAtlas();
         }
 
         public void OnDisabled() 
