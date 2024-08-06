@@ -18,7 +18,7 @@ namespace CampusIndustriesHousingMod.Patches
             {
                 CityServiceCreateUI();
             }
-            cityServiceHousingUIPanel.RefreshData();
+            cityServiceHousingUIPanel.UpdateBuildingData();
         }
 
         private static void CityServiceCreateUI()
@@ -32,7 +32,10 @@ namespace CampusIndustriesHousingMod.Patches
             {
                 return;
             }
-            cityServiceHousingUIPanel = new HousingUIPanel(m_cityServiceWorldInfoPanel, buttonPanels);
+            if (cityServiceHousingUIPanel == null)
+            {
+                cityServiceHousingUIPanel = new HousingUIPanel(m_cityServiceWorldInfoPanel, buttonPanels);
+            }
         }
     }
 }

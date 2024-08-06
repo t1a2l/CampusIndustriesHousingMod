@@ -1,7 +1,6 @@
 ﻿using CampusIndustriesHousingMod.AI;
 using ColossalFramework;
 using System.Collections.Generic;
-using static ColossalFramework.DataBinding.BindPropertyByKey;
 
 namespace CampusIndustriesHousingMod.Managers
 {
@@ -14,22 +13,17 @@ namespace CampusIndustriesHousingMod.Managers
         public struct BuildingRecord
         {
             public string BuildingAI;
-
             public int NumOfApartments;
-
             public bool IsDefault;
-
             public bool IsPrefab;
-
             public bool IsGlobal;
+            public bool IsLocked;
         }
 
         public struct PrefabRecord
         {
             public string InfoName;
-
             public string BuildingAI;
-
             public int NumOfApartments;
         }
 
@@ -77,12 +71,13 @@ namespace CampusIndustriesHousingMod.Managers
             PrefabAI buildingAI = building.Info.GetAI();
             string buildingAIstr = buildingAI.GetType().Name;
 
-            BuildingRecord newBuildingRecord = new BuildingRecord
+            BuildingRecord newBuildingRecord = new()
             {
                 BuildingAI = buildingAIstr,
                 IsDefault = true,
                 IsPrefab = false,
-                IsGlobal = false
+                IsGlobal = false,
+                IsLocked = true
             };
 
             if (buildingAI is BarracksAI barracksAI)
@@ -97,6 +92,7 @@ namespace CampusIndustriesHousingMod.Managers
             }
 
             BuildingRecords.Add(buildingID, newBuildingRecord);
+
             return newBuildingRecord;
         }
 

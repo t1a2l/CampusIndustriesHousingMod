@@ -29,6 +29,12 @@
     <Copy SourceFiles="@(ModFiles)" DestinationFolder="$(ModDirectory)" />
   </Target>
   <ItemGroup>
+    <None Remove="UI\Atlas\LockButtonAtlas.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UI\Atlas\LockButtonAtlas.png" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="CitiesHarmony.API" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
