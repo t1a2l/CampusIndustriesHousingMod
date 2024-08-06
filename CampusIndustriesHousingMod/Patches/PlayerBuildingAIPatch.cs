@@ -11,9 +11,15 @@ namespace CampusIndustriesHousingMod.Patches
         [HarmonyPrefix]
         public static void CreateBuildingPrefix(PlayerBuildingAI __instance, ushort buildingID, ref Building data)
         {
-            if (data.Info.GetAI() is DormsAI || data.Info.GetAI() is BarracksAI)
+            if (data.Info.GetAI() is BarracksAI barracksAI)
             {
-                HousingManager.CreateBuildingRecord(buildingID);
+                var buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
+                barracksAI.numApartments = buildingRecord.NumOfApartments;
+            }
+            else if (data.Info.GetAI() is DormsAI dormsAI)
+            {
+                var buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
+                dormsAI.numApartments = buildingRecord.NumOfApartments;
             }
         }
 
@@ -21,9 +27,35 @@ namespace CampusIndustriesHousingMod.Patches
         [HarmonyPrefix]
         public static void BuildingLoadedPrefix(PlayerBuildingAI __instance, ushort buildingID, ref Building data)
         {
-            if (!HousingManager.BuildingRecordExist(buildingID))
+            if (data.Info.GetAI() is BarracksAI barracksAI)
             {
-                HousingManager.CreateBuildingRecord(buildingID);
+                HousingManager.BuildingRecord buildingRecord;
+
+                if (!HousingManager.BuildingRecordExist(buildingID))
+                {
+                    buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
+                } 
+                else
+                {
+                    buildingRecord = HousingManager.GetBuildingRecord(buildingID);
+                }
+
+                barracksAI.numApartments = buildingRecord.NumOfApartments;
+            }
+            else if (data.Info.GetAI() is DormsAI dormsAI)
+            {
+                HousingManager.BuildingRecord buildingRecord;
+
+                if (!HousingManager.BuildingRecordExist(buildingID))
+                {
+                    buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
+                }
+                else
+                {
+                    buildingRecord = HousingManager.GetBuildingRecord(buildingID);
+                }
+
+                dormsAI.numApartments = buildingRecord.NumOfApartments;
             }
         }
 
