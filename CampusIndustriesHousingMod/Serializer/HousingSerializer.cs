@@ -10,7 +10,7 @@ namespace CampusIndustriesHousingMod.Serializer
         private const uint uiTUPLE_START = 0xFEFEFEFE;
         private const uint uiTUPLE_END = 0xFAFAFAFA;
 
-        private const ushort iHOUSING_DATA_VERSION = 3;
+        private const ushort iHOUSING_DATA_VERSION = 4;
 
         public static void SaveData(FastList<byte> Data)
         {
@@ -32,6 +32,7 @@ namespace CampusIndustriesHousingMod.Serializer
                 StorageData.WriteBool(kvp.Value.IsDefault, Data);
                 StorageData.WriteBool(kvp.Value.IsPrefab, Data);
                 StorageData.WriteBool(kvp.Value.IsGlobal, Data);
+                StorageData.WriteBool(kvp.Value.IsLocked, Data);
 
                 // Write end tuple
                 StorageData.WriteUInt32(uiTUPLE_END, Data);
@@ -110,7 +111,7 @@ namespace CampusIndustriesHousingMod.Serializer
                     int BuildingRecords_Count = StorageData.ReadInt32(Data, ref iIndex);
                     for (int i = 0; i < BuildingRecords_Count; i++)
                     {
-                        CheckStartTuple($"Buffer({i})", BuildingRecords_Count, Data, ref iIndex);
+                        CheckStartTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
 
                         ushort BuildingId = StorageData.ReadUInt16(Data, ref iIndex);
 
@@ -118,22 +119,28 @@ namespace CampusIndustriesHousingMod.Serializer
                         int NumOfApartments = StorageData.ReadInt32(Data, ref iIndex);
                         bool IsDefault = StorageData.ReadBool(Data, ref iIndex);
 
-                        var housing = new HousingManager.BuildingRecord()
+                        var builidngRecord = new HousingManager.BuildingRecord()
                         {
                             BuildingAI = BuildingAI,
                             NumOfApartments = NumOfApartments,
                             IsDefault = IsDefault,
                             IsPrefab = false,
-                            IsGlobal = false
+                            IsGlobal = false,
+                            IsLocked = false
                         };
 
-                        if (iHousingVersion == 3)
+                        if (iHousingVersion > 2)
                         {
-                            housing.IsPrefab = StorageData.ReadBool(Data, ref iIndex);
-                            housing.IsGlobal = StorageData.ReadBool(Data, ref iIndex);
+                            builidngRecord.IsPrefab = StorageData.ReadBool(Data, ref iIndex);
+                            builidngRecord.IsGlobal = StorageData.ReadBool(Data, ref iIndex);
                         }
 
-                        HousingManager.BuildingRecords.Add(BuildingId, housing);
+                        if (iHousingVersion > 3)
+                        {
+                            builidngRecord.IsLocked = StorageData.ReadBool(Data, ref iIndex);
+                        }
+
+                        HousingManager.BuildingRecords.Add(BuildingId, builidngRecord);
 
                         CheckEndTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
                     }
@@ -154,7 +161,6 @@ namespace CampusIndustriesHousingMod.Serializer
                     int PrefabRecords_Length = StorageData.ReadInt32(Data, ref iIndex);
                     for (int i = 0; i < PrefabRecords_Length; ++i)
                     {
-
                         HousingManager.PrefabRecord prefabgRecord = new()
                         {
                             InfoName = StorageData.ReadString(Data, ref iIndex),
@@ -182,7 +188,7 @@ namespace CampusIndustriesHousingMod.Serializer
                     int PrefabRecords_Count = StorageData.ReadInt32(Data, ref iIndex);
                     for (int i = 0; i < PrefabRecords_Count; i++)
                     {
-                        CheckStartTuple($"Buffer({i})", PrefabRecords_Count, Data, ref iIndex);
+                        CheckStartTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
 
                         string InfoName = StorageData.ReadString(Data, ref iIndex);
                         string BuildingAI = StorageData.ReadString(Data, ref iIndex);
