@@ -15,6 +15,7 @@ namespace CampusIndustriesHousingMod.AI
 
         [CustomizableProperty("Number of Apartments")]
         public int numApartments = 50;
+
         private float capacityModifier = 1.0f;
 
         public override Color GetColor(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode, InfoManager.SubInfoMode subInfoMode) 
