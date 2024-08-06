@@ -3,6 +3,8 @@ using CitiesHarmony.API;
 using CampusIndustriesHousingMod.Utils;
 using System;
 using CampusIndustriesHousingMod.Managers;
+using ColossalFramework;
+using CampusIndustriesHousingMod.AI;
 
 namespace CampusIndustriesHousingMod
 {
@@ -56,6 +58,35 @@ namespace CampusIndustriesHousingMod
             {
                 Logger.LogError(e.Message);
                 HousingManager.Deinit();
+            }
+        }
+
+        public override void OnLevelLoaded(LoadMode mode)
+        {
+            switch (mode)
+            {
+                case LoadMode.LoadGame:
+                case LoadMode.NewGame:
+                case LoadMode.LoadScenario:
+                case LoadMode.NewGameFromScenario:
+                    break;
+
+                default:
+                    return;
+            }
+
+            var buildings = Singleton<BuildingManager>.instance.m_buildings;
+
+            for (ushort buildingId = 0; buildingId < buildings.m_size; buildingId++)
+            {
+                var building = buildings.m_buffer[buildingId];
+                if ((building.m_flags & Building.Flags.Created) != 0)
+                {
+                    if (HousingManager.BuildingRecordExist(buildingId) && building.Info.GetAI() is not BarracksAI && building.Info.GetAI() is not DormsAI)
+                    {
+                        HousingManager.RemoveBuildingRecord(buildingId);
+                    }
+                }
             }
         }
 
