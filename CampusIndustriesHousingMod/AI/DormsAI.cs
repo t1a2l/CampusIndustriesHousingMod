@@ -231,7 +231,7 @@ namespace CampusIndustriesHousingMod.AI
             HandleDead2(buildingID, ref buildingData, ref behaviour, totalCount);
 
             // Handle Crime and Fire Factors
-            int crimeAccumulation = behaviour.m_crimeAccumulation / (3 * getModifiedCapacity(buildingID, ref buildingData));
+            int crimeAccumulation = behaviour.m_crimeAccumulation / (3 * getModifiedCapacity());
             if ((policies & DistrictPolicies.Services.RecreationalUse) != DistrictPolicies.Services.None) 
             {
                 crimeAccumulation = crimeAccumulation * 3 + 3 >> 2;
@@ -373,7 +373,7 @@ namespace CampusIndustriesHousingMod.AI
                     stringBuilder.Append(Environment.NewLine);
 			    }
 		    }
-            stringBuilder.Append(string.Format("Apartments Occupied: {0} of {1}", numApartmentsOccupied, getModifiedCapacity(buildingID, ref data)));
+            stringBuilder.Append(string.Format("Apartments Occupied: {0} of {1}", numApartmentsOccupied, getModifiedCapacity()));
             stringBuilder.Append(Environment.NewLine);
             stringBuilder.Append(string.Format("Number of Residents: {0}", numResidents));
             stringBuilder.Append(Environment.NewLine);
@@ -397,7 +397,7 @@ namespace CampusIndustriesHousingMod.AI
             }
 
             getOccupancyDetails(ref buildingData, out int numResidents, out int numApartmentsOccupied);
-            float capacityModifier = (float) numApartmentsOccupied / (float) getModifiedCapacity(buildingID,ref buildingData);
+            float capacityModifier = (float) numApartmentsOccupied / (float) getModifiedCapacity();
             int modifiedAmount = (int) ((float) originalAmount * capacityModifier);
 
             int amount = 0;
@@ -712,15 +712,14 @@ namespace CampusIndustriesHousingMod.AI
             }
         }
 
-        public int getModifiedCapacity(ushort buildingID, ref Building data) 
+        public int getModifiedCapacity() 
         {
-            var dorms = data.Info.GetAI() as DormsAI;
-            return capacityModifier > 0 ? (int) (dorms.numApartments * capacityModifier) : dorms.numApartments;
+            return capacityModifier > 0 ? (int) (numApartments * capacityModifier) : numApartments;
         }
 
         public void validateCapacity(ushort buildingId, ref Building data, bool shouldCreateApartments) 
         {
-            int numApartmentsExpected = getModifiedCapacity(buildingId, ref data);
+            int numApartmentsExpected = getModifiedCapacity();
             
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitIndex = data.m_citizenUnits;

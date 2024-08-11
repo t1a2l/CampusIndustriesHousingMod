@@ -1,6 +1,7 @@
 ﻿using CampusIndustriesHousingMod.AI;
 using CampusIndustriesHousingMod.Managers;
 using HarmonyLib;
+using UnityEngine;
 
 namespace CampusIndustriesHousingMod.Patches
 {

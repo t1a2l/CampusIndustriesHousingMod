@@ -45,7 +45,7 @@ namespace CampusIndustriesHousingMod.Patches
                 {
                     dormsAI.getOccupancyDetails(ref campusBuilding, out _, out int numApartmentsOccupied);
                     total_ocuppied_apartment_num += numApartmentsOccupied;
-                    total_apartment_num += dormsAI.getModifiedCapacity(buildingId, ref campusBuilding);
+                    total_apartment_num += dormsAI.getModifiedCapacity();
                     Logger.LogInfo(Logger.LOG_CAMPUS, "Campus Building occupied apartments: {0}", numApartmentsOccupied);
                 }
             }
