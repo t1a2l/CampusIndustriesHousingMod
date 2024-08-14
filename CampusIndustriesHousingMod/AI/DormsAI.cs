@@ -714,20 +714,9 @@ namespace CampusIndustriesHousingMod.AI
 
         public int getModifiedCapacity(ushort buildingID) 
         {
-            if (numApartments == 0)
-            {
-                if (HousingManager.BuildingRecordExist(buildingID))
-                {
-                    var buildingRecord = HousingManager.GetBuildingRecord(buildingID);
-                    numApartments = buildingRecord.NumOfApartments;
-                }
-                else
-                {
-                    var buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
-                    numApartments = buildingRecord.NumOfApartments;
-                }
-            }
-            return capacityModifier > 0 ? (int)(numApartments * capacityModifier) : numApartments;
+            ref Building building = ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
+            var dorms = building.Info.GetAI() as DormsAI;
+            return capacityModifier > 0 ? (int)(dorms.numApartments * capacityModifier) : dorms.numApartments;
         }
 
         public void validateCapacity(ushort buildingId, ref Building data, bool shouldCreateApartments) 

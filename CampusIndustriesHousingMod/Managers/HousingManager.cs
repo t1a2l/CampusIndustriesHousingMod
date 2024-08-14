@@ -109,10 +109,9 @@ namespace CampusIndustriesHousingMod.Managers
             BuildingRecords.Clear();
         }
 
-        public static bool PrefabExist(BuildingInfo buildingInfo)
+        public static bool PrefabExist(string BuildingInfostr, string BuildingAIstr)
         {
-            string BuildingAIstr = buildingInfo.GetAI().GetType().Name;
-            int index = PrefabRecords.FindIndex(item => item.InfoName == buildingInfo.name && item.BuildingAI == BuildingAIstr);
+            int index = PrefabRecords.FindIndex(item => item.InfoName == BuildingInfostr && item.BuildingAI == BuildingAIstr);
             return index != -1;
         }
 

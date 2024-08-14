@@ -132,7 +132,7 @@ namespace CampusIndustriesHousingMod.UI
             ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
             Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
 
-            if (HousingManager.PrefabExist(building.Info))
+            if (HousingManager.PrefabExist(building.Info.name, building.Info.GetAI().GetType().Name))
             {
                 ApplyPrefabSettingsBtn.Enable();
             }
@@ -183,7 +183,7 @@ namespace CampusIndustriesHousingMod.UI
                 m_apartmentsNumTextfield.text = buildingRecord.NumOfApartments.ToString();
                 numOfApartments = buildingRecord.NumOfApartments;
             }
-            else if (HousingManager.PrefabExist(building.Info) && buildingRecord.IsPrefab && !buildingRecord.IsLocked)
+            else if (HousingManager.PrefabExist(building.Info.name, building.Info.GetAI().GetType().Name) && buildingRecord.IsPrefab && !buildingRecord.IsLocked)
             {
                 m_settingsStatus.text = "This Building is using type settings";
 
@@ -200,7 +200,7 @@ namespace CampusIndustriesHousingMod.UI
             }
 
             UpdateHouse(buildingID, ref building, numOfApartments);
-            CreateOrEnsure(false, buildingID, ref building, numOfApartments, 0, 0);
+            CreateOrEnsure(false, buildingID, ref building, numOfApartments);
 
             m_settingsCheckBox.Show();
             m_settingsCheckBox.relativePosition = new Vector3(400f, 0f);
@@ -288,7 +288,7 @@ namespace CampusIndustriesHousingMod.UI
 
             var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
 
-            if (HousingManager.PrefabExist(buildingInfo) && !buildingRecord.IsLocked)
+            if (HousingManager.PrefabExist(buildingInfo.name, buildingInfo.GetAI().GetType().Name) && !buildingRecord.IsLocked)
             {
                 var prefabRecord = HousingManager.GetPrefab(buildingInfo);
                 m_apartmentsNumTextfield.text = prefabRecord.NumOfApartments.ToString();
@@ -338,12 +338,9 @@ namespace CampusIndustriesHousingMod.UI
                     NumOfApartments = int.Parse(m_apartmentsNumTextfield.text)
                 };
 
-                if (!buildingRecord.IsLocked)
-                {
-                    m_settingsStatus.text = "This Building is using type settings";
-                }
-
                 UpdateBuildingSettings.CreatePrefabSettings(buildingID, newPrefabSettings);
+
+                RefreshData(buildingID, newPrefabSettings);
             });
         }
 
@@ -366,12 +363,9 @@ namespace CampusIndustriesHousingMod.UI
                     NumOfApartments = int.Parse(m_apartmentsNumTextfield.text)
                 };
 
-                if (!buildingRecord.IsLocked)
-                {
-                    m_settingsStatus.text = "This Building is using global settings";
-                }
-
                 UpdateBuildingSettings.CreateGlobalSettings(buildingID, newGlobalSettings);
+
+                RefreshData(buildingID, newGlobalSettings);
             });
         }
 
@@ -393,7 +387,19 @@ namespace CampusIndustriesHousingMod.UI
             }
         }
 
-        private void EnsureCitizenUnits(ushort buildingID, ref Building data, int homeCount = 0, int workCount = 0, int visitCount = 0, int studentCount = 0, int hotelCount = 0)
+        private void CreateOrEnsure(bool is_new, ushort buildingID, ref Building data, int numOfApartments)
+        {
+            if(is_new)
+            {
+                Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, numOfApartments);
+            }
+            else
+            {
+                EnsureCitizenUnits(buildingID, ref data, numOfApartments);
+            }
+        }
+
+        private void EnsureCitizenUnits(ushort buildingID, ref Building data, int homeCount = 0)
         {
             if ((data.m_flags & (Building.Flags.Abandoned | Building.Flags.Collapsed)) != 0)
             {
@@ -412,18 +418,6 @@ namespace CampusIndustriesHousingMod.UI
                     instance.m_units.m_buffer[num2].SetWealthLevel(wealthLevel);
                     homeCount--;
                 }
-                if ((flags & CitizenUnit.Flags.Work) != 0)
-                {
-                    workCount -= 5;
-                }
-                if ((flags & CitizenUnit.Flags.Visit) != 0)
-                {
-                    visitCount -= 5;
-                }
-                if ((flags & CitizenUnit.Flags.Student) != 0)
-                {
-                    studentCount -= 5;
-                }
                 num = num2;
                 num2 = instance.m_units.m_buffer[num2].m_nextUnit;
                 if (++num3 > 524288)
@@ -433,15 +427,11 @@ namespace CampusIndustriesHousingMod.UI
                 }
             }
             homeCount = Mathf.Max(0, homeCount);
-            workCount = Mathf.Max(0, workCount);
-            visitCount = Mathf.Max(0, visitCount);
-            studentCount = Mathf.Max(0, studentCount);
-            hotelCount = Mathf.Max(0, hotelCount);
-            if (homeCount == 0 && workCount == 0 && visitCount == 0 && studentCount == 0 && hotelCount == 0)
+            if (homeCount == 0)
             {
                 return;
             }
-            if (instance.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount, workCount, visitCount, 0, studentCount, hotelCount))
+            if (instance.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount))
             {
                 if (num != 0)
                 {
@@ -451,18 +441,6 @@ namespace CampusIndustriesHousingMod.UI
                 {
                     data.m_citizenUnits = firstUnit;
                 }
-            }
-        }
-
-        private void CreateOrEnsure(bool is_new, ushort buildingID, ref Building data, int numOfApartments, int workCount, int studentCount)
-        {
-            if(is_new)
-            {
-                Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, numOfApartments, workCount, 0, 0, 0);
-            }
-            else
-            {
-                EnsureCitizenUnits(buildingID, ref data, numOfApartments, workCount);
             }
         }
 

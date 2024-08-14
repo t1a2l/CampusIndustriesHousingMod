@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using ICities;
 using UnityEngine;
 
@@ -31,23 +32,27 @@ namespace CampusIndustriesHousingMod.Serializer
                     byte[] Data = m_serializableData.LoadData(DataID);
                     if (Data != null && Data.Length > 0)
                     {
-                        ushort SaveGameFileVersion;
-                        int Index = 0;
+                        // Data was read - go ahead and deserialise.
+                        using MemoryStream stream = new(Data);
+                        using BinaryReader reader = new(stream);
 
-                        SaveGameFileVersion = StorageData.ReadUInt16(Data, ref Index);
+                        int SaveGameFileVersion = reader.ReadInt32();
 
                         Debug.Log("DataID: " + DataID + "; Data length: " + Data.Length.ToString() + "; Data Version: " + SaveGameFileVersion);
 
                         if (SaveGameFileVersion <= DataVersion)
                         {
-                            while (Index < Data.Length)
+                            if (SaveGameFileVersion == 1)
                             {
-                                if(SaveGameFileVersion == 1)
-                                {
-                                    HousingSerializer.LoadData(SaveGameFileVersion, Data, ref Index);
-                                    break;
-                                }
-                                else
+                                HousingManagerOldSerializer.Deserialize(reader);
+
+                                Logger.LogInfo(Logger.LOG_DATA, "read ", stream.Length);
+                            }
+                            else
+                            {
+                                int Index = 0;
+
+                                while (Index < Data.Length)
                                 {
                                     CheckStartTuple("HousingSerializer", SaveGameFileVersion, Data, ref Index);
                                     HousingSerializer.LoadData(SaveGameFileVersion, Data, ref Index);

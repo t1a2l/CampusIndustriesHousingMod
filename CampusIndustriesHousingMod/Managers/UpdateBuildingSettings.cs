@@ -97,7 +97,7 @@ namespace CampusIndustriesHousingMod.Managers
                 HousingManager.SetBuildingRecord(buildingId, buildingRecord);
             }
 
-            if (HousingManager.PrefabExist(buildingInfo))
+            if (HousingManager.PrefabExist(buildingInfo.name, buildingInfo.GetAI().GetType().Name))
             {
                 // update the prefab
                 var prefabRecord = HousingManager.GetPrefab(buildingInfo);

@@ -64,150 +64,92 @@ namespace CampusIndustriesHousingMod.Serializer
         {
             if (Data != null && Data.Length > iIndex)
             {
-                int iHousingVersion = StorageData.ReadUInt16(Data, ref iIndex);
-                Debug.Log("Global: " + iGlobalVersion + " BufferVersion: " + iHousingVersion + " DataLength: " + Data.Length + " Index: " + iIndex);
-
                 HousingManager.BuildingRecords ??= [];
+
+                HousingManager.PrefabRecords ??= [];
 
                 if (HousingManager.BuildingRecords.Count > 0)
                 {
                     HousingManager.BuildingRecords.Clear();
                 }
 
-                if (iHousingVersion < 2)
-                {
-                    // old version
-                    int BuildingRecords_Count = StorageData.ReadInt32(Data, ref iIndex);
-
-                    for (int i = 0; i < BuildingRecords_Count; ++i)
-                    {
-                        // Dictionary entry key.
-                        uint buildingID = StorageData.ReadUInt32(Data, ref iIndex);
-
-                        HousingManager.BuildingRecord buildingRecord = new()
-                        {
-                            BuildingAI = StorageData.ReadString(Data, ref iIndex),
-                            NumOfApartments = StorageData.ReadInt32(Data, ref iIndex),
-                            IsDefault = StorageData.ReadBool(Data, ref iIndex)
-                        };
-
-                        // Drop any empty entries.
-                        if (buildingRecord.BuildingAI == null)
-                        {
-                            continue;
-                        }
-
-                        // Add completed entry to dictionary.
-                        if (!HousingManager.BuildingRecords.ContainsKey((ushort)buildingID))
-                        {
-                            HousingManager.BuildingRecords.Add((ushort)buildingID, buildingRecord);
-                        }
-                    }
-                }
-                else
-                {
-                    CheckStartTuple($"BuildingRecords Start", iHousingVersion, Data, ref iIndex);
-
-                    int BuildingRecords_Count = StorageData.ReadInt32(Data, ref iIndex);
-                    for (int i = 0; i < BuildingRecords_Count; i++)
-                    {
-                        CheckStartTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
-
-                        ushort BuildingId = StorageData.ReadUInt16(Data, ref iIndex);
-
-                        string BuildingAI = StorageData.ReadString(Data, ref iIndex);
-                        int NumOfApartments = StorageData.ReadInt32(Data, ref iIndex);
-                        bool IsDefault = StorageData.ReadBool(Data, ref iIndex);
-
-                        var builidngRecord = new HousingManager.BuildingRecord()
-                        {
-                            BuildingAI = BuildingAI,
-                            NumOfApartments = NumOfApartments,
-                            IsDefault = IsDefault,
-                            IsPrefab = false,
-                            IsGlobal = false,
-                            IsLocked = false
-                        };
-
-                        if (iHousingVersion > 2)
-                        {
-                            builidngRecord.IsPrefab = StorageData.ReadBool(Data, ref iIndex);
-                            builidngRecord.IsGlobal = StorageData.ReadBool(Data, ref iIndex);
-                        }
-
-                        if (iHousingVersion > 3)
-                        {
-                            builidngRecord.IsLocked = StorageData.ReadBool(Data, ref iIndex);
-                        }
-
-                        HousingManager.BuildingRecords.Add(BuildingId, builidngRecord);
-
-                        CheckEndTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
-                    }
-
-                    CheckEndTuple($"BuildingRecords End", iHousingVersion, Data, ref iIndex);
-                }
-
-                //--------------------------------------------------------------------------------------
-                HousingManager.PrefabRecords ??= [];
-
                 if (HousingManager.PrefabRecords.Count > 0)
                 {
                     HousingManager.PrefabRecords.Clear();
                 }
 
-                if (iHousingVersion < 2)
+                int iHousingVersion = StorageData.ReadUInt16(Data, ref iIndex);
+
+                Debug.Log("Global: " + iGlobalVersion + " BufferVersion: " + iHousingVersion + " DataLength: " + Data.Length + " Index: " + iIndex);
+
+                CheckStartTuple($"BuildingRecords Start", iHousingVersion, Data, ref iIndex);
+
+                int BuildingRecords_Count = StorageData.ReadInt32(Data, ref iIndex);
+                for (int i = 0; i < BuildingRecords_Count; i++)
                 {
-                    int PrefabRecords_Length = StorageData.ReadInt32(Data, ref iIndex);
-                    for (int i = 0; i < PrefabRecords_Length; ++i)
+                    CheckStartTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
+
+                    ushort BuildingId = StorageData.ReadUInt16(Data, ref iIndex);
+
+                    string BuildingAI = StorageData.ReadString(Data, ref iIndex);
+                    int NumOfApartments = StorageData.ReadInt32(Data, ref iIndex);
+                    bool IsDefault = StorageData.ReadBool(Data, ref iIndex);
+
+                    var builidngRecord = new HousingManager.BuildingRecord()
                     {
-                        HousingManager.PrefabRecord prefabgRecord = new()
-                        {
-                            InfoName = StorageData.ReadString(Data, ref iIndex),
-                            BuildingAI = StorageData.ReadString(Data, ref iIndex),
-                            NumOfApartments = StorageData.ReadInt32(Data, ref iIndex)
-                        };
+                        BuildingAI = BuildingAI,
+                        NumOfApartments = NumOfApartments,
+                        IsDefault = IsDefault,
+                        IsPrefab = false,
+                        IsGlobal = false,
+                        IsLocked = false
+                    };
 
-                        // Drop any empty entries.
-                        if (prefabgRecord.InfoName == null && prefabgRecord.BuildingAI == null)
-                        {
-                            continue;
-                        }
-
-                        // Add completed entry to list.
-                        if (!HousingManager.PrefabRecords.Contains(prefabgRecord))
-                        {
-                            HousingManager.PrefabRecords.Add(prefabgRecord);
-                        }
-                    }
-                }
-                else
-                {
-                    CheckStartTuple($"PrefabRecords Start", iHousingVersion, Data, ref iIndex);
-                    
-                    int PrefabRecords_Count = StorageData.ReadInt32(Data, ref iIndex);
-                    for (int i = 0; i < PrefabRecords_Count; i++)
+                    if (iHousingVersion > 2)
                     {
-                        CheckStartTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
-
-                        string InfoName = StorageData.ReadString(Data, ref iIndex);
-                        string BuildingAI = StorageData.ReadString(Data, ref iIndex);
-                        int NumOfApartments = StorageData.ReadInt32(Data, ref iIndex);
-
-                        var housing = new HousingManager.PrefabRecord()
-                        {
-                            InfoName = InfoName,
-                            BuildingAI = BuildingAI,
-                            NumOfApartments = NumOfApartments
-                        };
-
-                        HousingManager.PrefabRecords.Add(housing);
-
-                        CheckEndTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
+                        builidngRecord.IsPrefab = StorageData.ReadBool(Data, ref iIndex);
+                        builidngRecord.IsGlobal = StorageData.ReadBool(Data, ref iIndex);
                     }
 
-                    CheckEndTuple($"PrefabRecords End", iHousingVersion, Data, ref iIndex);
+                    if (iHousingVersion > 3)
+                    {
+                        builidngRecord.IsLocked = StorageData.ReadBool(Data, ref iIndex);
+                    }
+
+                    HousingManager.BuildingRecords.Add(BuildingId, builidngRecord);
+
+                    CheckEndTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
                 }
+
+                CheckEndTuple($"BuildingRecords End", iHousingVersion, Data, ref iIndex);
+
+                //--------------------------------------------------------------------------------------
+
+                CheckStartTuple($"PrefabRecords Start", iHousingVersion, Data, ref iIndex);
+
+                int PrefabRecords_Count = StorageData.ReadInt32(Data, ref iIndex);
+                for (int i = 0; i < PrefabRecords_Count; i++)
+                {
+                    CheckStartTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
+
+                    string InfoName = StorageData.ReadString(Data, ref iIndex);
+                    string BuildingAI = StorageData.ReadString(Data, ref iIndex);
+                    int NumOfApartments = StorageData.ReadInt32(Data, ref iIndex);
+
+                    var housing = new HousingManager.PrefabRecord()
+                    {
+                        InfoName = InfoName,
+                        BuildingAI = BuildingAI,
+                        NumOfApartments = NumOfApartments
+                    };
+
+                    HousingManager.PrefabRecords.Add(housing);
+
+                    CheckEndTuple($"Buffer({i})", iHousingVersion, Data, ref iIndex);
+                }
+
+                CheckEndTuple($"PrefabRecords End", iHousingVersion, Data, ref iIndex);
+                
             }
         }
 
