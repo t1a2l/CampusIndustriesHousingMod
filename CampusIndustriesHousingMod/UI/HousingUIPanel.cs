@@ -158,8 +158,16 @@ namespace CampusIndustriesHousingMod.UI
 
             if (isAllowedCityService)
             {
-                var buildingRecord = HousingManager.GetBuildingRecord(buildingID);
-                RefreshData(buildingID, buildingRecord);
+                if(HousingManager.BuildingRecordExist(buildingID))
+                {
+                    var buildingRecord = HousingManager.GetBuildingRecord(buildingID);
+                    RefreshData(buildingID, buildingRecord);
+                }
+                else
+                {
+                    var buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
+                    RefreshData(buildingID, buildingRecord);
+                }
             }
             else
             {
