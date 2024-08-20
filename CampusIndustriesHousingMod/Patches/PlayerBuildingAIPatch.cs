@@ -1,7 +1,6 @@
 ﻿using CampusIndustriesHousingMod.AI;
 using CampusIndustriesHousingMod.Managers;
 using HarmonyLib;
-using UnityEngine;
 
 namespace CampusIndustriesHousingMod.Patches
 {
@@ -28,22 +27,7 @@ namespace CampusIndustriesHousingMod.Patches
         [HarmonyPrefix]
         public static void BuildingLoadedPrefix(PlayerBuildingAI __instance, ushort buildingID, ref Building data)
         {
-            if (data.Info.GetAI() is BarracksAI barracksAI)
-            {
-                HousingManager.BuildingRecord buildingRecord;
-
-                if (!HousingManager.BuildingRecordExist(buildingID))
-                {
-                    buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
-                } 
-                else
-                {
-                    buildingRecord = HousingManager.GetBuildingRecord(buildingID);
-                }
-
-                barracksAI.numApartments = buildingRecord.NumOfApartments;
-            }
-            else if (data.Info.GetAI() is DormsAI dormsAI)
+            if(data.Info.GetAI() is BarracksAI || data.Info.GetAI() is DormsAI)
             {
                 HousingManager.BuildingRecord buildingRecord;
 
@@ -56,7 +40,14 @@ namespace CampusIndustriesHousingMod.Patches
                     buildingRecord = HousingManager.GetBuildingRecord(buildingID);
                 }
 
-                dormsAI.numApartments = buildingRecord.NumOfApartments;
+                if (data.Info.GetAI() is BarracksAI barracksAI)
+                {
+                    barracksAI.numApartments = buildingRecord.NumOfApartments;
+                }
+                else if (data.Info.GetAI() is DormsAI dormsAI)
+                {
+                    dormsAI.numApartments = buildingRecord.NumOfApartments;
+                }
             }
         }
 
