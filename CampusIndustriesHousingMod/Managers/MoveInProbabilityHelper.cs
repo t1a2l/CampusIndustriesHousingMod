@@ -1,5 +1,4 @@
 ﻿using System;
-using CampusIndustriesHousingMod.Utils;
 using ColossalFramework;
 using ColossalFramework.Math;
 using UnityEngine;
@@ -14,44 +13,44 @@ namespace CampusIndustriesHousingMod.Managers
         private static readonly float MAX_CHANCE_VALUE = DISTANCE_MAX_CHANCE_VALUE + QUALITY_MAX_CHANCE_VALUE;
         private static readonly float NO_CHANCE = -(MAX_CHANCE_VALUE * 10);
 
-        public static bool checkIfShouldMoveIn(uint[] family, ref Building buildingData, ref Randomizer randomizer, string type)
+        public static bool CheckIfShouldMoveIn(uint[] family, ref Building buildingData, ref Randomizer randomizer, string type)
         {
             float chanceValue = BASE_CHANCE_VALUE;
-            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.checkIfShouldMoveIn -- Base Chance: {0}", chanceValue);
+            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.CheckIfShouldMoveIn -- Base Chance: {0}", chanceValue);
             Logger.LogInfo(Logger.LOG_CHANCES, "---------------------------------");
 
             // Distance
-            chanceValue += getDistanceChanceValue(family, ref buildingData, type);
+            chanceValue += GetDistanceChanceValue(family, ref buildingData, type);
 
             // Wealth
-            chanceValue += getWealthChanceValue(family, type);
+            chanceValue += GetWealthChanceValue(family, type);
 
             // Check for no chance
             if (chanceValue <= 0)
             {
-                Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.checkIfShouldMoveIn -- No Chance: {0}", chanceValue);
+                Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.CheckIfShouldMoveIn -- No Chance: {0}", chanceValue);
                 return false;
             }
 
             // Check against random value
             uint maxChance = (uint)MAX_CHANCE_VALUE;
             int randomValue = randomizer.Int32(maxChance);
-            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.checkIfShouldMoveIn -- Total Chance Value: {0} -- Random Number: {1} -- result: {2}", chanceValue, randomValue, randomValue <= chanceValue);
+            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.CheckIfShouldMoveIn -- Total Chance Value: {0} -- Random Number: {1} -- result: {2}", chanceValue, randomValue, randomValue <= chanceValue);
             return randomValue <= chanceValue;
         }
 
-        private static float getDistanceChanceValue(uint[] family, ref Building buildingData, string type)
+        private static float GetDistanceChanceValue(uint[] family, ref Building buildingData, string type)
         {
-            WorkerManager workerManager = WorkerManager.getInstance();
-            StudentManager studentManager = StudentManager.getInstance();
+            WorkerManager workerManager = WorkerManager.GetInstance();
+            StudentManager studentManager = StudentManager.GetInstance();
 
             // Get the home for the family
-            ushort homeBuildingId = getHomeBuildingIdForFamily(family);
+            ushort homeBuildingId = GetHomeBuildingIdForFamily(family);
 
             if (homeBuildingId == 0)
             {
                 // homeBuilding should never be 0, but if it is return NO_CHANCE to prevent this family from being chosen 
-                Logger.LogError(Logger.LOG_CHANCES, "MoveInProbabilityHelper.getDistanceChanceValue -- Home Building was 0 when it shouldn't have been");
+                Logger.LogError(Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetDistanceChanceValue -- Home Building was 0 when it shouldn't have been");
                 return NO_CHANCE;
             }
 
@@ -60,9 +59,9 @@ namespace CampusIndustriesHousingMod.Managers
             {
                 foreach (uint familyMember in family)
                 {
-                    if (workerManager.isIndustryAreaWorker(familyMember))
+                    if (workerManager.IsIndustryAreaWorker(familyMember))
                     {
-                        workBuildingId = getWorkBuildingId(familyMember);
+                        workBuildingId = GetWorkBuildingId(familyMember);
                         break;
                     }
                 }
@@ -71,9 +70,9 @@ namespace CampusIndustriesHousingMod.Managers
             {
                 foreach (uint familyMember in family)
                 {
-                    if (studentManager.isCampusAreaStudent(familyMember))
+                    if (studentManager.IsCampusAreaStudent(familyMember))
                     {
-                        workBuildingId = getWorkBuildingId(familyMember);
+                        workBuildingId = GetWorkBuildingId(familyMember);
                         break;
                     }
                 }
@@ -83,7 +82,7 @@ namespace CampusIndustriesHousingMod.Managers
             if (workBuildingId == 0)
             {
                 // workBuildingId should never be 0, but if it is return NO_CHANCE to prevent this family from being chosen 
-                Logger.LogError(Logger.LOG_CHANCES, "MoveInProbabilityHelper.getDistanceChanceValue -- Work Building was 0 when it shouldn't have been");
+                Logger.LogError(Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetDistanceChanceValue -- Work Building was 0 when it shouldn't have been");
                 return NO_CHANCE;
             }
 
@@ -104,12 +103,12 @@ namespace CampusIndustriesHousingMod.Managers
             {
                 distanceChanceValue = DISTANCE_MAX_CHANCE_VALUE * 1f;
             }
-            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.getDistanceChanceValue -- Distance Chance Value: {0} -- Distance From Current Home: {1}, Distance From New Home: {2}", distanceChanceValue, distance_from_current_home_to_work, distance_from_new_home_to_Work);
+            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetDistanceChanceValue -- Distance Chance Value: {0} -- Distance From Current Home: {1}, Distance From New Home: {2}", distanceChanceValue, distance_from_current_home_to_work, distance_from_new_home_to_Work);
 
             return distanceChanceValue;
         }
 
-        private static ushort getHomeBuildingIdForFamily(uint[] family)
+        private static ushort GetHomeBuildingIdForFamily(uint[] family)
         {
             foreach (uint familyMember in family)
             {
@@ -122,14 +121,14 @@ namespace CampusIndustriesHousingMod.Managers
             return 0;
         }
 
-        private static ushort getWorkBuildingId(uint familyMember)
+        private static ushort GetWorkBuildingId(uint familyMember)
         {
             return Singleton<CitizenManager>.instance.m_citizens.m_buffer[familyMember].m_workBuilding;
         }
 
-        private static float getWealthChanceValue(uint[] family, string type)
+        private static float GetWealthChanceValue(uint[] family, string type)
         {
-            Citizen.Wealth wealth = getFamilyWealth(family);
+            Citizen.Wealth wealth = GetFamilyWealth(family);
             float chance = NO_CHANCE;
             if (type == "worker")
             {
@@ -162,11 +161,11 @@ namespace CampusIndustriesHousingMod.Managers
                 }
             }
 
-            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.getQualityLevelChanceValue -- Wealth Chance Value: {0} -- Family Wealth: {1} -- type: {2}", chance, wealth, type);
+            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetQualityLevelChanceValue -- Wealth Chance Value: {0} -- Family Wealth: {1} -- type: {2}", chance, wealth, type);
             return chance;
         }
 
-        private static Citizen.Wealth getFamilyWealth(uint[] family)
+        private static Citizen.Wealth GetFamilyWealth(uint[] family)
         {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 

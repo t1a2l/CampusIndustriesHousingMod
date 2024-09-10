@@ -158,7 +158,7 @@ namespace CampusIndustriesHousingMod.AI
             {
                 int maxMail = 100;
                 int mailAccumulation = 1;
-                this.HandleCommonConsumption(buildingID, ref buildingData, ref frameData, ref modifiedElectricityConsumption, ref heatingConsumption, ref waterConsumption, ref modifiedSewageAccumulation, ref garbageAccumulation, ref mailAccumulation, maxMail, policies);
+                HandleCommonConsumption(buildingID, ref buildingData, ref frameData, ref modifiedElectricityConsumption, ref heatingConsumption, ref waterConsumption, ref modifiedSewageAccumulation, ref garbageAccumulation, ref mailAccumulation, maxMail, policies);
                 buildingData.m_flags |= Building.Flags.Active;
             } 
             else 
@@ -186,7 +186,7 @@ namespace CampusIndustriesHousingMod.AI
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.ElderCare, behaviour.m_healthAccumulation, buildingData.m_position, radius);
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Health, behaviour.m_healthAccumulation, buildingData.m_position, radius);
             }
-            Logger.LogInfo(Logger.LOG_SIMULATION, "BarracksAI.SimulationStepActive -- health: {0}", health);
+            Logger.LogInfo(Logger.LOG_BARRACKS_SIMULATION, "BarracksAI.SimulationStepActive -- health: {0}", health);
 
             // Get the Wellbeing
             int wellbeing = 0;
@@ -198,7 +198,7 @@ namespace CampusIndustriesHousingMod.AI
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Wellbeing, behaviour.m_wellbeingAccumulation, buildingData.m_position, radius);
             }
-            Logger.LogInfo(Logger.LOG_SIMULATION, "BarracksAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
+            Logger.LogInfo(Logger.LOG_BARRACKS_SIMULATION, "BarracksAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
 
             if (aliveCount != 0) 
             {
@@ -215,7 +215,7 @@ namespace CampusIndustriesHousingMod.AI
             {
                 happiness -= happiness >> 2;
             }
-            Logger.LogInfo(Logger.LOG_SIMULATION, "BarracksAI.SimulationStepActive -- happiness: {0}", happiness);
+            Logger.LogInfo(Logger.LOG_BARRACKS_SIMULATION, "BarracksAI.SimulationStepActive -- happiness: {0}", happiness);
 
             buildingData.m_health = (byte) health;
             buildingData.m_happiness = (byte) happiness;
@@ -232,7 +232,7 @@ namespace CampusIndustriesHousingMod.AI
             HandleDead2(buildingID, ref buildingData, ref behaviour, totalCount);
 
             // Handle Crime and Fire Factors
-            int crimeAccumulation = behaviour.m_crimeAccumulation / (3 * getModifiedCapacity(buildingID));
+            int crimeAccumulation = behaviour.m_crimeAccumulation / (3 * GetModifiedCapacity(buildingID));
             if ((policies & DistrictPolicies.Services.RecreationalUse) != DistrictPolicies.Services.None) 
             {
                 crimeAccumulation = crimeAccumulation * 3 + 3 >> 2;
@@ -269,7 +269,7 @@ namespace CampusIndustriesHousingMod.AI
             districtManager.m_districts.m_buffer[(int) district].AddResidentialData(ref behaviour, aliveCount, health, happiness, crimeRate, homeCount, aliveHomeCount, emptyHomeCount, (int) this.m_info.m_class.m_level, modifiedElectricityConsumption, heatingConsumption, waterConsumption, modifiedSewageAccumulation, garbageAccumulation, modifiedIncomeAccumulation, Mathf.Min(100, (int) buildingData.m_garbageBuffer / 50), (int) buildingData.m_waterPollution * 100 / (int) byte.MaxValue, this.m_info.m_class.m_subService);
 
             // Handle custom maintenance in addition to the standard maintenance handled in the base class
-            handleAdditionalMaintenanceCost(buildingID, ref buildingData);
+            HandleAdditionalMaintenanceCost(buildingID, ref buildingData);
 		    
             base.SimulationStepActive(buildingID, ref buildingData, ref frameData);
             HandleFire(buildingID, ref buildingData, ref frameData, policies);
@@ -287,7 +287,7 @@ namespace CampusIndustriesHousingMod.AI
 		    {
 			    return;
 		    }
-            getOccupancyDetails(ref buildingData, out int numResidents, out int numApartmentsOccupied);
+            GetOccupancyDetails(ref buildingData, out int numResidents, out int numApartmentsOccupied);
 
             // Make sure there are no problems
             if ((buildingData.m_problems & (Notification.Problem1.MajorProblem | Notification.Problem1.Electricity | Notification.Problem1.ElectricityNotConnected | Notification.Problem1.Fire | Notification.Problem1.Water | Notification.Problem1.WaterNotConnected | Notification.Problem1.TurnedOff)) != Notification.Problem1.None) 
@@ -299,62 +299,62 @@ namespace CampusIndustriesHousingMod.AI
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 
             // Fetch a Worker and family that wants to move in 
-            uint[] familyWithWorkers = workerManager.getFamilyWithWorkers(buildingData);
+            uint[] familyWithWorkers = workerManager.GetFamilyWithWorkers(buildingData);
             if (familyWithWorkers != null) 
             {
                 // Make sure there are empty apartments available
-                uint emptyApartment = getEmptyCitizenUnit(ref buildingData);
+                uint emptyApartment = GetEmptyCitizenUnit(ref buildingData);
                 if (emptyApartment == 0) 
                 {
                     return;
                 }
 
-                Logger.LogInfo(Logger.LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.LogInfo(Logger.LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Worker Family: {0}", string.Join(", ", Array.ConvertAll(familyWithWorkers, item => item.ToString())));
+                Logger.LogInfo(Logger.LOG_BARRACKS_PRODUCTION, "------------------------------------------------------------");
+                Logger.LogInfo(Logger.LOG_BARRACKS_PRODUCTION, "BarracksAI.ProduceGoods -- Worker Family: {0}", string.Join(", ", Array.ConvertAll(familyWithWorkers, item => item.ToString())));
                 // Check move in chance
                 bool shouldMoveIn = MoveInProbabilityHelper.checkIfShouldMoveIn(familyWithWorkers, ref buildingData, ref randomizer, "worker");
 
                 // Process the worker and his family and move them in if able to, mark the worker as done processing regardless
                 if (shouldMoveIn)
                 {
-                    Logger.LogInfo(Logger.LOG_PRODUCTION, "BarracksAI.ProduceGoods -- shouldMoveIn");
+                    Logger.LogInfo(Logger.LOG_BARRACKS_PRODUCTION, "BarracksAI.ProduceGoods -- shouldMoveIn");
                     foreach (uint familyMember in familyWithWorkers) 
                     {
                         if(familyMember != 0)
                         {
-                            Logger.LogInfo(Logger.LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving In: {0}", familyMember);
+                            Logger.LogInfo(Logger.LOG_BARRACKS_PRODUCTION, "BarracksAI.ProduceGoods -- Moving In: {0}", familyMember);
                             citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, buildingID, emptyApartment);
                         }
                     }
 
-                    workerManager.doneProcessingFamily(familyWithWorkers);
+                    workerManager.DoneProcessingFamily(familyWithWorkers);
                 }
             }
 
             // Fetch a barracks family that needs to move out because none of the family members is working in this indastrial area no more
-            uint[] BarracksApartmentFamily = workerManager.getBarracksApartmentFamily(buildingData);
+            uint[] BarracksApartmentFamily = workerManager.GetBarracksApartmentFamily(buildingData);
             if (BarracksApartmentFamily != null) 
             {
-                Logger.LogInfo(Logger.LOG_PRODUCTION, "------------------------------------------------------------");
-                Logger.LogInfo(Logger.LOG_PRODUCTION, "BarracksAI.ProduceGoods -- BarracksApartmentFamily: {0}", string.Join(", ", Array.ConvertAll(BarracksApartmentFamily, item => item.ToString())));
+                Logger.LogInfo(Logger.LOG_BARRACKS_PRODUCTION, "------------------------------------------------------------");
+                Logger.LogInfo(Logger.LOG_BARRACKS_PRODUCTION, "BarracksAI.ProduceGoods -- BarracksApartmentFamily: {0}", string.Join(", ", Array.ConvertAll(BarracksApartmentFamily, item => item.ToString())));
 
                 foreach (uint familyMember in BarracksApartmentFamily) 
                 {
                     if(familyMember != 0)
                     {
-                        Logger.LogInfo(Logger.LOG_PRODUCTION, "BarracksAI.ProduceGoods -- Moving Out: {0}", familyMember);
+                        Logger.LogInfo(Logger.LOG_BARRACKS_PRODUCTION, "BarracksAI.ProduceGoods -- Moving Out: {0}", familyMember);
                         citizenManager.m_citizens.m_buffer[familyMember].SetHome(familyMember, 0, 0);
                     }
                 }
 
-                workerManager.doneProcessingFamily(BarracksApartmentFamily);
+                workerManager.DoneProcessingFamily(BarracksApartmentFamily);
             }
 
         }
         
         public override string GetLocalizedStats(ushort buildingID, ref Building data) 
         {
-            getOccupancyDetails(ref data, out int numResidents, out int numApartmentsOccupied);
+            GetOccupancyDetails(ref data, out int numResidents, out int numApartmentsOccupied);
             StringBuilder stringBuilder = new();
             DistrictManager instance = Singleton<DistrictManager>.instance;
 		    byte b = instance.GetPark(data.m_position);
@@ -389,7 +389,7 @@ namespace CampusIndustriesHousingMod.AI
 			{
 				stringBuilder.Append(Environment.NewLine);
 			}
-            stringBuilder.Append(string.Format("Apartments Occupied: {0} of {1}", numApartmentsOccupied, getModifiedCapacity(buildingID)));
+            stringBuilder.Append(string.Format("Apartments Occupied: {0} of {1}", numApartmentsOccupied, GetModifiedCapacity(buildingID)));
             stringBuilder.Append(Environment.NewLine);
             stringBuilder.Append(string.Format("Number of Residents: {0}", numResidents));
             stringBuilder.Append(Environment.NewLine);
@@ -397,28 +397,28 @@ namespace CampusIndustriesHousingMod.AI
             return stringBuilder.ToString();
         }
 
-        private int getCustomMaintenanceCost(ushort buildingID, ref Building buildingData) 
+        private int GetCustomMaintenanceCost(ushort buildingID, ref Building buildingData) 
         {
-            int originalAmount = -(this.m_maintenanceCost * 100);
+            int originalAmount = -(m_maintenanceCost * 100);
 
-            Mod mod = Mod.getInstance();
+            Mod mod = Mod.GetInstance();
             if (mod == null) 
             {
                 return 0;
             }
 
-            OptionsManager optionsManager = mod.getOptionsManager();
+            OptionsManager optionsManager = mod.GetOptionsManager();
             if (optionsManager == null) 
             {
                 return 0;
             }
 
-            getOccupancyDetails(ref buildingData, out int numResidents, out int numApartmentsOccupied);
-            float capacityModifier = (float) numApartmentsOccupied / (float) getModifiedCapacity(buildingID);
-            int modifiedAmount = (int) ((float) originalAmount * capacityModifier);
+            GetOccupancyDetails(ref buildingData, numResidents: out int _, out int numApartmentsOccupied);
+            float capacityModifier = numApartmentsOccupied / (float) GetModifiedCapacity(buildingID);
+            int modifiedAmount = (int) (originalAmount * capacityModifier);
 
             int amount = 0;
-            switch (optionsManager.getBarracksIncomeModifier()) 
+            switch (optionsManager.GetBarracksIncomeModifier()) 
             {
                 case OptionsManager.IncomeValues.FULL_MAINTENANCE:
                     return 0;
@@ -445,14 +445,14 @@ namespace CampusIndustriesHousingMod.AI
             }
             
             Singleton<EconomyManager>.instance.m_EconomyWrapper.OnGetMaintenanceCost(ref amount, this.m_info.m_class.m_service, this.m_info.m_class.m_subService, this.m_info.m_class.m_level);
-            Logger.LogInfo(Logger.LOG_INCOME, "getCustomMaintenanceCost - building: {0} - calculated maintenance amount: {1}", buildingData.m_buildIndex, amount);
+            Logger.LogInfo(Logger.LOG_BARRACKS_INCOME, "GetCustomMaintenanceCost - building: {0} - calculated maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
             return amount;
         }
 
-        public void handleAdditionalMaintenanceCost(ushort buildingID, ref Building buildingData) 
+        public void HandleAdditionalMaintenanceCost(ushort buildingID, ref Building buildingData) 
         {
-            int amount = getCustomMaintenanceCost(buildingID, ref buildingData);
+            int amount = GetCustomMaintenanceCost(buildingID, ref buildingData);
             if (amount == 0) 
             {
                 return;
@@ -460,9 +460,9 @@ namespace CampusIndustriesHousingMod.AI
 
             int productionRate = (int) buildingData.m_productionRate;
             int budget = Singleton<EconomyManager>.instance.GetBudget(this.m_info.m_class);
-            amount = amount / 100;
+            amount /= 100;
             amount = productionRate * budget / 100 * amount / 100;
-            Logger.LogInfo(Logger.LOG_INCOME, "getCustomMaintenanceCost - building: {0} - adjusted maintenance amount: {1}", buildingData.m_buildIndex, amount);
+            Logger.LogInfo(Logger.LOG_BARRACKS_INCOME, "GetCustomMaintenanceCost - building: {0} - adjusted maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
             if ((buildingData.m_flags & Building.Flags.Original) == Building.Flags.None && amount != 0) 
             {
@@ -470,7 +470,7 @@ namespace CampusIndustriesHousingMod.AI
             }
         }
 
-        private uint getEmptyCitizenUnit(ref Building data) 
+        private uint GetEmptyCitizenUnit(ref Building data) 
         {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitIndex = data.m_citizenUnits;
@@ -491,7 +491,7 @@ namespace CampusIndustriesHousingMod.AI
             return 0;
         }
 
-        private int GetAverageResidentRequirement(ushort buildingID, ref Building data, ImmaterialResourceManager.Resource resource) 
+        private int GetAverageResidentRequirement(ref Building data, ImmaterialResourceManager.Resource resource) 
         {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnit = data.m_citizenUnits;
@@ -529,7 +529,7 @@ namespace CampusIndustriesHousingMod.AI
                 citizenUnit = num5;
                 if (++counter > numCitizenUnits) 
                 {
-                    CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + System.Environment.StackTrace);
+                    CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
                     break;
                 }
             }
@@ -581,59 +581,59 @@ namespace CampusIndustriesHousingMod.AI
             switch (resource) 
             {
                 case ImmaterialResourceManager.Resource.HealthCare:
-                    int residentRequirement1 = GetAverageResidentRequirement(buildingID, ref data, resource);
+                    int residentRequirement1 = GetAverageResidentRequirement(ref data, resource);
                     int local1;
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out local1);
                     int num1 = ImmaterialResourceManager.CalculateResourceEffect(local1, residentRequirement1, 500, 20, 40);
-                    return Mathf.Clamp((float) (ImmaterialResourceManager.CalculateResourceEffect(local1 + Mathf.RoundToInt(amount), residentRequirement1, 500, 20, 40) - num1) / 20f, -1f, 1f);
+                    return Mathf.Clamp((ImmaterialResourceManager.CalculateResourceEffect(local1 + Mathf.RoundToInt(amount), residentRequirement1, 500, 20, 40) - num1) / 20f, -1f, 1f);
                 case ImmaterialResourceManager.Resource.FireDepartment:
-                    int residentRequirement2 = GetAverageResidentRequirement(buildingID, ref data, resource);
+                    int residentRequirement2 = GetAverageResidentRequirement(ref data, resource);
                     int local2;
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out local2);
                     int num2 = ImmaterialResourceManager.CalculateResourceEffect(local2, residentRequirement2, 500, 20, 40);
-                    return Mathf.Clamp((float) (ImmaterialResourceManager.CalculateResourceEffect(local2 + Mathf.RoundToInt(amount), residentRequirement2, 500, 20, 40) - num2) / 20f, -1f, 1f);
+                    return Mathf.Clamp((ImmaterialResourceManager.CalculateResourceEffect(local2 + Mathf.RoundToInt(amount), residentRequirement2, 500, 20, 40) - num2) / 20f, -1f, 1f);
                 case ImmaterialResourceManager.Resource.PoliceDepartment:
-                    int residentRequirement3 = GetAverageResidentRequirement(buildingID, ref data, resource);
+                    int residentRequirement3 = GetAverageResidentRequirement(ref data, resource);
                     int local3;
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out local3);
                     int num3 = ImmaterialResourceManager.CalculateResourceEffect(local3, residentRequirement3, 500, 20, 40);
-                    return Mathf.Clamp((float) (ImmaterialResourceManager.CalculateResourceEffect(local3 + Mathf.RoundToInt(amount), residentRequirement3, 500, 20, 40) - num3) / 20f, -1f, 1f);
+                    return Mathf.Clamp((ImmaterialResourceManager.CalculateResourceEffect(local3 + Mathf.RoundToInt(amount), residentRequirement3, 500, 20, 40) - num3) / 20f, -1f, 1f);
                 case ImmaterialResourceManager.Resource.EducationElementary:
                 case ImmaterialResourceManager.Resource.EducationHighSchool:
                 case ImmaterialResourceManager.Resource.EducationUniversity:
-                    int residentRequirement4 = GetAverageResidentRequirement(buildingID, ref data, resource);
+                    int residentRequirement4 = GetAverageResidentRequirement(ref data, resource);
                     int local4;
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out local4);
                     int num4 = ImmaterialResourceManager.CalculateResourceEffect(local4, residentRequirement4, 500, 20, 40);
-                    return Mathf.Clamp((float) (ImmaterialResourceManager.CalculateResourceEffect(local4 + Mathf.RoundToInt(amount), residentRequirement4, 500, 20, 40) - num4) / 20f, -1f, 1f);
+                    return Mathf.Clamp((ImmaterialResourceManager.CalculateResourceEffect(local4 + Mathf.RoundToInt(amount), residentRequirement4, 500, 20, 40) - num4) / 20f, -1f, 1f);
                 case ImmaterialResourceManager.Resource.DeathCare:
-                    int residentRequirement5 = GetAverageResidentRequirement(buildingID, ref data, resource);
+                    int residentRequirement5 = GetAverageResidentRequirement(ref data, resource);
                     int local5;
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out local5);
                     int num5 = ImmaterialResourceManager.CalculateResourceEffect(local5, residentRequirement5, 500, 10, 20);
-                    return Mathf.Clamp((float) (ImmaterialResourceManager.CalculateResourceEffect(local5 + Mathf.RoundToInt(amount), residentRequirement5, 500, 10, 20) - num5) / 20f, -1f, 1f);
+                    return Mathf.Clamp((ImmaterialResourceManager.CalculateResourceEffect(local5 + Mathf.RoundToInt(amount), residentRequirement5, 500, 10, 20) - num5) / 20f, -1f, 1f);
                 case ImmaterialResourceManager.Resource.PublicTransport:
-                    int residentRequirement6 = GetAverageResidentRequirement(buildingID, ref data, resource);
+                    int residentRequirement6 = GetAverageResidentRequirement(ref data, resource);
                     int local6;
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out local6);
                     int num6 = ImmaterialResourceManager.CalculateResourceEffect(local6, residentRequirement6, 500, 20, 40);
-                    return Mathf.Clamp((float) (ImmaterialResourceManager.CalculateResourceEffect(local6 + Mathf.RoundToInt(amount), residentRequirement6, 500, 20, 40) - num6) / 20f, -1f, 1f);
+                    return Mathf.Clamp((ImmaterialResourceManager.CalculateResourceEffect(local6 + Mathf.RoundToInt(amount), residentRequirement6, 500, 20, 40) - num6) / 20f, -1f, 1f);
                 case ImmaterialResourceManager.Resource.NoisePollution:
                     int local7;
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out local7);
                     int num7 = local7 * 100 / (int) byte.MaxValue;
-                    return Mathf.Clamp((float) (Mathf.Clamp(local7 + Mathf.RoundToInt(amount), 0, (int) byte.MaxValue) * 100 / (int) byte.MaxValue - num7) / 50f, -1f, 1f);
+                    return Mathf.Clamp((Mathf.Clamp(local7 + Mathf.RoundToInt(amount), 0, (int) byte.MaxValue) * 100 / (int) byte.MaxValue - num7) / 50f, -1f, 1f);
                 case ImmaterialResourceManager.Resource.Entertainment:
-                    int residentRequirement7 = GetAverageResidentRequirement(buildingID, ref data, resource);
+                    int residentRequirement7 = GetAverageResidentRequirement(ref data, resource);
                     int local8;
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out local8);
                     int num8 = ImmaterialResourceManager.CalculateResourceEffect(local8, residentRequirement7, 500, 30, 60);
-                    return Mathf.Clamp((float) (ImmaterialResourceManager.CalculateResourceEffect(local8 + Mathf.RoundToInt(amount), residentRequirement7, 500, 30, 60) - num8) / 30f, -1f, 1f);
+                    return Mathf.Clamp((ImmaterialResourceManager.CalculateResourceEffect(local8 + Mathf.RoundToInt(amount), residentRequirement7, 500, 30, 60) - num8) / 30f, -1f, 1f);
                 case ImmaterialResourceManager.Resource.Abandonment:
                     int local9;
                     Singleton<ImmaterialResourceManager>.instance.CheckLocalResource(resource, data.m_position, out local9);
                     int num9 = ImmaterialResourceManager.CalculateResourceEffect(local9, 15, 50, 10, 20);
-                    return Mathf.Clamp((float) (ImmaterialResourceManager.CalculateResourceEffect(local9 + Mathf.RoundToInt(amount), 15, 50, 10, 20) - num9) / 50f, -1f, 1f);
+                    return Mathf.Clamp((ImmaterialResourceManager.CalculateResourceEffect(local9 + Mathf.RoundToInt(amount), 15, 50, 10, 20) - num9) / 50f, -1f, 1f);
                 default:
                     return 0f;
             }
@@ -645,10 +645,9 @@ namespace CampusIndustriesHousingMod.AI
                 return 0.0f;
             if (resource != NaturalResourceManager.Resource.Pollution)
                 return 0f;
-            byte groundPollution;
-            Singleton<NaturalResourceManager>.instance.CheckPollution(data.m_position, out groundPollution);
-            int num = (int) groundPollution * 100 / (int) byte.MaxValue;
-            return Mathf.Clamp((float) (Mathf.Clamp((int) groundPollution + Mathf.RoundToInt(amount), 0, (int) byte.MaxValue) * 100 / (int) byte.MaxValue - num) / 50f, -1f, 1f);
+            Singleton<NaturalResourceManager>.instance.CheckPollution(data.m_position, out byte groundPollution);
+            int num = groundPollution * 100 / byte.MaxValue;
+            return Mathf.Clamp((Mathf.Clamp(groundPollution + Mathf.RoundToInt(amount), 0, byte.MaxValue) * 100 / byte.MaxValue - num) / 50f, -1f, 1f);
         }
 
         public void GetConsumptionRates(Randomizer randomizer, int productionRate, out int electricityConsumption, out int waterConsumption, out int sewageAccumulation, out int garbageAccumulation, out int incomeAccumulation) 
@@ -676,7 +675,7 @@ namespace CampusIndustriesHousingMod.AI
             incomeAccumulation = productionRate * incomeAccumulation;
         }
 
-        public void getOccupancyDetails(ref Building data, out int numResidents, out int numApartmentsOccupied) 
+        public void GetOccupancyDetails(ref Building data, out int numResidents, out int numApartmentsOccupied) 
         {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitIndex = data.m_citizenUnits;
@@ -715,28 +714,28 @@ namespace CampusIndustriesHousingMod.AI
             }
         }
 
-        public void updateCapacity(float newCapacityModifier) 
+        public void UpdateCapacity(float newCapacityModifier) 
         {
-            Logger.LogInfo(Logger.LOG_OPTIONS, "BarracksAI.updateCapacity -- Updating capacity with modifier: {0}", newCapacityModifier);
+            Logger.LogInfo(Logger.LOG_BARRACKS_CAPACITY, "BarracksAI.UpdateCapacity -- Updating capacity with modifier: {0}", newCapacityModifier);
             // Set the capcityModifier and check to see if the value actually changes
             if (Interlocked.Exchange(ref capacityModifier, newCapacityModifier) == newCapacityModifier) 
             {
                 // Capcity has already been set to this value, nothing to do
-                Logger.LogInfo(Logger.LOG_OPTIONS, "BarracksAI.updateCapacity -- Skipping capacity change because the value was already set");
+                Logger.LogInfo(Logger.LOG_BARRACKS_CAPACITY, "BarracksAI.UpdateCapacity -- Skipping capacity change because the value was already set");
                 return;
             }
         }
 
-        public int getModifiedCapacity(ushort buildingID) 
+        public int GetModifiedCapacity(ushort buildingID) 
         {
             ref Building building = ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
             var barracks = building.Info.GetAI() as BarracksAI;
             return capacityModifier > 0 ? (int) (barracks.numApartments * capacityModifier) : barracks.numApartments;
         }
 
-        public void validateCapacity(ushort buildingId, ref Building data, bool shouldCreateApartments) 
+        public void ValidateCapacity(ushort buildingId, ref Building data, bool shouldCreateApartments) 
         {
-            int numApartmentsExpected = getModifiedCapacity(buildingId);
+            int numApartmentsExpected = GetModifiedCapacity(buildingId);
             
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitIndex = data.m_citizenUnits;
@@ -755,7 +754,7 @@ namespace CampusIndustriesHousingMod.AI
                 citizenUnitIndex = nextCitizenUnitIndex;
             }
 
-            Logger.LogInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.validateCapacity -- Checking Expected Capacity {0} vs Current Capacity {1} for Building {2}", numApartmentsExpected, numApartmentsFound, buildingId);
+            Logger.LogInfo(Logger.LOG_BARRACKS_CAPACITY, "BarracksAI.ValidateCapacity -- Checking Expected Capacity {0} vs Current Capacity {1} for Building {2}", numApartmentsExpected, numApartmentsFound, buildingId);
             // Check to see if the correct amount of apartments are present, otherwise adjust accordingly
             if (numApartmentsFound == numApartmentsExpected) 
             {
@@ -766,26 +765,26 @@ namespace CampusIndustriesHousingMod.AI
                 if (shouldCreateApartments) 
                 {
                     // Only create apartments after a building is already loaded, otherwise let EnsureCitizenUnits to create them
-                    createApartments((numApartmentsExpected - numApartmentsFound), buildingId, ref data, lastCitizenUnitIndex);
+                    CreateApartments(numApartmentsExpected - numApartmentsFound, buildingId, lastCitizenUnitIndex);
                 }
             } 
             else 
             {
-                deleteApartments((numApartmentsFound - numApartmentsExpected), buildingId, ref data);
+                DeleteApartments(numApartmentsFound - numApartmentsExpected, ref data);
             }
         }
 
-        private void createApartments(int numApartmentsToCreate, ushort buildingId, ref Building data, uint lastCitizenUnitIndex) 
+        private void CreateApartments(int numApartmentsToCreate, ushort buildingId, uint lastCitizenUnitIndex) 
         {
-            Logger.LogInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.createApartments -- Creating {0} Apartments", numApartmentsToCreate);
+            Logger.LogInfo(Logger.LOG_BARRACKS_CAPACITY, "BarracksAI.CreateApartments -- Creating {0} Apartments", numApartmentsToCreate);
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             citizenManager.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingId, (ushort) 0, numApartmentsToCreate, 0, 0, 0, 0);
             citizenManager.m_units.m_buffer[lastCitizenUnitIndex].m_nextUnit = firstUnit;
         }
 
-        private void deleteApartments(int numApartmentsToDelete, ushort buildingId, ref Building data) 
+        private void DeleteApartments(int numApartmentsToDelete, ref Building data) 
         {
-            Logger.LogInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.deleteApartments -- Deleting {0} Apartments", numApartmentsToDelete);
+            Logger.LogInfo(Logger.LOG_BARRACKS_CAPACITY, "BarracksAI.DeleteApartments -- Deleting {0} Apartments", numApartmentsToDelete);
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             
             // Always start with the second to avoid loss of pointer from the building to the first unit
@@ -801,7 +800,7 @@ namespace CampusIndustriesHousingMod.AI
                 {
                     if (citizenManager.m_units.m_buffer[citizenUnitIndex].Empty()) 
                     {
-                        deleteApartment(citizenUnitIndex, ref citizenManager.m_units.m_buffer[citizenUnitIndex], prevUnit);
+                        DeleteApartment(citizenUnitIndex, ref citizenManager.m_units.m_buffer[citizenUnitIndex], prevUnit);
                         numApartmentsToDelete--;
                         deleted = true;
                     }
@@ -819,7 +818,7 @@ namespace CampusIndustriesHousingMod.AI
                 return;
             }
 
-            Logger.LogInfo(Logger.LOG_CAPACITY_MANAGEMENT, "BarracksAI.deleteApartments -- Deleting {0} Occupied Apartments", numApartmentsToDelete);
+            Logger.LogInfo(Logger.LOG_BARRACKS_CAPACITY, "BarracksAI.DeleteApartments -- Deleting {0} Occupied Apartments", numApartmentsToDelete);
             // Still need to delete more apartments so start deleting apartments with people in them...
             // Always start with the second to avoid loss of pointer from the building to the first unit
             prevUnit = data.m_citizenUnits;
@@ -832,7 +831,7 @@ namespace CampusIndustriesHousingMod.AI
                 uint nextCitizenUnitIndex = citizenManager.m_units.m_buffer[citizenUnitIndex].m_nextUnit;
                 if ((citizenManager.m_units.m_buffer[citizenUnitIndex].m_flags & CitizenUnit.Flags.Home) != CitizenUnit.Flags.None) 
                 {
-                    deleteApartment(citizenUnitIndex, ref citizenManager.m_units.m_buffer[citizenUnitIndex], prevUnit);
+                    DeleteApartment(citizenUnitIndex, ref citizenManager.m_units.m_buffer[citizenUnitIndex], prevUnit);
                     numApartmentsToDelete--;
                     deleted = true;
                 }
@@ -844,7 +843,7 @@ namespace CampusIndustriesHousingMod.AI
             }
         }
 
-        private void deleteApartment(uint unit, ref CitizenUnit data, uint prevUnit) 
+        private void DeleteApartment(uint unit, ref CitizenUnit data, uint prevUnit) 
         {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 
@@ -852,18 +851,18 @@ namespace CampusIndustriesHousingMod.AI
             citizenManager.m_units.m_buffer[prevUnit].m_nextUnit = data.m_nextUnit;
 
             // Release all the citizens
-            releaseUnitCitizen(data.m_citizen0, ref data);
-            releaseUnitCitizen(data.m_citizen1, ref data);
-            releaseUnitCitizen(data.m_citizen2, ref data);
-            releaseUnitCitizen(data.m_citizen3, ref data);
-            releaseUnitCitizen(data.m_citizen4, ref data);
+            ReleaseUnitCitizen(data.m_citizen0, ref data);
+            ReleaseUnitCitizen(data.m_citizen1, ref data);
+            ReleaseUnitCitizen(data.m_citizen2, ref data);
+            ReleaseUnitCitizen(data.m_citizen3, ref data);
+            ReleaseUnitCitizen(data.m_citizen4, ref data);
 
             // Release the Unit
             data = new CitizenUnit();
             citizenManager.m_units.ReleaseItem(unit);
         }
 
-        private void releaseUnitCitizen(uint citizen, ref CitizenUnit data) 
+        private void ReleaseUnitCitizen(uint citizen, ref CitizenUnit data) 
         {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 

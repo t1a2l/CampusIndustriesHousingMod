@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace CampusIndustriesHousingMod.Serializer
 {
@@ -102,7 +101,7 @@ namespace CampusIndustriesHousingMod.Serializer
             {
                 for (int j = 0; j != UInt16Array.GetLength(1); j++)
                 {
-                    StorageData.WriteUInt16(UInt16Array[i, j], Data);
+                    WriteUInt16(UInt16Array[i, j], Data);
                 }
             }
         }
@@ -182,7 +181,7 @@ namespace CampusIndustriesHousingMod.Serializer
                 }
                 else
                 {
-                    Debug.LogError("Data size not large enough aborting read. ArraySize: " + iArrayCount + " DataSize: " + Data.Length + " Index: " + iIndex);
+                    Logger.LogError(Logger.LOG_SERIALIZATION, "Data size not large enough aborting read. ArraySize: " + iArrayCount + " DataSize: " + Data.Length + " Index: " + iIndex);
                 }
             }
             return list;
@@ -203,7 +202,7 @@ namespace CampusIndustriesHousingMod.Serializer
                 }
                 else
                 {
-                    Debug.LogError("Data size not large enough aborting read. ArraySize: " + iArrayCount + " DataSize: " + Data.Length + " Index: " + iIndex);
+                    Logger.LogError(Logger.LOG_SERIALIZATION, "Data size not large enough aborting read. ArraySize: " + iArrayCount + " DataSize: " + Data.Length + " Index: " + iIndex);
                 }
             }
             return list;

@@ -11,7 +11,6 @@ namespace CampusIndustriesHousingMod.Utils
 {
     public class OptionsManager
     {
-
         private static readonly string[] CAPACITY_LABELS = ["Give Em Room (x0.5)", "Realistic (x1.0)", "Just a bit More (x1.5)", "Gameplay over Realism (x2.0)", "Who needs Living Space? (x2.5)", "Pack em like Sardines! (x3.0)"];
         private static readonly float[] CAPACITY_VALUES = [0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f];
 
@@ -38,17 +37,17 @@ namespace CampusIndustriesHousingMod.Utils
         private IncomeValues barracksIncomeValue = IncomeValues.NO_MAINTENANCE;
         private IncomeValues dormsIncomeValue = IncomeValues.NO_MAINTENANCE;
 
-        public void initialize(UIHelperBase helper)
+        public void Initialize(UIHelperBase helper)
         {
-            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.initialize -- Initializing Menu Options");
+            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.Initialize -- Initializing Menu Options");
             UIHelperBase group = helper.AddGroup("Housing Global Settings");
-            barracksCapacityDropDown = (UIDropDown)group.AddDropdown("Barracks Capacity Modifier", CAPACITY_LABELS, 1, handleCapacityChange);
-            barracksIncomeDropDown = (UIDropDown)group.AddDropdown("Barracks Income Modifier", BARRACKS_INCOME_LABELS, 2, handleIncomeChange);
+            barracksCapacityDropDown = (UIDropDown)group.AddDropdown("Barracks Capacity Modifier", CAPACITY_LABELS, 1, HandleCapacityChange);
+            barracksIncomeDropDown = (UIDropDown)group.AddDropdown("Barracks Income Modifier", BARRACKS_INCOME_LABELS, 2, HandleIncomeChange);
             group.AddSpace(2);
-            dormsCapacityDropDown = (UIDropDown)group.AddDropdown("Dorms Capacity Modifier", CAPACITY_LABELS, 1, handleCapacityChange);
-            dormsIncomeDropDown = (UIDropDown)group.AddDropdown("Dorms Income Modifier", DORMS_INCOME_LABELS, 2, handleIncomeChange);
+            dormsCapacityDropDown = (UIDropDown)group.AddDropdown("Dorms Capacity Modifier", CAPACITY_LABELS, 1, HandleCapacityChange);
+            dormsIncomeDropDown = (UIDropDown)group.AddDropdown("Dorms Income Modifier", DORMS_INCOME_LABELS, 2, HandleIncomeChange);
             group.AddSpace(5);
-            group.AddButton("Save", saveOptions);
+            group.AddButton("Save", SaveOptions);
 
             UIHelperBase group_clear = helper.AddGroup("Housing Clear Settings, Use with Caution!! Can't be undone!");
             group_clear.AddButton("Clear All Buildings Records", ConfimDeleteBuildignRecords);
@@ -89,56 +88,56 @@ namespace CampusIndustriesHousingMod.Utils
         }
 
 
-        private void handleCapacityChange(int newSelection)
+        private void HandleCapacityChange(int newSelection)
         {
             // Do nothing until Save is pressed
         }
 
-        private void handleIncomeChange(int newSelection)
+        private void HandleIncomeChange(int newSelection)
         {
             // Do nothing until Save is pressed
         }
 
-        public void updateBarracksCapacity()
+        public void UpdateBarracksCapacity()
         {
-            this.updateBarracksCapacity(this.barracksCapacityModifier);
+            UpdateBarracksCapacity(barracksCapacityModifier);
         }
 
-        public void updateDormsCapacity()
+        public void UpdateDormsCapacity()
         {
-            this.updateDormsCapacity(this.dormsCapacityModifier);
+            UpdateDormsCapacity(dormsCapacityModifier);
         }
 
-        public float getBarracksCapacityModifier()
+        public float GetBarracksCapacityModifier()
         {
-            return this.barracksCapacityModifier;
+            return barracksCapacityModifier;
         }
 
-        public float getDormsCapacityModifier()
+        public float GetDormsCapacityModifier()
         {
-            return this.dormsCapacityModifier;
+            return dormsCapacityModifier;
         }
 
-        public IncomeValues getBarracksIncomeModifier()
+        public IncomeValues GetBarracksIncomeModifier()
         {
-            return this.barracksIncomeValue;
+            return barracksIncomeValue;
         }
 
-        public IncomeValues getDormsIncomeModifier()
+        public IncomeValues GetDormsIncomeModifier()
         {
-            return this.dormsIncomeValue;
+            return dormsIncomeValue;
         }
 
-        public void updateBarracksCapacity(float targetValue)
+        public void UpdateBarracksCapacity(float targetValue)
         {
 
-            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.updateBarracksCapacity -- Updating barracks capacity with modifier: {0}", targetValue);
+            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.UpdateBarracksCapacity -- Updating barracks capacity with modifier: {0}", targetValue);
             for (uint index = 0; PrefabCollection<BuildingInfo>.LoadedCount() > index; ++index)
             {
                 BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(index);
                 if (buildingInfo != null && buildingInfo.m_buildingAI is BarracksAI barracksAI)
                 {
-                    barracksAI.updateCapacity(targetValue);
+                    barracksAI.UpdateCapacity(targetValue);
                 }
             }
 
@@ -147,21 +146,21 @@ namespace CampusIndustriesHousingMod.Utils
             {
                 if (buildingManager.m_buildings.m_buffer[i].Info != null && buildingManager.m_buildings.m_buffer[i].Info.m_buildingAI != null && buildingManager.m_buildings.m_buffer[i].Info.m_buildingAI is BarracksAI barracksAI)
                 {
-                    barracksAI.validateCapacity(i, ref buildingManager.m_buildings.m_buffer[i], true);
+                    barracksAI.ValidateCapacity(i, ref buildingManager.m_buildings.m_buffer[i], true);
                 }
             }
         }
 
-        public void updateDormsCapacity(float targetValue)
+        public void UpdateDormsCapacity(float targetValue)
         {
 
-            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.updateDormsCapacity -- Updating dorms capacity with modifier: {0}", targetValue);
+            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.UpdateDormsCapacity -- Updating dorms capacity with modifier: {0}", targetValue);
             for (uint index = 0; PrefabCollection<BuildingInfo>.LoadedCount() > index; ++index)
             {
                 BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(index);
                 if (buildingInfo != null && buildingInfo.m_buildingAI is DormsAI dormsAI)
                 {
-                    dormsAI.updateCapacity(targetValue);
+                    dormsAI.UpdateCapacity(targetValue);
                 }
             }
 
@@ -170,63 +169,63 @@ namespace CampusIndustriesHousingMod.Utils
             {
                 if (buildingManager.m_buildings.m_buffer[i].Info != null && buildingManager.m_buildings.m_buffer[i].Info.m_buildingAI != null && buildingManager.m_buildings.m_buffer[i].Info.m_buildingAI is DormsAI dormsAI)
                 {
-                    dormsAI.validateCapacity(i, ref buildingManager.m_buildings.m_buffer[i], true);
+                    dormsAI.ValidateCapacity(i, ref buildingManager.m_buildings.m_buffer[i], true);
                 }
             }
         }
 
-        private void saveOptions()
+        private void SaveOptions()
         {
-            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.saveOptions -- Saving Options");
+            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.SaveOptions -- Saving Options");
             Options options = new()
             {
                 barracksCapacityModifierSelectedIndex = -1,
                 dormsCapacityModifierSelectedIndex = -1
             };
 
-            if (this.barracksCapacityDropDown != null)
+            if (barracksCapacityDropDown != null)
             {
-                int barracksCapacitySelectedIndex = this.barracksCapacityDropDown.selectedIndex;
+                int barracksCapacitySelectedIndex = barracksCapacityDropDown.selectedIndex;
                 options.barracksCapacityModifierSelectedIndex = barracksCapacitySelectedIndex;
                 if (barracksCapacitySelectedIndex >= 0)
                 {
-                    Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.saveOptions -- Barracks Capacity Modifier Set to: {0}", CAPACITY_VALUES[barracksCapacitySelectedIndex]);
-                    this.barracksCapacityModifier = CAPACITY_VALUES[barracksCapacitySelectedIndex];
-                    this.updateBarracksCapacity(CAPACITY_VALUES[barracksCapacitySelectedIndex]);
+                    Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.SaveOptions -- Barracks Capacity Modifier Set to: {0}", CAPACITY_VALUES[barracksCapacitySelectedIndex]);
+                    barracksCapacityModifier = CAPACITY_VALUES[barracksCapacitySelectedIndex];
+                    UpdateBarracksCapacity(CAPACITY_VALUES[barracksCapacitySelectedIndex]);
                 }
             }
 
-            if (this.barracksIncomeDropDown != null)
+            if (barracksIncomeDropDown != null)
             {
-                int barracksIncomeSelectedIndex = this.barracksIncomeDropDown.selectedIndex + 1;
+                int barracksIncomeSelectedIndex = barracksIncomeDropDown.selectedIndex + 1;
                 options.barracksIncomeModifierSelectedIndex = barracksIncomeSelectedIndex;
                 if (barracksIncomeSelectedIndex >= 0)
                 {
-                    Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.saveOptions -- Barracks Income Modifier Set to: {0}", (IncomeValues)barracksIncomeSelectedIndex);
-                    this.barracksIncomeValue = (IncomeValues)barracksIncomeSelectedIndex;
+                    Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.SaveOptions -- Barracks Income Modifier Set to: {0}", (IncomeValues)barracksIncomeSelectedIndex);
+                    barracksIncomeValue = (IncomeValues)barracksIncomeSelectedIndex;
                 }
             }
 
-            if (this.dormsCapacityDropDown != null)
+            if (dormsCapacityDropDown != null)
             {
-                int dormsCapacitySelectedIndex = this.dormsCapacityDropDown.selectedIndex;
+                int dormsCapacitySelectedIndex = dormsCapacityDropDown.selectedIndex;
                 options.dormsCapacityModifierSelectedIndex = dormsCapacitySelectedIndex;
                 if (dormsCapacitySelectedIndex >= 0)
                 {
                     Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.saveOptions -- Dorms Capacity Modifier Set to: {0}", CAPACITY_VALUES[dormsCapacitySelectedIndex]);
-                    this.dormsCapacityModifier = CAPACITY_VALUES[dormsCapacitySelectedIndex];
-                    this.updateDormsCapacity(CAPACITY_VALUES[dormsCapacitySelectedIndex]);
+                    dormsCapacityModifier = CAPACITY_VALUES[dormsCapacitySelectedIndex];
+                    UpdateDormsCapacity(CAPACITY_VALUES[dormsCapacitySelectedIndex]);
                 }
             }
 
-            if (this.dormsIncomeDropDown != null)
+            if (dormsIncomeDropDown != null)
             {
-                int dormsIncomeSelectedIndex = this.dormsIncomeDropDown.selectedIndex + 1;
+                int dormsIncomeSelectedIndex = dormsIncomeDropDown.selectedIndex + 1;
                 options.dormsIncomeModifierSelectedIndex = dormsIncomeSelectedIndex;
                 if (dormsIncomeSelectedIndex >= 0)
                 {
                     Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.saveOptions -- Dorms Income Modifier Set to: {0}", (IncomeValues)dormsIncomeSelectedIndex);
-                    this.dormsIncomeValue = (IncomeValues)dormsIncomeSelectedIndex;
+                    dormsIncomeValue = (IncomeValues)dormsIncomeSelectedIndex;
                 }
             }
 
@@ -242,14 +241,14 @@ namespace CampusIndustriesHousingMod.Utils
 
         }
 
-        public void loadOptions()
+        public void LoadOptions()
         {
-            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.loadOptions -- Loading Options");
-            Options options = new Options();
+            Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.LoadOptions -- Loading Options");
+            Options options = new();
 
             try
             {
-                using StreamReader streamReader = new StreamReader("CampusIndustriesHousingModOptions.xml");
+                using StreamReader streamReader = new("CampusIndustriesHousingModOptions.xml");
                 options = (Options)new XmlSerializer(typeof(Options)).Deserialize(streamReader);
             }
             catch (FileNotFoundException)
@@ -265,30 +264,30 @@ namespace CampusIndustriesHousingMod.Utils
 
             if (options.barracksCapacityModifierSelectedIndex != -1)
             {
-                Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.loadOptions -- Loading Barracks Capacity Modifier to: x{0}", CAPACITY_VALUES[options.barracksCapacityModifierSelectedIndex]);
-                this.barracksCapacityDropDown.selectedIndex = options.barracksCapacityModifierSelectedIndex;
-                this.barracksCapacityModifier = CAPACITY_VALUES[options.barracksCapacityModifierSelectedIndex];
+                Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.LoadOptions -- Loading Barracks Capacity Modifier to: x{0}", CAPACITY_VALUES[options.barracksCapacityModifierSelectedIndex]);
+                barracksCapacityDropDown.selectedIndex = options.barracksCapacityModifierSelectedIndex;
+                barracksCapacityModifier = CAPACITY_VALUES[options.barracksCapacityModifierSelectedIndex];
             }
 
             if (options.barracksIncomeModifierSelectedIndex > 0)
             {
-                Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.loadOptions -- Loading Barracks Income Modifier to: {0}", (IncomeValues)options.barracksIncomeModifierSelectedIndex);
-                this.barracksIncomeDropDown.selectedIndex = options.barracksIncomeModifierSelectedIndex - 1;
-                this.barracksIncomeValue = (IncomeValues)options.barracksIncomeModifierSelectedIndex;
+                Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.LoadOptions -- Loading Barracks Income Modifier to: {0}", (IncomeValues)options.barracksIncomeModifierSelectedIndex);
+                barracksIncomeDropDown.selectedIndex = options.barracksIncomeModifierSelectedIndex - 1;
+                barracksIncomeValue = (IncomeValues)options.barracksIncomeModifierSelectedIndex;
             }
 
             if (options.dormsCapacityModifierSelectedIndex != -1)
             {
-                Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.loadOptions -- Loading Dorms Capacity Modifier to: x{0}", CAPACITY_VALUES[options.dormsCapacityModifierSelectedIndex]);
-                this.dormsCapacityDropDown.selectedIndex = options.dormsCapacityModifierSelectedIndex;
-                this.dormsCapacityModifier = CAPACITY_VALUES[options.dormsCapacityModifierSelectedIndex];
+                Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.LoadOptions -- Loading Dorms Capacity Modifier to: x{0}", CAPACITY_VALUES[options.dormsCapacityModifierSelectedIndex]);
+                dormsCapacityDropDown.selectedIndex = options.dormsCapacityModifierSelectedIndex;
+                dormsCapacityModifier = CAPACITY_VALUES[options.dormsCapacityModifierSelectedIndex];
             }
 
             if (options.dormsIncomeModifierSelectedIndex > 0)
             {
-                Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.loadOptions -- Loading Dorms Income Modifier to: {0}", (IncomeValues)options.dormsIncomeModifierSelectedIndex);
-                this.dormsIncomeDropDown.selectedIndex = options.dormsIncomeModifierSelectedIndex - 1;
-                this.dormsIncomeValue = (IncomeValues)options.dormsIncomeModifierSelectedIndex;
+                Logger.LogInfo(Logger.LOG_OPTIONS, "OptionsManager.LoadOptions -- Loading Dorms Income Modifier to: {0}", (IncomeValues)options.dormsIncomeModifierSelectedIndex);
+                dormsIncomeDropDown.selectedIndex = options.dormsIncomeModifierSelectedIndex - 1;
+                dormsIncomeValue = (IncomeValues)options.dormsIncomeModifierSelectedIndex;
             }
         }
 

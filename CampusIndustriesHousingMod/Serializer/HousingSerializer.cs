@@ -1,6 +1,5 @@
 using System;
 using CampusIndustriesHousingMod.Managers;
-using UnityEngine;
 
 namespace CampusIndustriesHousingMod.Serializer
 {
@@ -80,7 +79,7 @@ namespace CampusIndustriesHousingMod.Serializer
 
                 int iHousingVersion = StorageData.ReadUInt16(Data, ref iIndex);
 
-                Debug.Log("Global: " + iGlobalVersion + " BufferVersion: " + iHousingVersion + " DataLength: " + Data.Length + " Index: " + iIndex);
+                Logger.LogInfo(Logger.LOG_SERIALIZATION, "Global: " + iGlobalVersion + " BufferVersion: " + iHousingVersion + " DataLength: " + Data.Length + " Index: " + iIndex);
 
                 CheckStartTuple($"BuildingRecords Start", iHousingVersion, Data, ref iIndex);
 

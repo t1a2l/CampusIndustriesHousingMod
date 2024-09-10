@@ -9,21 +9,26 @@ namespace CampusIndustriesHousingMod
 
         public static readonly bool LOG_BASE = true;
 
-        public static readonly bool LOG_INITIALIZER = false;
-        public static readonly bool LOG_SERIALIZATION = false;
-        public static readonly bool LOG_CHANCES = false;
-        public static readonly bool LOG_OPTIONS = false;
-        public static readonly bool LOG_DATA = false;
-        public static readonly bool LOG_CAPACITY_MANAGEMENT = false;
-        public static readonly bool LOG_INCOME = false;
+        public static readonly bool LOG_INITIALIZER = true;
+        public static readonly bool LOG_SERIALIZATION = true;
+        public static readonly bool LOG_CHANCES = true;
+        public static readonly bool LOG_OPTIONS = true;
 
-        public static readonly bool LOG_PRODUCTION = false;
-        public static readonly bool LOG_SIMULATION = false;
-        public static readonly bool LOG_CAMPUS = false;
+        public static readonly bool LOG_BARRACKS_CAPACITY = false;
+        public static readonly bool LOG_BARRACKS_INCOME = false;
+        public static readonly bool LOG_BARRACKS_PRODUCTION = false;
+        public static readonly bool LOG_BARRACKS_SIMULATION = false;
+
+        public static readonly bool LOG_DORMS_CAPACITY = false;
+        public static readonly bool LOG_DORMS_INCOME = false;
+        public static readonly bool LOG_DORMS_PRODUCTION = false;
+        public static readonly bool LOG_DORMS_SIMULATION = false;
+
+        public static readonly bool LOG_CAMPUS = true;
         public static readonly bool LOG_INDUSTRY = false;
 
-        public static readonly bool LOG_STUDENTS = false;
-        public static readonly bool LOG_WORKERS = false;
+        public static readonly bool LOG_STUDENTS_MANAGER = true;
+        public static readonly bool LOG_WORKERS_MANAGER = false;
 
 
 
@@ -49,7 +54,7 @@ namespace CampusIndustriesHousingMod
         {
             if (shouldLog) 
             {
-                Logger.LogWarning(message, args);
+                LogWarning(message, args);
             }
         }
 
@@ -62,7 +67,7 @@ namespace CampusIndustriesHousingMod
         {
             if (shouldLog) 
             {
-                Logger.LogError(message, args);
+                LogError(message, args);
             }
         }
 

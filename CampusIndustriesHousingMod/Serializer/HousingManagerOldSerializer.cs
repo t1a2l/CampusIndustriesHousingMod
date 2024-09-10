@@ -11,7 +11,7 @@ namespace CampusIndustriesHousingMod.Serializer
         /// <param name="reader">Reader to deserialize from.</param>
         internal static void Deserialize(BinaryReader reader)
         {
-            Logger.LogInfo("Deserializing building old data");
+            Logger.LogInfo(Logger.LOG_SERIALIZATION, "Deserializing building old data");
 
             // Clear dictionary.
             HousingManager.BuildingRecords.Clear();

@@ -10,7 +10,7 @@ namespace CampusIndustriesHousingMod
 {
     public class Mod : LoadingExtensionBase, IUserMod, ISerializableData  
     {
-        private OptionsManager optionsManager = new();
+        private readonly OptionsManager optionsManager = new();
 
         public new IManagers managers { get; }
 
@@ -30,20 +30,20 @@ namespace CampusIndustriesHousingMod
             if (HarmonyHelper.IsHarmonyInstalled) Patcher.UnpatchAll();
         }
 
-        public static Mod getInstance() 
+        public static Mod GetInstance() 
         {
             return instance;
         }
 
-        public OptionsManager getOptionsManager() 
+        public OptionsManager GetOptionsManager() 
         {
             return optionsManager;
         }
 
         public void OnSettingsUI(UIHelperBase helper) 
         {
-            optionsManager.initialize(helper);
-            optionsManager.loadOptions();
+            optionsManager.Initialize(helper);
+            optionsManager.LoadOptions();
         }
 
         public override void OnCreated(ILoading loading) 
@@ -92,13 +92,13 @@ namespace CampusIndustriesHousingMod
 
         public byte[] LoadData(string id) 
         {
-            Logger.LogInfo(Logger.LOG_OPTIONS, "Load Data: {0}", id);
+            Logger.LogInfo(Logger.LOG_SERIALIZATION, "Load Data: {0}", id);
             return null;
         }
 
         public void SaveData(string id, byte[] data) 
         {
-            Logger.LogInfo(Logger.LOG_OPTIONS, "Save Data: {0} -- {1}", id, data);
+            Logger.LogInfo(Logger.LOG_SERIALIZATION, "Save Data: {0} -- {1}", id, data);
         }
 
         public string[] EnumerateData()

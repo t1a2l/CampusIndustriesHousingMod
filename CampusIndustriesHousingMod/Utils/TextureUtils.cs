@@ -33,7 +33,7 @@ namespace CampusIndustriesHousingMod.Utils
             return returnAtlas;
         }
 
-        private static PluginManager man => PluginManager.instance;
+        private static PluginManager Man => PluginManager.instance;
 
         public static void FixTransparency(Texture2D texture)
         {
@@ -67,7 +67,7 @@ namespace CampusIndustriesHousingMod.Utils
 
                         if (!done && y < h - 1)
                         {
-                            done = TryAdjacent(ref pixel, pixels[idx + w]); // Bottom pixel
+                            _ = TryAdjacent(ref pixel, pixels[idx + w]); // Bottom pixel
                         }
 
                         pixels[idx] = pixel;
@@ -195,7 +195,7 @@ namespace CampusIndustriesHousingMod.Utils
         public static PluginInfo GetPlugin(Assembly assembly = null)
         {
             assembly ??= Assembly.GetExecutingAssembly();
-            foreach (var current in man.GetPluginsInfo())
+            foreach (var current in Man.GetPluginsInfo())
             {
                 if (current.ContainsAssembly(assembly))
                 {

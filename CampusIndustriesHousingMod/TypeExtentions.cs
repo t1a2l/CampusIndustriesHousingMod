@@ -11,7 +11,7 @@ namespace CampusIndustriesHousingMod
         {
             if (type == null) 
             {
-                return Enumerable.Empty<FieldInfo>();
+                return [];
             }
             BindingFlags bindingAttr = BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
             if (type.BaseType != null) 

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using ICities;
-using UnityEngine;
 
 namespace CampusIndustriesHousingMod.Serializer
 {
@@ -38,7 +37,7 @@ namespace CampusIndustriesHousingMod.Serializer
 
                         int SaveGameFileVersion = reader.ReadInt32();
 
-                        Debug.Log("DataID: " + DataID + "; Data length: " + Data.Length.ToString() + "; Data Version: " + SaveGameFileVersion);
+                        Logger.LogInfo(Logger.LOG_SERIALIZATION, "DataID: " + DataID + "; Data length: " + Data.Length.ToString() + "; Data Version: " + SaveGameFileVersion);
 
                         if (SaveGameFileVersion <= DataVersion)
                         {
@@ -46,7 +45,7 @@ namespace CampusIndustriesHousingMod.Serializer
                             {
                                 HousingManagerOldSerializer.Deserialize(reader);
 
-                                Logger.LogInfo(Logger.LOG_DATA, "read ", stream.Length);
+                                Logger.LogInfo(Logger.LOG_SERIALIZATION, "read ", stream.Length);
                             }
                             else
                             {
@@ -69,17 +68,17 @@ namespace CampusIndustriesHousingMod.Serializer
                             sMessage += "\r\n";
                             sMessage += "Saved game data version: " + SaveGameFileVersion + "\r\n";
                             sMessage += "MOD data version: " + DataVersion + "\r\n";
-                            Debug.Log(sMessage);
+                            Logger.LogInfo(Logger.LOG_SERIALIZATION, sMessage);
                         }
                     }
                     else
                     {
-                        Debug.Log("Data is null");
+                        Logger.LogInfo(Logger.LOG_SERIALIZATION, "Data is null");
                     }
                 }
                 else
                 {
-                    Debug.Log("m_serializableData is null");
+                    Logger.LogInfo(Logger.LOG_SERIALIZATION, "m_serializableData is null");
                 }
             }
             catch (Exception ex)
@@ -87,13 +86,13 @@ namespace CampusIndustriesHousingMod.Serializer
                 string sErrorMessage = "Loading of Campus Industries Housing Mod save game settings failed with the following error:\r\n";
                 sErrorMessage += "\r\n";
                 sErrorMessage += ex.Message;
-                Debug.LogError(sErrorMessage);
+                Logger.LogError(Logger.LOG_SERIALIZATION, sErrorMessage);
             }
         }
 
         public void OnSaveData()
         {
-            Debug.Log("OnSaveData - Start");
+            Logger.LogInfo(Logger.LOG_SERIALIZATION, "OnSaveData - Start");
             try
             {
                 if (m_serializableData != null)
@@ -113,9 +112,9 @@ namespace CampusIndustriesHousingMod.Serializer
             }
             catch (Exception ex)
             {
-                Debug.Log("Could not save data. " + ex.Message);
+                Logger.LogError(Logger.LOG_SERIALIZATION, "Could not save data. " + ex.Message);
             }
-            Debug.Log("OnSaveData - Finish");
+            Logger.LogInfo(Logger.LOG_SERIALIZATION, "OnSaveData - Finish");
         }
 
         private void CheckStartTuple(string sTupleLocation, int iDataVersion, byte[] Data, ref int iIndex)
