@@ -380,17 +380,17 @@ namespace CampusIndustriesHousingMod.UI
         private void UpdateHouse(ushort buildingID, ref Building data, int numOfApartments)
         {
             // Validate the capacity and adjust accordingly - but don't create new units, that will be done by EnsureCitizenUnits
-            float capacityModifier = Mod.getInstance().getOptionsManager().getDormsCapacityModifier();
+            float capacityModifier = Mod.GetInstance().GetOptionsManager().GetDormsCapacityModifier();
             if (data.Info.GetAI() is BarracksAI barracksAI)
             {
-                barracksAI.updateCapacity(capacityModifier);
-                barracksAI.validateCapacity(buildingID, ref data, false);
+                barracksAI.UpdateCapacity(capacityModifier);
+                barracksAI.ValidateCapacity(buildingID, ref data, false);
                 barracksAI.numApartments = numOfApartments;
             }
             else if (data.Info.GetAI() is DormsAI dormsAI)
             {
-                dormsAI.updateCapacity(capacityModifier);
-                dormsAI.validateCapacity(buildingID, ref data, false);
+                dormsAI.UpdateCapacity(capacityModifier);
+                dormsAI.ValidateCapacity(buildingID, ref data, false);
                 dormsAI.numApartments = numOfApartments;
             }
         }

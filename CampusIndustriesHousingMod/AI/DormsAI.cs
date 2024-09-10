@@ -304,7 +304,7 @@ namespace CampusIndustriesHousingMod.AI
                 Logger.LogInfo(Logger.LOG_DORMS_PRODUCTION, "------------------------------------------------------------");
                 Logger.LogInfo(Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- Student: {0}", string.Join(", ", Array.ConvertAll(familyWithStudents, item => item.ToString())));
                 // Check move in chance
-                bool shouldMoveIn = MoveInProbabilityHelper.checkIfShouldMoveIn(familyWithStudents, ref buildingData, ref randomizer, "student");
+                bool shouldMoveIn = MoveInProbabilityHelper.CheckIfShouldMoveIn(familyWithStudents, ref buildingData, ref randomizer, "student");
 
                 if(shouldMoveIn)
                 {

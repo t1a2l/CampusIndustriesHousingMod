@@ -42,9 +42,9 @@ namespace CampusIndustriesHousingMod.Patches
                 Building industryBuilding = buildingManager.m_buildings.m_buffer[buildingId];
                 if(industryBuilding.Info.GetAI() is BarracksAI barracksAI)
                 {
-                    barracksAI.getOccupancyDetails(ref industryBuilding, out int numResidents, out int numApartmentsOccupied);
+                    barracksAI.GetOccupancyDetails(ref industryBuilding, out int numResidents, out int numApartmentsOccupied);
                     total_ocuppied_apartment_num += numApartmentsOccupied;
-                    total_apartment_num += barracksAI.getModifiedCapacity(buildingId);
+                    total_apartment_num += barracksAI.GetModifiedCapacity(buildingId);
                     Logger.LogInfo(Logger.LOG_INDUSTRY, "Industry Building occupied apartments: {0}", numApartmentsOccupied);
                 }
             }

@@ -295,7 +295,7 @@ namespace CampusIndustriesHousingMod.AI
                 return;
             }
 
-            WorkerManager workerManager = WorkerManager.getInstance();
+            WorkerManager workerManager = WorkerManager.GetInstance();
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 
             // Fetch a Worker and family that wants to move in 
@@ -312,7 +312,7 @@ namespace CampusIndustriesHousingMod.AI
                 Logger.LogInfo(Logger.LOG_BARRACKS_PRODUCTION, "------------------------------------------------------------");
                 Logger.LogInfo(Logger.LOG_BARRACKS_PRODUCTION, "BarracksAI.ProduceGoods -- Worker Family: {0}", string.Join(", ", Array.ConvertAll(familyWithWorkers, item => item.ToString())));
                 // Check move in chance
-                bool shouldMoveIn = MoveInProbabilityHelper.checkIfShouldMoveIn(familyWithWorkers, ref buildingData, ref randomizer, "worker");
+                bool shouldMoveIn = MoveInProbabilityHelper.CheckIfShouldMoveIn(familyWithWorkers, ref buildingData, ref randomizer, "worker");
 
                 // Process the worker and his family and move them in if able to, mark the worker as done processing regardless
                 if (shouldMoveIn)
