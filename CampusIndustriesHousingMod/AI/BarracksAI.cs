@@ -778,7 +778,7 @@ namespace CampusIndustriesHousingMod.AI
         {
             Logger.LogInfo(Logger.LOG_BARRACKS_CAPACITY, "BarracksAI.CreateApartments -- Creating {0} Apartments", numApartmentsToCreate);
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
-            citizenManager.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingId, (ushort) 0, numApartmentsToCreate, 0, 0, 0, 0);
+            citizenManager.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingId, 0, numApartmentsToCreate);
             citizenManager.m_units.m_buffer[lastCitizenUnitIndex].m_nextUnit = firstUnit;
         }
 
