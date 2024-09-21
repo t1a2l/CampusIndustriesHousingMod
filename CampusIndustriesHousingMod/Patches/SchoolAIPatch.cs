@@ -20,10 +20,11 @@ namespace CampusIndustriesHousingMod.Patches
         [HarmonyPrefix]
         public static bool CreateBuilding(SchoolAI __instance, ushort buildingID, ref Building data)
         {
-			if(data.Info.GetAI() is DormsAI)
+			if(data.Info.GetAI() is DormsAI dormsAI)
 			{
 				BaseCreateBuilding(__instance, buildingID, ref data);
-				return false;
+                dormsAI.m_studentCount = 0;
+                return false;
 			}
             return true;
         }
@@ -32,10 +33,11 @@ namespace CampusIndustriesHousingMod.Patches
         [HarmonyPrefix]
 		public static bool BuildingLoaded(SchoolAI __instance, ushort buildingID, ref Building data, uint version)
 		{
-			if(data.Info.GetAI() is DormsAI)
+			if(data.Info.GetAI() is DormsAI dormsAI)
 			{
 				BaseBuildingLoaded(__instance, buildingID, ref data, version);
-				return false;
+                dormsAI.m_studentCount = 0;
+                return false;
 			}
 			return true;
 		}
@@ -44,10 +46,11 @@ namespace CampusIndustriesHousingMod.Patches
         [HarmonyPrefix]
 		public static bool EndRelocating(SchoolAI __instance, ushort buildingID, ref Building data)
 		{
-			if(data.Info.GetAI() is DormsAI)
+			if(data.Info.GetAI() is DormsAI dormsAI)
 			{
 				BaseEndRelocating(__instance, buildingID, ref data);
-				return false;
+                dormsAI.m_studentCount = 0;
+                return false;
 			}
 			return true;
 		}
