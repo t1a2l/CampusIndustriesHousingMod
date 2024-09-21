@@ -68,7 +68,8 @@ namespace CampusIndustriesHousingMod.Patches
 
             Logger.LogInfo(Logger.LOG_CAMPUS, "new campus worker label: {0}", m_studentCapacityLabel);
 
+            var campusWorldInfoPanel = UIView.Find<UIPanel>("(Library) CampusWorldInfoPanel");
+            campusWorldInfoPanel.height = 780f;
         }
-
     }
 }
