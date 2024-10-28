@@ -29,8 +29,6 @@ namespace CampusIndustriesHousingMod
         public static readonly bool LOG_STUDENTS_MANAGER = false;
         public static readonly bool LOG_WORKERS_MANAGER = false;
 
-
-
         public static void LogInfo(bool shouldLog, string message, params object[] args) 
         {
             if (shouldLog) 

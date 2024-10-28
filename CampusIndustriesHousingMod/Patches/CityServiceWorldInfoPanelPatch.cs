@@ -12,7 +12,7 @@ namespace CampusIndustriesHousingMod.Patches
 
         [HarmonyPatch(typeof(CityServiceWorldInfoPanel), "OnSetTarget")]
         [HarmonyPostfix]
-        private static void OnSetTarget()
+        public static void OnSetTarget()
         {
             if (cityServiceHousingUIPanel == null)
             {

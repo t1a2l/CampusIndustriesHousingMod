@@ -61,7 +61,7 @@ namespace CampusIndustriesHousingMod.Patches
                 {
                     data.m_problems = Notification.AddProblems(data.m_problems, Notification.Problem1.NotInIndustryArea);
                     GuideController properties = Singleton<GuideManager>.instance.m_properties;
-                    if ((object)properties != null)
+                    if (properties is not null)
                     {
                         Singleton<BuildingManager>.instance.m_industryBuildingOutsideIndustryArea.Activate(properties.m_industryBuildingOutsideIndustryArea, buildingID);
                     }
