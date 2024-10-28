@@ -137,7 +137,7 @@ namespace CampusIndustriesHousingMod.Utils
                 BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(index);
                 if (buildingInfo != null && buildingInfo.m_buildingAI is BarracksAI barracksAI)
                 {
-                    barracksAI.UpdateCapacity(targetValue);
+                    barracksAI.UpdateCapacityModifier(targetValue);
                 }
             }
 
@@ -160,7 +160,7 @@ namespace CampusIndustriesHousingMod.Utils
                 BuildingInfo buildingInfo = PrefabCollection<BuildingInfo>.GetLoaded(index);
                 if (buildingInfo != null && buildingInfo.m_buildingAI is DormsAI dormsAI)
                 {
-                    dormsAI.UpdateCapacity(targetValue);
+                    dormsAI.UpdateCapacityModifier(targetValue);
                 }
             }
 
