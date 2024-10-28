@@ -9,7 +9,8 @@ using CampusIndustriesHousingMod.Managers;
 
 namespace CampusIndustriesHousingMod.AI
 {
-    public class BarracksAI : AuxiliaryBuildingAI {
+    public class BarracksAI : AuxiliaryBuildingAI 
+    {
 
         private Randomizer randomizer = new(97);
 

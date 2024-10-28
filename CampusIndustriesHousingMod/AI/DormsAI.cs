@@ -10,7 +10,8 @@ using CampusIndustriesHousingMod.Managers;
 
 namespace CampusIndustriesHousingMod.AI
 {
-    public class DormsAI : CampusBuildingAI {
+    public class DormsAI : CampusBuildingAI 
+    {
 
         private Randomizer randomizer = new(97);
 
