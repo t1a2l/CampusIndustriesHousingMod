@@ -31,11 +31,10 @@ namespace CampusIndustriesHousingMod.Serializer
                     byte[] Data = m_serializableData.LoadData(DataID);
                     if (Data != null && Data.Length > 0)
                     {
-                        // Data was read - go ahead and deserialise.
-                        using MemoryStream stream = new(Data);
-                        using BinaryReader reader = new(stream);
+                        ushort SaveGameFileVersion;
+                        int Index = 0;
 
-                        int SaveGameFileVersion = reader.ReadInt32();
+                        SaveGameFileVersion = StorageData.ReadUInt16(Data, ref Index);
 
                         Logger.LogInfo(Logger.LOG_SERIALIZATION, "DataID: " + DataID + "; Data length: " + Data.Length.ToString() + "; Data Version: " + SaveGameFileVersion);
 
@@ -43,14 +42,16 @@ namespace CampusIndustriesHousingMod.Serializer
                         {
                             if (SaveGameFileVersion == 1)
                             {
+                                // Data was read - go ahead and deserialise.
+                                using MemoryStream stream = new(Data);
+                                using BinaryReader reader = new(stream);
+
                                 HousingManagerOldSerializer.Deserialize(reader);
 
                                 Logger.LogInfo(Logger.LOG_SERIALIZATION, "read ", stream.Length);
                             }
                             else
                             {
-                                int Index = 0;
-
                                 while (Index < Data.Length)
                                 {
                                     CheckStartTuple("HousingSerializer", SaveGameFileVersion, Data, ref Index);
@@ -100,12 +101,15 @@ namespace CampusIndustriesHousingMod.Serializer
                     var Data = new FastList<byte>();
                     // Always write out data version first
                     StorageData.WriteUInt16(DataVersion, Data);
-
+                    Logger.LogInfo(Logger.LOG_SERIALIZATION, "OnSaveData DataVersion: " + DataVersion);
                     // housing settings
                     StorageData.WriteUInt32(uiTUPLE_START, Data);
-                    HousingSerializer.SaveData(Data);
-                    StorageData.WriteUInt32(uiTUPLE_END, Data);
+                    Logger.LogInfo(Logger.LOG_SERIALIZATION, "OnSaveData uiTUPLE_START: " + uiTUPLE_START);
 
+                    HousingSerializer.SaveData(Data);
+
+                    StorageData.WriteUInt32(uiTUPLE_END, Data);
+                    Logger.LogInfo(Logger.LOG_SERIALIZATION, "OnSaveData uiTUPLE_END: " + uiTUPLE_END);
 
                     m_serializableData.SaveData(DataID, Data.ToArray());
                 }
@@ -122,6 +126,7 @@ namespace CampusIndustriesHousingMod.Serializer
             if (iDataVersion >= 1)
             {
                 uint iTupleStart = StorageData.ReadUInt32(Data, ref iIndex);
+                Logger.LogInfo(Logger.LOG_SERIALIZATION, "OnLoadData iTupleStart: " + iTupleStart);
                 if (iTupleStart != uiTUPLE_START)
                 {
                     throw new Exception($"CampusIndustriesHousingMod Start tuple not found at: {sTupleLocation}");
@@ -134,6 +139,7 @@ namespace CampusIndustriesHousingMod.Serializer
             if (iDataVersion >= 1)
             {
                 uint iTupleEnd = StorageData.ReadUInt32(Data, ref iIndex);
+                Logger.LogInfo(Logger.LOG_SERIALIZATION, "OnLoadData iTupleEnd: " + iTupleEnd);
                 if (iTupleEnd != uiTUPLE_END)
                 {
                     throw new Exception($"CampusIndustriesHousingMod End tuple not found at: {sTupleLocation}");

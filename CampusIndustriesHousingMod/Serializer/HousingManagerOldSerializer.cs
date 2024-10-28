@@ -13,6 +13,8 @@ namespace CampusIndustriesHousingMod.Serializer
         {
             Logger.LogInfo(Logger.LOG_SERIALIZATION, "Deserializing building old data");
 
+            reader.ReadInt32(); // read version
+
             // Clear dictionary.
             HousingManager.BuildingRecords.Clear();
 
