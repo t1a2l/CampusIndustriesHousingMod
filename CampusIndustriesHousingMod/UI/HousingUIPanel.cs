@@ -3,7 +3,6 @@ using CampusIndustriesHousingMod.Utils;
 using CampusIndustriesHousingMod.Managers;
 using ColossalFramework;
 using ColossalFramework.UI;
-using System;
 using UnityEngine;
 
 namespace CampusIndustriesHousingMod.UI
@@ -153,7 +152,6 @@ namespace CampusIndustriesHousingMod.UI
             ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
             var building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
             var buildingAI = building.Info.GetAI();
-            var instance = Singleton<DistrictManager>.instance;
             bool isAllowedCityService = buildingAI is BarracksAI || buildingAI is DormsAI;
 
             if (isAllowedCityService)
@@ -179,36 +177,25 @@ namespace CampusIndustriesHousingMod.UI
         public void RefreshData(ushort buildingID, HousingManager.BuildingRecord buildingRecord)
         {
             Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
-           
-            int numOfApartments = 0;
             var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
-
             var globalRecord = HousingConfig.Config.GetGlobalSettings(building.Info);
 
             if (!buildingRecord.IsPrefab && !buildingRecord.IsGlobal)
             {
                 m_settingsStatus.text = buildingRecord.IsDefault ? "This Building is using default settings" : "This Building is using his own settings";
                 m_apartmentsNumTextfield.text = buildingRecord.NumOfApartments.ToString();
-                numOfApartments = buildingRecord.NumOfApartments;
             }
             else if (HousingManager.PrefabExist(building.Info.name, building.Info.GetAI().GetType().Name) && buildingRecord.IsPrefab && !buildingRecord.IsLocked)
             {
                 m_settingsStatus.text = "This Building is using type settings";
-
                 var prefabRecord = HousingManager.GetPrefab(building.Info);
-
                 m_apartmentsNumTextfield.text = prefabRecord.NumOfApartments.ToString();
-                numOfApartments = prefabRecord.NumOfApartments;
             }
             else if(globalRecord != null && buildingRecord.IsGlobal && !buildingRecord.IsLocked)
             {
                 m_settingsStatus.text = "This Building is using global settings";
                 m_apartmentsNumTextfield.text = globalRecord.NumOfApartments.ToString();
-                numOfApartments = globalRecord.NumOfApartments;
             }
-
-            UpdateHouse(buildingID, ref building, numOfApartments);
-            CreateOrEnsure(false, buildingID, ref building, numOfApartments);
 
             m_settingsCheckBox.Show();
             m_settingsCheckBox.relativePosition = new Vector3(400f, 0f);
@@ -375,81 +362,6 @@ namespace CampusIndustriesHousingMod.UI
 
                 RefreshData(buildingID, newGlobalSettings);
             });
-        }
-
-        private void UpdateHouse(ushort buildingID, ref Building data, int numOfApartments)
-        {
-            // Validate the capacity and adjust accordingly - but don't create new units, that will be done by EnsureCitizenUnits
-            float capacityModifier = Mod.GetInstance().GetOptionsManager().GetDormsCapacityModifier();
-            if (data.Info.GetAI() is BarracksAI barracksAI)
-            {
-                barracksAI.UpdateCapacity(capacityModifier);
-                barracksAI.ValidateCapacity(buildingID, ref data, false);
-                barracksAI.numApartments = numOfApartments;
-            }
-            else if (data.Info.GetAI() is DormsAI dormsAI)
-            {
-                dormsAI.UpdateCapacity(capacityModifier);
-                dormsAI.ValidateCapacity(buildingID, ref data, false);
-                dormsAI.numApartments = numOfApartments;
-            }
-        }
-
-        private void CreateOrEnsure(bool is_new, ushort buildingID, ref Building data, int numOfApartments)
-        {
-            if(is_new)
-            {
-                Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, numOfApartments);
-            }
-            else
-            {
-                EnsureCitizenUnits(buildingID, ref data, numOfApartments);
-            }
-        }
-
-        private void EnsureCitizenUnits(ushort buildingID, ref Building data, int homeCount = 0)
-        {
-            if ((data.m_flags & (Building.Flags.Abandoned | Building.Flags.Collapsed)) != 0)
-            {
-                return;
-            }
-            Citizen.Wealth wealthLevel = Citizen.GetWealthLevel((ItemClass.Level)data.m_level);
-            CitizenManager instance = Singleton<CitizenManager>.instance;
-            uint num = 0u;
-            uint num2 = data.m_citizenUnits;
-            int num3 = 0;
-            while (num2 != 0)
-            {
-                CitizenUnit.Flags flags = instance.m_units.m_buffer[num2].m_flags;
-                if ((flags & CitizenUnit.Flags.Home) != 0)
-                {
-                    instance.m_units.m_buffer[num2].SetWealthLevel(wealthLevel);
-                    homeCount--;
-                }
-                num = num2;
-                num2 = instance.m_units.m_buffer[num2].m_nextUnit;
-                if (++num3 > 524288)
-                {
-                    CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
-                    break;
-                }
-            }
-            homeCount = Mathf.Max(0, homeCount);
-            if (homeCount == 0)
-            {
-                return;
-            }
-            if (instance.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount))
-            {
-                if (num != 0)
-                {
-                    instance.m_units.m_buffer[num].m_nextUnit = firstUnit;
-                }
-                else
-                {
-                    data.m_citizenUnits = firstUnit;
-                }
-            }
         }
 
     }

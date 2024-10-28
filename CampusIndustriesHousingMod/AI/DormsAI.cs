@@ -12,7 +12,6 @@ namespace CampusIndustriesHousingMod.AI
 {
     public class DormsAI : CampusBuildingAI 
     {
-
         private Randomizer randomizer = new(97);
 
         [CustomizableProperty("Number of Apartments")]
@@ -96,6 +95,43 @@ namespace CampusIndustriesHousingMod.AI
                 _ => 160,
             };
             return Mathf.Max(100, width * length * num + r.Int32(100u)) / 100;
+        }
+
+        public override void CreateBuilding(ushort buildingID, ref Building data)
+        {
+            base.CreateBuilding(buildingID, ref data);
+            var buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
+            UpdateBuildingSettings.UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, true);
+        }
+
+        public override void BuildingLoaded(ushort buildingID, ref Building data, uint version)
+        {
+            base.BuildingLoaded(buildingID, ref data, version);
+            HousingManager.BuildingRecord buildingRecord;
+            if (HousingManager.BuildingRecordExist(buildingID))
+            {
+                buildingRecord = HousingManager.GetBuildingRecord(buildingID);
+            }
+            else
+            {
+                buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
+            }
+            UpdateBuildingSettings.UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, false);
+        }
+
+        public override void EndRelocating(ushort buildingID, ref Building data)
+        {
+            base.EndRelocating(buildingID, ref data);
+            HousingManager.BuildingRecord buildingRecord;
+            if (HousingManager.BuildingRecordExist(buildingID))
+            {
+                buildingRecord = HousingManager.GetBuildingRecord(buildingID);
+            }
+            else
+            {
+                buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
+            }
+            UpdateBuildingSettings.UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, false);
         }
 
         public override void SimulationStep(ushort buildingID, ref Building buildingData, ref Building.Frame frameData) 
@@ -700,7 +736,7 @@ namespace CampusIndustriesHousingMod.AI
             }
         }
 
-        public void UpdateCapacity(float newCapacityModifier) 
+        public void UpdateCapacityModifier(float newCapacityModifier) 
         {
             Logger.LogInfo(Logger.LOG_DORMS_CAPACITY, "DormsAI.UpdateCapacity -- Updating capacity with modifier: {0}", newCapacityModifier);
             // Set the capcityModifier and check to see if the value actually changes
@@ -710,6 +746,11 @@ namespace CampusIndustriesHousingMod.AI
                 Logger.LogInfo(Logger.LOG_DORMS_CAPACITY, "DormsAI.UpdateCapacity -- Skipping capacity change because the value was already set");
                 return;
             }
+        }
+
+        public void SetCapacity(int numOfApartments)
+        {
+            numApartments = numOfApartments;
         }
 
         public int GetModifiedCapacity(ushort buildingID) 
