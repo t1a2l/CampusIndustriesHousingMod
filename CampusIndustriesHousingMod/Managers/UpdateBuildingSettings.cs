@@ -207,6 +207,7 @@ namespace CampusIndustriesHousingMod.Managers
 
         private static void EnsureCitizenUnits(ushort buildingID, ref Building data, int homeCount = 0)
         {
+            bool old_building = false;
             if ((data.m_flags & (Building.Flags.Abandoned | Building.Flags.Collapsed)) != 0)
             {
                 return;
@@ -224,6 +225,11 @@ namespace CampusIndustriesHousingMod.Managers
                     instance.m_units.m_buffer[num2].SetWealthLevel(wealthLevel);
                     homeCount--;
                 }
+                if ((flags & CitizenUnit.Flags.Work) != 0 || (flags & CitizenUnit.Flags.Student) != 0)
+                {
+                    old_building = true;
+                    break;
+                }
                 num = num2;
                 num2 = instance.m_units.m_buffer[num2].m_nextUnit;
                 if (++num3 > 524288)
@@ -231,6 +237,12 @@ namespace CampusIndustriesHousingMod.Managers
                     CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
                     break;
                 }
+            }
+            if (old_building) 
+            {
+                Singleton<CitizenManager>.instance.ReleaseUnits(data.m_citizenUnits);
+                instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount);
+                return;
             }
             homeCount = Mathf.Max(0, homeCount);
             if (homeCount == 0)
