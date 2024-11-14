@@ -3,7 +3,6 @@ using System.Text;
 using ColossalFramework;
 using ColossalFramework.Math;
 using UnityEngine;
-using System.Threading;
 using CampusIndustriesHousingMod.Utils;
 using CampusIndustriesHousingMod.Managers;
 
@@ -153,7 +152,7 @@ namespace CampusIndustriesHousingMod.AI
 
             districtManager.m_districts.m_buffer[district].m_servicePoliciesEffect |= policies & (DistrictPolicies.Services.PowerSaving | DistrictPolicies.Services.WaterSaving | DistrictPolicies.Services.SmokeDetectors | DistrictPolicies.Services.PetBan | DistrictPolicies.Services.Recycling | DistrictPolicies.Services.SmokingBan | DistrictPolicies.Services.ExtraInsulation | DistrictPolicies.Services.NoElectricity | DistrictPolicies.Services.OnlyElectricity);
 
-            this.GetConsumptionRates(new Randomizer(buildingID), 100, out int electricityConsumption, out int waterConsumption, out int sewageAccumulation, out int garbageAccumulation, out _);
+            GetConsumptionRates(new Randomizer(buildingID), 100, out int electricityConsumption, out int waterConsumption, out int sewageAccumulation, out int garbageAccumulation, out _);
 
             int modifiedElectricityConsumption = 1 + (electricityConsumption * behaviour.m_electricityConsumption + 9999) / 10000;
             waterConsumption = 1 + (waterConsumption * behaviour.m_waterConsumption + 9999) / 10000;
@@ -301,7 +300,7 @@ namespace CampusIndustriesHousingMod.AI
                 crimeRate = 0;
             }
 
-            districtManager.m_districts.m_buffer[(int) district].AddResidentialData(ref behaviour, aliveCount, health, happiness, crimeRate, homeCount, aliveHomeCount, emptyHomeCount, (int) this.m_info.m_class.m_level, modifiedElectricityConsumption, heatingConsumption, waterConsumption, modifiedSewageAccumulation, garbageAccumulation, modifiedIncomeAccumulation, Mathf.Min(100, (int) buildingData.m_garbageBuffer / 50), (int) buildingData.m_waterPollution * 100 / (int) byte.MaxValue, this.m_info.m_class.m_subService);
+            districtManager.m_districts.m_buffer[(int) district].AddResidentialData(ref behaviour, aliveCount, health, happiness, crimeRate, homeCount, aliveHomeCount, emptyHomeCount, (int) m_info.m_class.m_level, modifiedElectricityConsumption, heatingConsumption, waterConsumption, modifiedSewageAccumulation, garbageAccumulation, modifiedIncomeAccumulation, Mathf.Min(100, (int) buildingData.m_garbageBuffer / 50), (int) buildingData.m_waterPollution * 100 / (int) byte.MaxValue, m_info.m_class.m_subService);
 
             // Handle custom maintenance in addition to the standard maintenance handled in the base class
             HandleAdditionalMaintenanceCost(buildingID, ref buildingData);
@@ -479,7 +478,7 @@ namespace CampusIndustriesHousingMod.AI
                 return 0;
             }
             
-            Singleton<EconomyManager>.instance.m_EconomyWrapper.OnGetMaintenanceCost(ref amount, this.m_info.m_class.m_service, this.m_info.m_class.m_subService, this.m_info.m_class.m_level);
+            Singleton<EconomyManager>.instance.m_EconomyWrapper.OnGetMaintenanceCost(ref amount, m_info.m_class.m_service, m_info.m_class.m_subService, m_info.m_class.m_level);
             Logger.LogInfo(Logger.LOG_BARRACKS_INCOME, "GetCustomMaintenanceCost - building: {0} - calculated maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
             return amount;
@@ -494,14 +493,14 @@ namespace CampusIndustriesHousingMod.AI
             }
 
             int productionRate = (int) buildingData.m_productionRate;
-            int budget = Singleton<EconomyManager>.instance.GetBudget(this.m_info.m_class);
+            int budget = Singleton<EconomyManager>.instance.GetBudget(m_info.m_class);
             amount /= 100;
             amount = productionRate * budget / 100 * amount / 100;
             Logger.LogInfo(Logger.LOG_BARRACKS_INCOME, "GetCustomMaintenanceCost - building: {0} - adjusted maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
             if ((buildingData.m_flags & Building.Flags.Original) == Building.Flags.None && amount != 0) 
             {
-                int result = Singleton<EconomyManager>.instance.FetchResource(EconomyManager.Resource.Maintenance, amount, this.m_info.m_class);
+                Singleton<EconomyManager>.instance.FetchResource(EconomyManager.Resource.Maintenance, amount, m_info.m_class);
             }
         }
 

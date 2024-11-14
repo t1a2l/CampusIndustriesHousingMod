@@ -3,7 +3,6 @@ using System.Text;
 using ColossalFramework;
 using ColossalFramework.Math;
 using UnityEngine;
-using System.Threading;
 using System.Collections.Generic;
 using CampusIndustriesHousingMod.Utils;
 using CampusIndustriesHousingMod.Managers;
@@ -417,7 +416,7 @@ namespace CampusIndustriesHousingMod.AI
 
         private int GetCustomMaintenanceCost(ushort buildingID, ref Building buildingData) 
         {
-            int originalAmount = -(this.m_maintenanceCost * 100);
+            int originalAmount = -(m_maintenanceCost * 100);
 
             Mod mod = Mod.GetInstance();
             if (mod == null) 
@@ -462,7 +461,7 @@ namespace CampusIndustriesHousingMod.AI
                 return 0;
             }
             
-            Singleton<EconomyManager>.instance.m_EconomyWrapper.OnGetMaintenanceCost(ref amount, this.m_info.m_class.m_service, this.m_info.m_class.m_subService, this.m_info.m_class.m_level);
+            Singleton<EconomyManager>.instance.m_EconomyWrapper.OnGetMaintenanceCost(ref amount, m_info.m_class.m_service, m_info.m_class.m_subService, m_info.m_class.m_level);
             Logger.LogInfo(Logger.LOG_DORMS_INCOME, "getCustomMaintenanceCost - building: {0} - calculated maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
             return amount;
@@ -477,14 +476,14 @@ namespace CampusIndustriesHousingMod.AI
             }
 
             int productionRate = (int) buildingData.m_productionRate;
-            int budget = Singleton<EconomyManager>.instance.GetBudget(this.m_info.m_class);
+            int budget = Singleton<EconomyManager>.instance.GetBudget(m_info.m_class);
             amount /= 100;
             amount = productionRate * budget / 100 * amount / 100;
             Logger.LogInfo(Logger.LOG_DORMS_INCOME, "getCustomMaintenanceCost - building: {0} - adjusted maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
             if ((buildingData.m_flags & Building.Flags.Original) == Building.Flags.None && amount != 0) 
             {
-                int result = Singleton<EconomyManager>.instance.FetchResource(EconomyManager.Resource.Maintenance, amount, this.m_info.m_class);
+                Singleton<EconomyManager>.instance.FetchResource(EconomyManager.Resource.Maintenance, amount, m_info.m_class);
             }
         }
 
