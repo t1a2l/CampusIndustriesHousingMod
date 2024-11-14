@@ -748,22 +748,16 @@ namespace CampusIndustriesHousingMod.AI
             }
         }
 
-        public void SetCapacity(int numOfApartments)
+        public int GetModifiedCapacity(ushort buildingID)
         {
-            numApartments = numOfApartments;
-        }
-
-        public int GetModifiedCapacity(ushort buildingID) 
-        {
-            ref Building building = ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
-            var dorms = building.Info.GetAI() as DormsAI;
-            return capacityModifier > 0 ? (int)(dorms.numApartments * capacityModifier) : dorms.numApartments;
+            var buildingRecord = HousingManager.GetBuildingRecord(buildingID);
+            return capacityModifier > 0 ? (int)(buildingRecord.NumOfApartments * capacityModifier) : buildingRecord.NumOfApartments;
         }
 
         public void ValidateCapacity(ushort buildingId, ref Building data, bool shouldCreateApartments) 
         {
             int numApartmentsExpected = GetModifiedCapacity(buildingId);
-            
+
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitIndex = data.m_citizenUnits;
             uint lastCitizenUnitIndex = 0;
@@ -792,12 +786,12 @@ namespace CampusIndustriesHousingMod.AI
                 if (shouldCreateApartments) 
                 {
                     // Only create apartments after a building is already loaded, otherwise let EnsureCitizenUnits to create them
-                    CreateApartments((numApartmentsExpected - numApartmentsFound), buildingId, ref data, lastCitizenUnitIndex);
+                    CreateApartments(numApartmentsExpected - numApartmentsFound, buildingId, ref data, lastCitizenUnitIndex);
                 }
             } 
             else 
             {
-                DeleteApartments((numApartmentsFound - numApartmentsExpected), buildingId, ref data);
+                DeleteApartments(numApartmentsFound - numApartmentsExpected, buildingId, ref data);
             }
         }
 

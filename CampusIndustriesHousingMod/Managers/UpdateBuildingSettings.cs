@@ -178,7 +178,6 @@ namespace CampusIndustriesHousingMod.Managers
             if (data.Info.GetAI() is BarracksAI barracksAI)
             {
                 float barracksCapacityModifier = Mod.GetInstance().GetOptionsManager().GetBarracksCapacityModifier();
-                barracksAI.SetCapacity(numOfApartments);
                 barracksAI.UpdateCapacityModifier(barracksCapacityModifier);
                 barracksAI.ValidateCapacity(buildingID, ref data, false);
                 CreateOrEnsure(is_new, buildingID, ref data, barracksAI.GetModifiedCapacity(buildingID));
@@ -186,7 +185,6 @@ namespace CampusIndustriesHousingMod.Managers
             else if (data.Info.GetAI() is DormsAI dormsAI)
             {
                 float dormsCapacityModifier = Mod.GetInstance().GetOptionsManager().GetDormsCapacityModifier();
-                dormsAI.SetCapacity(numOfApartments);
                 dormsAI.UpdateCapacityModifier(dormsCapacityModifier);
                 dormsAI.ValidateCapacity(buildingID, ref data, false);
                 CreateOrEnsure(is_new, buildingID, ref data, dormsAI.GetModifiedCapacity(buildingID));
