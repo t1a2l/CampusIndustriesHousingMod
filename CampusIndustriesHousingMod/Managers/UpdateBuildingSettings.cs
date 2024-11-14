@@ -177,15 +177,11 @@ namespace CampusIndustriesHousingMod.Managers
             ref Building data = ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
             if (data.Info.GetAI() is BarracksAI barracksAI)
             {
-                float barracksCapacityModifier = Mod.GetInstance().GetOptionsManager().GetBarracksCapacityModifier();
-                barracksAI.UpdateCapacityModifier(barracksCapacityModifier);
                 barracksAI.ValidateCapacity(buildingID, ref data, false);
                 CreateOrEnsure(is_new, buildingID, ref data, barracksAI.GetModifiedCapacity(buildingID));
             }
             else if (data.Info.GetAI() is DormsAI dormsAI)
             {
-                float dormsCapacityModifier = Mod.GetInstance().GetOptionsManager().GetDormsCapacityModifier();
-                dormsAI.UpdateCapacityModifier(dormsCapacityModifier);
                 dormsAI.ValidateCapacity(buildingID, ref data, false);
                 CreateOrEnsure(is_new, buildingID, ref data, dormsAI.GetModifiedCapacity(buildingID));
             }

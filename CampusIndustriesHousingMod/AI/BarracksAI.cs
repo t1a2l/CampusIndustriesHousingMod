@@ -16,8 +16,6 @@ namespace CampusIndustriesHousingMod.AI
         [CustomizableProperty("Number of Apartments")]
         public int numApartments = 50;
 
-        private float capacityModifier = 1.0f;
-
         public override Color GetColor(ushort buildingId, ref Building data, InfoManager.InfoMode infoMode, InfoManager.SubInfoMode subInfoMode) 
         {
             // This is a copy from ResidentialBuildingAI
@@ -751,22 +749,10 @@ namespace CampusIndustriesHousingMod.AI
             }
         }
 
-        public void UpdateCapacityModifier(float newCapacityModifier) 
-        {
-            Logger.LogInfo(Logger.LOG_BARRACKS_CAPACITY, "BarracksAI.UpdateCapacity -- Updating capacity with modifier: {0}", newCapacityModifier);
-            // Set the capcityModifier and check to see if the value actually changes
-            if (Interlocked.Exchange(ref capacityModifier, newCapacityModifier) == newCapacityModifier) 
-            {
-                // Capcity has already been set to this value, nothing to do
-                Logger.LogInfo(Logger.LOG_BARRACKS_CAPACITY, "BarracksAI.UpdateCapacity -- Skipping capacity change because the value was already set");
-                return;
-            }
-        }
-
         public int GetModifiedCapacity(ushort buildingID) 
         {
             var buildingRecord = HousingManager.GetBuildingRecord(buildingID);
-            return capacityModifier > 0 ? (int)(buildingRecord.NumOfApartments * capacityModifier) : buildingRecord.NumOfApartments;
+            return buildingRecord.NumOfApartments;
         }
 
         public void ValidateCapacity(ushort buildingId, ref Building data, bool shouldCreateApartments) 

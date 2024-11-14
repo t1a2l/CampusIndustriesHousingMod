@@ -67,9 +67,6 @@ namespace CampusIndustriesHousingMod.Patches
 
                 if(universityDormitoryBuildingInfo != null && farmWorkersBarracksBuildingInfo != null)
                 {
-                    float universityDormitoryCapcityModifier = Mod.GetInstance().GetOptionsManager().GetDormsCapacityModifier();
-                    float farmWorkersBarracksCapcityModifier = Mod.GetInstance().GetOptionsManager().GetBarracksCapacityModifier();
-
                     uint index = 0U;
                     for (; PrefabCollection<BuildingInfo>.LoadedCount() > index; ++index)
                     {
@@ -79,12 +76,10 @@ namespace CampusIndustriesHousingMod.Patches
                         if (buildingInfo != null && buildingInfo.GetAI() is DormsAI dormsAI)
                         {
                             buildingInfo.m_class = universityDormitoryBuildingInfo.m_class;
-                            dormsAI.UpdateCapacityModifier(universityDormitoryCapcityModifier);
                         }
                         else if (buildingInfo != null && buildingInfo.GetAI() is BarracksAI barracksAI)
                         {
                             buildingInfo.m_class = farmWorkersBarracksBuildingInfo.m_class;
-                            barracksAI.UpdateCapacityModifier(farmWorkersBarracksCapcityModifier);
                         }
                     }
                 }                
