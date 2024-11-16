@@ -2,8 +2,6 @@
 using ColossalFramework;
 using CampusIndustriesHousingMod.Utils;
 using CampusIndustriesHousingMod.AI;
-using UnityEngine;
-using System;
 
 namespace CampusIndustriesHousingMod.Managers
 {
@@ -28,7 +26,7 @@ namespace CampusIndustriesHousingMod.Managers
             buildingRecord.IsGlobal = false;
 
             HousingManager.SetBuildingRecord(buildingID, buildingRecord);
-            UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, false);
+            UpdateBuildingCapacity(buildingID);
         }
 
         public static void SetBuildingToPrefab(ushort buildingID, HousingManager.PrefabRecord recordPrefab)
@@ -41,7 +39,7 @@ namespace CampusIndustriesHousingMod.Managers
             buildingRecord.IsGlobal = false;
 
             HousingManager.SetBuildingRecord(buildingID, buildingRecord);
-            UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, false);
+            UpdateBuildingCapacity(buildingID);
         }
 
         public static void SetBuildingToGlobal(ushort buildingID, Housing buildingRecordGlobalConfig)
@@ -54,7 +52,7 @@ namespace CampusIndustriesHousingMod.Managers
             buildingRecord.IsGlobal = true;
 
             HousingManager.SetBuildingRecord(buildingID, buildingRecord);
-            UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, false);
+            UpdateBuildingCapacity(buildingID);
         }
 
         public static void UpdateBuildingToDefaultSettings(ushort buildingID, HousingManager.BuildingRecord newDefaultRecord)
@@ -67,7 +65,7 @@ namespace CampusIndustriesHousingMod.Managers
             buildingRecord.IsGlobal = false;
 
             HousingManager.SetBuildingRecord(buildingID, buildingRecord);
-            UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, false);
+            UpdateBuildingCapacity(buildingID);
         }
 
         public static void CreatePrefabSettings(ushort buildingID, HousingManager.BuildingRecord newRecord)
@@ -102,7 +100,7 @@ namespace CampusIndustriesHousingMod.Managers
                 buildingRecord.IsPrefab = true;
                 buildingRecord.IsGlobal = false;
                 HousingManager.SetBuildingRecord(buildingId, buildingRecord);
-                UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, false);
+                UpdateBuildingCapacity(buildingID);
             }
 
             if (HousingManager.PrefabExist(buildingInfo.name, buildingInfo.GetAI().GetType().Name))
@@ -153,7 +151,7 @@ namespace CampusIndustriesHousingMod.Managers
                 buildingRecord.IsPrefab = false;
                 buildingRecord.IsGlobal = true;
                 HousingManager.SetBuildingRecord(buildingId, buildingRecord);
-                UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, false);
+                UpdateBuildingCapacity(buildingID);
             }
 
             // try get global settings and update them or create new global settings for this building type
@@ -172,87 +170,16 @@ namespace CampusIndustriesHousingMod.Managers
             }
         }
 
-        public static void UpdateBuildingCapacity(ushort buildingID, int numOfApartments, bool is_new)
+        public static void UpdateBuildingCapacity(ushort buildingID)
         {
             ref Building data = ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
             if (data.Info.GetAI() is BarracksAI barracksAI)
             {
-                barracksAI.ValidateCapacity(buildingID, ref data, false);
-                CreateOrEnsure(is_new, buildingID, ref data, barracksAI.GetModifiedCapacity(buildingID));
+                barracksAI.ValidateCapacity(buildingID, ref data, true);
             }
             else if (data.Info.GetAI() is DormsAI dormsAI)
             {
-                dormsAI.ValidateCapacity(buildingID, ref data, false);
-                CreateOrEnsure(is_new, buildingID, ref data, dormsAI.GetModifiedCapacity(buildingID));
-            }
-        }
-
-        private static void CreateOrEnsure(bool is_new, ushort buildingID, ref Building data, int numOfApartments)
-        {
-            if (is_new)
-            {
-                Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, numOfApartments);
-            }
-            else
-            {
-                EnsureCitizenUnits(buildingID, ref data, numOfApartments);
-            }
-        }
-
-        private static void EnsureCitizenUnits(ushort buildingID, ref Building data, int homeCount = 0)
-        {
-            bool old_building = false;
-            if ((data.m_flags & (Building.Flags.Abandoned | Building.Flags.Collapsed)) != 0)
-            {
-                return;
-            }
-            Citizen.Wealth wealthLevel = Citizen.GetWealthLevel((ItemClass.Level)data.m_level);
-            CitizenManager instance = Singleton<CitizenManager>.instance;
-            uint num = 0u;
-            uint num2 = data.m_citizenUnits;
-            int num3 = 0;
-            while (num2 != 0)
-            {
-                CitizenUnit.Flags flags = instance.m_units.m_buffer[num2].m_flags;
-                if ((flags & CitizenUnit.Flags.Home) != 0)
-                {
-                    instance.m_units.m_buffer[num2].SetWealthLevel(wealthLevel);
-                    homeCount--;
-                }
-                if ((flags & CitizenUnit.Flags.Work) != 0 || (flags & CitizenUnit.Flags.Student) != 0)
-                {
-                    old_building = true;
-                    break;
-                }
-                num = num2;
-                num2 = instance.m_units.m_buffer[num2].m_nextUnit;
-                if (++num3 > 524288)
-                {
-                    CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
-                    break;
-                }
-            }
-            if (old_building) 
-            {
-                Singleton<CitizenManager>.instance.ReleaseUnits(data.m_citizenUnits);
-                instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount);
-                return;
-            }
-            homeCount = Mathf.Max(0, homeCount);
-            if (homeCount == 0)
-            {
-                return;
-            }
-            if (instance.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount))
-            {
-                if (num != 0)
-                {
-                    instance.m_units.m_buffer[num].m_nextUnit = firstUnit;
-                }
-                else
-                {
-                    data.m_citizenUnits = firstUnit;
-                }
+                dormsAI.ValidateCapacity(buildingID, ref data, true);
             }
         }
 

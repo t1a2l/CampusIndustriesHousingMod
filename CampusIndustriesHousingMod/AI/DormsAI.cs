@@ -98,37 +98,15 @@ namespace CampusIndustriesHousingMod.AI
         {
             base.CreateBuilding(buildingID, ref data);
             var buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
-            UpdateBuildingSettings.UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, true);
-        }
-
-        public override void BuildingLoaded(ushort buildingID, ref Building data, uint version)
-        {
-            base.BuildingLoaded(buildingID, ref data, version);
-            HousingManager.BuildingRecord buildingRecord;
-            if (HousingManager.BuildingRecordExist(buildingID))
-            {
-                buildingRecord = HousingManager.GetBuildingRecord(buildingID);
-            }
-            else
-            {
-                buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
-            }
-            UpdateBuildingSettings.UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, false);
+            Singleton<CitizenManager>.instance.CreateUnits(out data.m_citizenUnits, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, buildingRecord.NumOfApartments);
+            ValidateCapacity(buildingID, ref data, false);
         }
 
         public override void EndRelocating(ushort buildingID, ref Building data)
         {
             base.EndRelocating(buildingID, ref data);
-            HousingManager.BuildingRecord buildingRecord;
-            if (HousingManager.BuildingRecordExist(buildingID))
-            {
-                buildingRecord = HousingManager.GetBuildingRecord(buildingID);
-            }
-            else
-            {
-                buildingRecord = HousingManager.CreateBuildingRecord(buildingID);
-            }
-            UpdateBuildingSettings.UpdateBuildingCapacity(buildingID, buildingRecord.NumOfApartments, false);
+            ValidateCapacity(buildingID, ref data, false);
+            EnsureCitizenUnits(buildingID, ref data, GetModifiedCapacity(buildingID));
         }
 
         public override void SimulationStep(ushort buildingID, ref Building buildingData, ref Building.Frame frameData) 
