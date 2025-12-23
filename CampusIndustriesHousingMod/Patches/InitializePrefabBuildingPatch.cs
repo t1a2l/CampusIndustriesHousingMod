@@ -50,6 +50,10 @@ namespace CampusIndustriesHousingMod.Patches
                     Object.DestroyImmediate(oldAI);
                     var newAI = (PrefabAI)__instance.gameObject.AddComponent<DormsAI>();
                     PrefabUtil.TryCopyAttributes(oldAI, newAI, false);
+                    if (newAI is DormsAI dormsAI)
+                    {
+                        dormsAI.m_studentCount = 0;
+                    }
                 }
             }
             catch (Exception e)
