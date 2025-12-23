@@ -96,7 +96,7 @@ namespace CampusIndustriesHousingMod
                         }
                         if (building.Info.GetAI() is DormsAI dormsAI)
                         {
-                            dormsAI.ValidateCapacity(buildingId, ref building, false);
+                            dormsAI.ValidateCapacity(buildingId, ref building, false);           
                         }
                         else if (building.Info.GetAI() is BarracksAI barracksAI)
                         {
@@ -197,8 +197,7 @@ namespace CampusIndustriesHousingMod
                 return;
             }
 
-            uint firstUnit = 0u;
-            if (instance.CreateUnits(out firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount, workCount, visitCount, 0, studentCount, hotelCount))
+            if (instance.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingID, 0, homeCount, workCount, visitCount, 0, studentCount, hotelCount))
             {
                 if (num != 0)
                 {
