@@ -12,13 +12,13 @@ namespace CampusIndustriesHousingMod.Patches
 	public static class IndustryBuildingAIPatch
 	{
 		private delegate void PlayerBuildingAICreateBuildingDelegate(PlayerBuildingAI __instance, ushort buildingID, ref Building data);
-        private static PlayerBuildingAICreateBuildingDelegate BaseCreateBuilding = AccessTools.MethodDelegate<PlayerBuildingAICreateBuildingDelegate>(typeof(PlayerBuildingAI).GetMethod("CreateBuilding", BindingFlags.Instance | BindingFlags.Public), null, false);
+        private static readonly PlayerBuildingAICreateBuildingDelegate BaseCreateBuilding = AccessTools.MethodDelegate<PlayerBuildingAICreateBuildingDelegate>(typeof(PlayerBuildingAI).GetMethod("CreateBuilding", BindingFlags.Instance | BindingFlags.Public), null, false);
 
 		private delegate void PlayerBuildingAIBuildingLoadedDelegate(PlayerBuildingAI __instance, ushort buildingID, ref Building data, uint version);
-        private static PlayerBuildingAIBuildingLoadedDelegate BaseBuildingLoaded = AccessTools.MethodDelegate<PlayerBuildingAIBuildingLoadedDelegate>(typeof(PlayerBuildingAI).GetMethod("BuildingLoaded", BindingFlags.Instance | BindingFlags.Public), null, false);
+        private static readonly PlayerBuildingAIBuildingLoadedDelegate BaseBuildingLoaded = AccessTools.MethodDelegate<PlayerBuildingAIBuildingLoadedDelegate>(typeof(PlayerBuildingAI).GetMethod("BuildingLoaded", BindingFlags.Instance | BindingFlags.Public), null, false);
 
 		private delegate void PlayerBuildingAIEndRelocatingDelegate(PlayerBuildingAI __instance, ushort buildingID, ref Building data);
-        private static PlayerBuildingAIEndRelocatingDelegate BaseEndRelocating = AccessTools.MethodDelegate<PlayerBuildingAIEndRelocatingDelegate>(typeof(PlayerBuildingAI).GetMethod("EndRelocating", BindingFlags.Instance | BindingFlags.Public), null, false);
+        private static readonly PlayerBuildingAIEndRelocatingDelegate BaseEndRelocating = AccessTools.MethodDelegate<PlayerBuildingAIEndRelocatingDelegate>(typeof(PlayerBuildingAI).GetMethod("EndRelocating", BindingFlags.Instance | BindingFlags.Public), null, false);
 
         [HarmonyPatch(typeof(IndustryBuildingAI), "CreateBuilding")]
         [HarmonyPrefix]
@@ -26,6 +26,11 @@ namespace CampusIndustriesHousingMod.Patches
         {
             if(data.Info.GetAI() is BarracksAI)
             {
+                __instance.m_workPlaceCount0 = 0;
+                __instance.m_workPlaceCount1 = 0;
+                __instance.m_workPlaceCount2 = 0;
+                __instance.m_workPlaceCount3 = 0;   
+
                 var SearchKey = (uint)typeof(IndustryBuildingAI).GetProperty("SearchKey", AccessTools.all).GetValue(__instance, null);
                 if (__instance.m_info.m_placementStyle == ItemClass.Placement.Manual && ___m_searchTable.TryGetValue(SearchKey, out var value) && value != null && value.m_size >= 2)
                 {
@@ -77,6 +82,11 @@ namespace CampusIndustriesHousingMod.Patches
 		{
             if (data.Info.GetAI() is BarracksAI)
             {
+                __instance.m_workPlaceCount0 = 0;
+                __instance.m_workPlaceCount1 = 0;
+                __instance.m_workPlaceCount2 = 0;
+                __instance.m_workPlaceCount3 = 0;
+
                 BaseBuildingLoaded(__instance, buildingID, ref data, version);
                 DistrictManager instance = Singleton<DistrictManager>.instance;
                 byte b = instance.GetPark(data.m_position);
@@ -114,6 +124,11 @@ namespace CampusIndustriesHousingMod.Patches
 		{
             if (data.Info.GetAI() is BarracksAI)
             {
+                __instance.m_workPlaceCount0 = 0;
+                __instance.m_workPlaceCount1 = 0;
+                __instance.m_workPlaceCount2 = 0;
+                __instance.m_workPlaceCount3 = 0;
+
                 BaseEndRelocating(__instance, buildingID, ref data);
                 DistrictManager instance = Singleton<DistrictManager>.instance;
                 byte b = instance.GetPark(data.m_position);
@@ -221,6 +236,17 @@ namespace CampusIndustriesHousingMod.Patches
             }
             data.m_problems = problemStruct;
 			return false;
+        }
+
+        [HarmonyPatch(typeof(IndustryBuildingAI), "HandleWorkAndVisitPlaces")]
+        [HarmonyPrefix]
+        public static bool HandleWorkAndVisitPlaces(ushort buildingID, ref Building buildingData, ref Citizen.BehaviourData behaviour, ref int aliveWorkerCount, ref int totalWorkerCount, ref int workPlaceCount, ref int aliveVisitorCount, ref int totalVisitorCount, ref int visitPlaceCount)
+        {
+            if (buildingData.Info.GetAI() is BarracksAI)
+            {
+                return false;
+            }
+            return true;
         }
 
         private static void AddAreaNotification(ushort buildingID, ref Building data)

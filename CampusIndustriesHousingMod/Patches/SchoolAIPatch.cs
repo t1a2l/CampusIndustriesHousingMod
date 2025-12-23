@@ -20,10 +20,14 @@ namespace CampusIndustriesHousingMod.Patches
         [HarmonyPrefix]
         public static bool CreateBuilding(SchoolAI __instance, ushort buildingID, ref Building data)
         {
-			if(data.Info.GetAI() is DormsAI dormsAI)
+			if(data.Info.GetAI() is DormsAI)
 			{
-				BaseCreateBuilding(__instance, buildingID, ref data);
-                dormsAI.m_studentCount = 0;
+                __instance.m_workPlaceCount0 = 0;
+                __instance.m_workPlaceCount1 = 0;
+                __instance.m_workPlaceCount2 = 0;
+                __instance.m_workPlaceCount3 = 0;
+                __instance.m_studentCount = 0;
+                BaseCreateBuilding(__instance, buildingID, ref data);
                 return false;
 			}
             return true;
@@ -33,10 +37,14 @@ namespace CampusIndustriesHousingMod.Patches
         [HarmonyPrefix]
 		public static bool BuildingLoaded(SchoolAI __instance, ushort buildingID, ref Building data, uint version)
 		{
-			if(data.Info.GetAI() is DormsAI dormsAI)
+			if(data.Info.GetAI() is DormsAI)
 			{
-				BaseBuildingLoaded(__instance, buildingID, ref data, version);
-                dormsAI.m_studentCount = 0;
+                __instance.m_workPlaceCount0 = 0;
+                __instance.m_workPlaceCount1 = 0;
+                __instance.m_workPlaceCount2 = 0;
+                __instance.m_workPlaceCount3 = 0;
+                __instance.m_studentCount = 0;
+                BaseBuildingLoaded(__instance, buildingID, ref data, version);
                 return false;
 			}
 			return true;
@@ -46,13 +54,28 @@ namespace CampusIndustriesHousingMod.Patches
         [HarmonyPrefix]
 		public static bool EndRelocating(SchoolAI __instance, ushort buildingID, ref Building data)
 		{
-			if(data.Info.GetAI() is DormsAI dormsAI)
+			if(data.Info.GetAI() is DormsAI)
 			{
-				BaseEndRelocating(__instance, buildingID, ref data);
-                dormsAI.m_studentCount = 0;
+                __instance.m_workPlaceCount0 = 0;
+                __instance.m_workPlaceCount1 = 0;
+                __instance.m_workPlaceCount2 = 0;
+                __instance.m_workPlaceCount3 = 0;
+                __instance.m_studentCount = 0;
+                BaseEndRelocating(__instance, buildingID, ref data); 
                 return false;
 			}
 			return true;
 		}
-	}
+
+        [HarmonyPatch(typeof(SchoolAI), "HandleWorkAndVisitPlaces")]
+        [HarmonyPrefix]
+        public static bool HandleWorkAndVisitPlaces(ushort buildingID, ref Building buildingData, ref Citizen.BehaviourData behaviour, ref int aliveWorkerCount, ref int totalWorkerCount, ref int workPlaceCount, ref int aliveVisitorCount, ref int totalVisitorCount, ref int visitPlaceCount)
+        {
+            if (buildingData.Info.GetAI() is DormsAI)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
 }
