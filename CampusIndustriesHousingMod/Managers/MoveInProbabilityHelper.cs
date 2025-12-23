@@ -16,8 +16,8 @@ namespace CampusIndustriesHousingMod.Managers
         public static bool CheckIfShouldMoveIn(uint[] family, ref Building buildingData, ref Randomizer randomizer, string type)
         {
             float chanceValue = BASE_CHANCE_VALUE;
-            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.CheckIfShouldMoveIn -- Base Chance: {0}", chanceValue);
-            Logger.LogInfo(Logger.LOG_CHANCES, "---------------------------------");
+            Utils.Logger.LogInfo(Utils.Logger.LOG_CHANCES, "MoveInProbabilityHelper.CheckIfShouldMoveIn -- Base Chance: {0}", chanceValue);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_CHANCES, "---------------------------------");
 
             // Distance
             chanceValue += GetDistanceChanceValue(family, ref buildingData, type);
@@ -28,14 +28,14 @@ namespace CampusIndustriesHousingMod.Managers
             // Check for no chance
             if (chanceValue <= 0)
             {
-                Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.CheckIfShouldMoveIn -- No Chance: {0}", chanceValue);
+                Utils.Logger.LogInfo(Utils.Logger.LOG_CHANCES, "MoveInProbabilityHelper.CheckIfShouldMoveIn -- No Chance: {0}", chanceValue);
                 return false;
             }
 
             // Check against random value
             uint maxChance = (uint)MAX_CHANCE_VALUE;
             int randomValue = randomizer.Int32(maxChance);
-            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.CheckIfShouldMoveIn -- Total Chance Value: {0} -- Random Number: {1} -- result: {2}", chanceValue, randomValue, randomValue <= chanceValue);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_CHANCES, "MoveInProbabilityHelper.CheckIfShouldMoveIn -- Total Chance Value: {0} -- Random Number: {1} -- result: {2}", chanceValue, randomValue, randomValue <= chanceValue);
             return randomValue <= chanceValue;
         }
 
@@ -50,7 +50,7 @@ namespace CampusIndustriesHousingMod.Managers
             if (homeBuildingId == 0)
             {
                 // homeBuilding should never be 0, but if it is return NO_CHANCE to prevent this family from being chosen 
-                Logger.LogError(Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetDistanceChanceValue -- Home Building was 0 when it shouldn't have been");
+                Utils.Logger.LogError(Utils.Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetDistanceChanceValue -- Home Building was 0 when it shouldn't have been");
                 return NO_CHANCE;
             }
 
@@ -82,7 +82,7 @@ namespace CampusIndustriesHousingMod.Managers
             if (workBuildingId == 0)
             {
                 // workBuildingId should never be 0, but if it is return NO_CHANCE to prevent this family from being chosen 
-                Logger.LogError(Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetDistanceChanceValue -- Work Building was 0 when it shouldn't have been");
+                Utils.Logger.LogError(Utils.Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetDistanceChanceValue -- Work Building was 0 when it shouldn't have been");
                 return NO_CHANCE;
             }
 
@@ -103,7 +103,7 @@ namespace CampusIndustriesHousingMod.Managers
             {
                 distanceChanceValue = DISTANCE_MAX_CHANCE_VALUE * 1f;
             }
-            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetDistanceChanceValue -- Distance Chance Value: {0} -- Distance From Current Home: {1}, Distance From New Home: {2}", distanceChanceValue, distance_from_current_home_to_work, distance_from_new_home_to_Work);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetDistanceChanceValue -- Distance Chance Value: {0} -- Distance From Current Home: {1}, Distance From New Home: {2}", distanceChanceValue, distance_from_current_home_to_work, distance_from_new_home_to_Work);
 
             return distanceChanceValue;
         }
@@ -161,7 +161,7 @@ namespace CampusIndustriesHousingMod.Managers
                 }
             }
 
-            Logger.LogInfo(Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetQualityLevelChanceValue -- Wealth Chance Value: {0} -- Family Wealth: {1} -- type: {2}", chance, wealth, type);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_CHANCES, "MoveInProbabilityHelper.GetQualityLevelChanceValue -- Wealth Chance Value: {0} -- Family Wealth: {1} -- type: {2}", chance, wealth, type);
             return chance;
         }
 

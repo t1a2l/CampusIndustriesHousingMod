@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-namespace CampusIndustriesHousingMod 
+namespace CampusIndustriesHousingMod.Utils
 {
-    internal static class Logger 
+    public static class Logger 
     {
         private static readonly string Prefix = "CampusIndustriesHousingMod: ";
 
@@ -37,7 +37,7 @@ namespace CampusIndustriesHousingMod
             }
         }
 
-        internal static void LogInfo(object LOG_OPTIONS, string v) 
+        public static void LogInfo(object LOG_OPTIONS, string v) 
         {
             throw new NotImplementedException();
         }

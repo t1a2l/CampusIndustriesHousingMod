@@ -197,7 +197,7 @@ namespace CampusIndustriesHousingMod.AI
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Health, behaviour.m_healthAccumulation, buildingData.m_position, radius);
             }
-            Logger.LogInfo(Logger.LOG_DORMS_SIMULATION, "DormsAI.SimulationStepActive -- health: {0}", health);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_SIMULATION, "DormsAI.SimulationStepActive -- health: {0}", health);
 
             // Get the Wellbeing
             int wellbeing = 0;
@@ -209,7 +209,7 @@ namespace CampusIndustriesHousingMod.AI
                 }
                 Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.Wellbeing, behaviour.m_wellbeingAccumulation, buildingData.m_position, radius);
             }
-            Logger.LogInfo(Logger.LOG_DORMS_SIMULATION, "DormsAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_SIMULATION, "DormsAI.SimulationStepActive -- wellbeing: {0}", wellbeing);
 
             if (aliveCount != 0) 
             {
@@ -226,7 +226,7 @@ namespace CampusIndustriesHousingMod.AI
             {
                 happiness -= happiness >> 2;
             }
-            Logger.LogInfo(Logger.LOG_DORMS_SIMULATION, "DormsAI.SimulationStepActive -- happiness: {0}", happiness);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_SIMULATION, "DormsAI.SimulationStepActive -- happiness: {0}", happiness);
 
             buildingData.m_health = (byte) health;
             buildingData.m_happiness = (byte) happiness;
@@ -313,8 +313,8 @@ namespace CampusIndustriesHousingMod.AI
             uint[] familyWithStudents = studentManager.GetFamilyWithStudents(buildingData);
             if (familyWithStudents != null) 
             {
-                Logger.LogInfo(Logger.LOG_DORMS_PRODUCTION, "------------------------------------------------------------");
-                Logger.LogInfo(Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- Student: {0}", string.Join(", ", Array.ConvertAll(familyWithStudents, item => item.ToString())));
+                Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_PRODUCTION, "------------------------------------------------------------");
+                Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- Student: {0}", string.Join(", ", Array.ConvertAll(familyWithStudents, item => item.ToString())));
                 // Check move in chance
                 bool shouldMoveIn = MoveInProbabilityHelper.CheckIfShouldMoveIn(familyWithStudents, ref buildingData, ref randomizer, "student");
 
@@ -326,7 +326,7 @@ namespace CampusIndustriesHousingMod.AI
                     {
                         if (studentManager.IsCampusAreaStudent(familyMember))
                         {
-                            Logger.LogInfo(Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- familyMember: {0} is a student", familyMember);
+                            Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- familyMember: {0} is a student", familyMember);
                             studentsList.Add(familyMember);
                         }
                     }
@@ -340,7 +340,7 @@ namespace CampusIndustriesHousingMod.AI
                             return;
                         }
                         uint studentId = studentsList[i];
-                        Logger.LogInfo(Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- Moving In: {0}", studentId);
+                        Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- Moving In: {0}", studentId);
                         citizenManager.m_citizens.m_buffer[studentId].SetHome(studentId, buildingID, dormApartmentId);
                         studentManager.DoneProcessingStudent(studentId);
                     }
@@ -352,12 +352,12 @@ namespace CampusIndustriesHousingMod.AI
             uint[] DormApartmentStudents = studentManager.GetDormApartmentStudents(buildingData);
             if (DormApartmentStudents != null) 
             {
-                Logger.LogInfo(Logger.LOG_DORMS_PRODUCTION, "------------------------------------------------------------");
-                Logger.LogInfo(Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- DormApartmentStudents: {0}", string.Join(", ", Array.ConvertAll(DormApartmentStudents, item => item.ToString())));
+                Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_PRODUCTION, "------------------------------------------------------------");
+                Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- DormApartmentStudents: {0}", string.Join(", ", Array.ConvertAll(DormApartmentStudents, item => item.ToString())));
 
                 foreach (uint studentId in DormApartmentStudents)
                 {
-                    Logger.LogInfo(Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- Moving Out: {0}", studentId);
+                    Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_PRODUCTION, "DormsAI.ProduceGoods -- Moving Out: {0}", studentId);
                     if(studentId != 0)
                     {
                         citizenManager.m_citizens.m_buffer[studentId].SetHome(studentId, 0, 0);
@@ -440,7 +440,7 @@ namespace CampusIndustriesHousingMod.AI
             }
             
             Singleton<EconomyManager>.instance.m_EconomyWrapper.OnGetMaintenanceCost(ref amount, m_info.m_class.m_service, m_info.m_class.m_subService, m_info.m_class.m_level);
-            Logger.LogInfo(Logger.LOG_DORMS_INCOME, "getCustomMaintenanceCost - building: {0} - calculated maintenance amount: {1}", buildingData.m_buildIndex, amount);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_INCOME, "getCustomMaintenanceCost - building: {0} - calculated maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
             return amount;
         }
@@ -457,7 +457,7 @@ namespace CampusIndustriesHousingMod.AI
             int budget = Singleton<EconomyManager>.instance.GetBudget(m_info.m_class);
             amount /= 100;
             amount = productionRate * budget / 100 * amount / 100;
-            Logger.LogInfo(Logger.LOG_DORMS_INCOME, "getCustomMaintenanceCost - building: {0} - adjusted maintenance amount: {1}", buildingData.m_buildIndex, amount);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_INCOME, "getCustomMaintenanceCost - building: {0} - adjusted maintenance amount: {1}", buildingData.m_buildIndex, amount);
 
             if ((buildingData.m_flags & Building.Flags.Original) == Building.Flags.None && amount != 0) 
             {
@@ -738,7 +738,7 @@ namespace CampusIndustriesHousingMod.AI
                 citizenUnitIndex = nextCitizenUnitIndex;
             }
 
-            Logger.LogInfo(Logger.LOG_DORMS_CAPACITY, "DormsAI.ValidateCapacity -- Checking Expected Capacity {0} vs Current Capacity {1} for Building {2}", numApartmentsExpected, numApartmentsFound, buildingId);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_CAPACITY, "DormsAI.ValidateCapacity -- Checking Expected Capacity {0} vs Current Capacity {1} for Building {2}", numApartmentsExpected, numApartmentsFound, buildingId);
             // Check to see if the correct amount of apartments are present, otherwise adjust accordingly
             if (numApartmentsFound == numApartmentsExpected) 
             {
@@ -760,7 +760,7 @@ namespace CampusIndustriesHousingMod.AI
 
         private void CreateApartments(int numApartmentsToCreate, ushort buildingId, ref Building data, uint lastCitizenUnitIndex) 
         {
-            Logger.LogInfo(Logger.LOG_DORMS_CAPACITY, "DormsAI.CreateApartments -- Creating {0} Apartments", numApartmentsToCreate);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_CAPACITY, "DormsAI.CreateApartments -- Creating {0} Apartments", numApartmentsToCreate);
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             citizenManager.CreateUnits(out uint firstUnit, ref Singleton<SimulationManager>.instance.m_randomizer, buildingId, 0, numApartmentsToCreate);
             citizenManager.m_units.m_buffer[lastCitizenUnitIndex].m_nextUnit = firstUnit;
@@ -768,7 +768,7 @@ namespace CampusIndustriesHousingMod.AI
 
         private void DeleteApartments(int numApartmentsToDelete, ushort buildingId, ref Building data) 
         {
-            Logger.LogInfo(Logger.LOG_DORMS_CAPACITY, "DormsAI.DeleteApartments -- Deleting {0} Apartments", numApartmentsToDelete);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_CAPACITY, "DormsAI.DeleteApartments -- Deleting {0} Apartments", numApartmentsToDelete);
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             
             // Always start with the second to avoid loss of pointer from the building to the first unit
@@ -802,7 +802,7 @@ namespace CampusIndustriesHousingMod.AI
                 return;
             }
 
-            Logger.LogInfo(Logger.LOG_DORMS_CAPACITY, "BarracksAI.DeleteApartments -- Deleting {0} Occupied Apartments", numApartmentsToDelete);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_DORMS_CAPACITY, "BarracksAI.DeleteApartments -- Deleting {0} Occupied Apartments", numApartmentsToDelete);
             // Still need to delete more apartments so start deleting apartments with people in them...
             // Always start with the second to avoid loss of pointer from the building to the first unit
             prevUnit = data.m_citizenUnits;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using CampusIndustriesHousingMod.AI;
+using CampusIndustriesHousingMod.Utils;
 using ColossalFramework;
 using ColossalFramework.Math;
 using ICities;
@@ -317,7 +318,7 @@ namespace CampusIndustriesHousingMod.Managers
 
             // create an array of the barracks family to move out of the apartment
             CitizenUnit barracksApartment = citizenManager.m_units.m_buffer[barracksApartmentId];
-            uint[] barracks_apartment = new uint[] {0, 0, 0, 0, 0};
+            uint[] barracks_apartment = [0, 0, 0, 0, 0];
             for (int i = 0; i < 5; i++) 
             {
                 uint familyMember = barracksApartment.GetCitizen(i);

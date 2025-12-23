@@ -1,4 +1,5 @@
 ﻿using CampusIndustriesHousingMod.Managers;
+using CampusIndustriesHousingMod.Utils;
 using System.IO;
 
 namespace CampusIndustriesHousingMod.Serializer
@@ -9,7 +10,7 @@ namespace CampusIndustriesHousingMod.Serializer
         /// Deserializes old savegame data.
         /// </summary>
         /// <param name="reader">Reader to deserialize from.</param>
-        internal static void Deserialize(BinaryReader reader)
+        public static void Deserialize(BinaryReader reader)
         {
             Logger.LogInfo(Logger.LOG_SERIALIZATION, "Deserializing building old data");
 

@@ -1,4 +1,5 @@
 ﻿using CampusIndustriesHousingMod.AI;
+using CampusIndustriesHousingMod.Utils;
 using ColossalFramework;
 using ColossalFramework.UI;
 using HarmonyLib;
@@ -42,7 +43,7 @@ namespace CampusIndustriesHousingMod.Patches
                 Building industryBuilding = buildingManager.m_buildings.m_buffer[buildingId];
                 if(industryBuilding.Info.GetAI() is BarracksAI barracksAI)
                 {
-                    barracksAI.GetOccupancyDetails(ref industryBuilding, out int numResidents, out int numApartmentsOccupied);
+                    barracksAI.GetOccupancyDetails(ref industryBuilding, out _, out int numApartmentsOccupied);
                     total_ocuppied_apartment_num += numApartmentsOccupied;
                     total_apartment_num += barracksAI.GetModifiedCapacity(buildingId);
                     Logger.LogInfo(Logger.LOG_INDUSTRY, "Industry Building occupied apartments: {0}", numApartmentsOccupied);

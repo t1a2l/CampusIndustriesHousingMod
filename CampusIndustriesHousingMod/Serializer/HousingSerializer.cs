@@ -1,5 +1,6 @@
 using System;
 using CampusIndustriesHousingMod.Managers;
+using CampusIndustriesHousingMod.Utils;
 
 namespace CampusIndustriesHousingMod.Serializer
 {

@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using HarmonyLib;
 
-namespace CampusIndustriesHousingMod 
+namespace CampusIndustriesHousingMod.Utils 
 {
     public static class Patcher 
     {
@@ -40,7 +40,8 @@ namespace CampusIndustriesHousingMod
     [HarmonyPatch(typeof(SimulationManager), "CreateRelay")]
     public static class SimulationManagerCreateRelayPatch 
     {
-        public static void Prefix() {
+        public static void Prefix() 
+        {
             UnityEngine.Debug.Log("CreateRelay Prefix");
         }
     }
@@ -49,7 +50,8 @@ namespace CampusIndustriesHousingMod
     [HarmonyPatch(typeof(LoadingManager), "MetaDataLoaded")]
     public static class LoadingManagerMetaDataLoadedPatch 
     {
-        public static void Prefix() {
+        public static void Prefix() 
+        {
             UnityEngine.Debug.Log("MetaDataLoaded Prefix");
         }
     }

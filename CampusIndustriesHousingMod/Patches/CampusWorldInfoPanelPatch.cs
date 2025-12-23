@@ -1,4 +1,5 @@
 ﻿using CampusIndustriesHousingMod.AI;
+using CampusIndustriesHousingMod.Utils;
 using ColossalFramework;
 using ColossalFramework.UI;
 using HarmonyLib;

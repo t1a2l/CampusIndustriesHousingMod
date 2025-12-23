@@ -76,7 +76,7 @@ namespace CampusIndustriesHousingMod.Utils
         {
             try 
             {
-                using FileStream stream = new FileStream(GetXMLPath(), FileMode.Create, FileAccess.Write);
+                using FileStream stream = new(GetXMLPath(), FileMode.Create, FileAccess.Write);
 			    Ser_.Serialize(stream, this);   
             } 
             catch(Exception ex) 

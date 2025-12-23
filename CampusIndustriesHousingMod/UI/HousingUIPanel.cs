@@ -238,7 +238,6 @@ namespace CampusIndustriesHousingMod.UI
         public void ReturnToDefault(UIComponent c, UIMouseEventParameter eventParameter)
         {
             ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
-            var buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
 
             var buildingWorkTimeDefault = HousingManager.CreateBuildingRecord(buildingID);
 

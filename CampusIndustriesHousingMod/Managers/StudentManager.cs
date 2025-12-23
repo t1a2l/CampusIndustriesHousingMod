@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using CampusIndustriesHousingMod.AI;
+using CampusIndustriesHousingMod.Utils;
 using ColossalFramework;
 using ColossalFramework.Math;
 using ICities;
