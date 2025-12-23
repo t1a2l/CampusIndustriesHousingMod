@@ -49,7 +49,7 @@ namespace CampusIndustriesHousingMod
 
         public override void OnCreated(ILoading loading) 
         {
-            Logger.LogInfo(Logger.LOG_BASE, "CampusIndustriesHousingMod Created");
+            Utils.Logger.LogInfo(Utils.Logger.LOG_BASE, "CampusIndustriesHousingMod Created");
             instance = this;
             try
             {
@@ -57,7 +57,7 @@ namespace CampusIndustriesHousingMod
             }
             catch (Exception e)
             {
-                Logger.LogError(e.Message);
+                Utils.Logger.LogError(e.Message);
                 HousingManager.Deinit();
             }
         }
@@ -114,13 +114,13 @@ namespace CampusIndustriesHousingMod
 
         public byte[] LoadData(string id) 
         {
-            Logger.LogInfo(Logger.LOG_SERIALIZATION, "Load Data: {0}", id);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_SERIALIZATION, "Load Data: {0}", id);
             return null;
         }
 
         public void SaveData(string id, byte[] data) 
         {
-            Logger.LogInfo(Logger.LOG_SERIALIZATION, "Save Data: {0} -- {1}", id, data);
+            Utils.Logger.LogInfo(Utils.Logger.LOG_SERIALIZATION, "Save Data: {0} -- {1}", id, data);
         }
 
         public string[] EnumerateData()
