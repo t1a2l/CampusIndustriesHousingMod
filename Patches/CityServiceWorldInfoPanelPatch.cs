@@ -12,6 +12,8 @@ namespace CampusIndustriesHousingMod.Patches
 	{
         private static HousingUIPanel cityServiceHousingUIPanel;
 
+        private static UISprite checkedSprite;
+
         [HarmonyPatch(typeof(CityServiceWorldInfoPanel), "OnSetTarget")]
         [HarmonyPostfix]
         public static void OnSetTarget()
@@ -31,15 +33,27 @@ namespace CampusIndustriesHousingMod.Patches
             {
                 return;
             }
+
+            if (checkedSprite == null)
+            {
+                UISprite unchecked_sprite = ___m_OnOff?.GetComponentInChildren<UISprite>();
+
+                if (unchecked_sprite != null)
+                {
+                    checkedSprite = unchecked_sprite?.GetComponentInChildren<UISprite>();
+                }
+            }
+
             ushort building = ___m_InstanceID.Building;
             Building data = Singleton<BuildingManager>.instance.m_buildings.m_buffer[building];
             if ((data.Info.GetAI() is BarracksAI || data.Info.GetAI() is DormsAI) && ___m_OnOff.isChecked)
             {
-                ___m_OnOff.Hide();
+                ___m_OnOff.Disable();
+                checkedSprite?.disabledColor = new Color(128, 128, 128, 255);
             }
             else
             {
-                ___m_OnOff.Show();
+                ___m_OnOff.Enable();
             }
         }
 
