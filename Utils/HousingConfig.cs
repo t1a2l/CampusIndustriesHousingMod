@@ -20,6 +20,12 @@ namespace CampusIndustriesHousingMod.Utils
         
         public static void Reset() => config_ = new HousingConfig();
 
+        public bool GlobalSettingsExist(BuildingInfo buildingInfo)
+        {
+            string BuildingAIstr = buildingInfo.GetAI().GetType().Name;
+            int index = HousingSettings.FindIndex(x => x.Name == buildingInfo.name && x.BuildingAI == BuildingAIstr);
+            return index != -1;
+        }
 
         public Housing GetGlobalSettings(BuildingInfo buildingInfo)
         {
@@ -47,6 +53,15 @@ namespace CampusIndustriesHousingMod.Utils
             if (index == -1)
             {
                 HousingSettings.Add(housing);
+            }
+        }
+
+        public void RemoveGlobalSettings(Housing housing)
+        {
+            int index = HousingSettings.FindIndex(x => x.Name == housing.Name && x.BuildingAI == housing.BuildingAI);
+            if (index != -1)
+            {
+                HousingSettings.RemoveAt(index);
             }
         }
 

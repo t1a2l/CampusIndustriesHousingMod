@@ -67,6 +67,15 @@ namespace CampusIndustriesHousingMod.Managers
 
         public static BuildingRecord CreateBuildingRecord(ushort buildingID)
         {
+            var newBuildingRecord = CreateDefaultBuildingRecord(buildingID);
+
+            BuildingRecords.Add(buildingID, newBuildingRecord);
+
+            return newBuildingRecord;
+        }
+
+        public static BuildingRecord CreateDefaultBuildingRecord(ushort buildingID)
+        {
             Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID];
             PrefabAI buildingAI = building.Info.GetAI();
             string buildingAIstr = buildingAI.GetType().Name;
@@ -88,8 +97,6 @@ namespace CampusIndustriesHousingMod.Managers
             {
                 newBuildingRecord.NumOfApartments = DefaultValues(dormsAI.m_campusType);
             }
-
-            BuildingRecords.Add(buildingID, newBuildingRecord);
 
             return newBuildingRecord;
         }

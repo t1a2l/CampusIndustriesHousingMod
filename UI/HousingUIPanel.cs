@@ -26,6 +26,9 @@ namespace CampusIndustriesHousingMod.UI
         private readonly UIButton SetPrefabSettingsBtn;
         private readonly UIButton SetGlobalSettingsBtn;
 
+        private readonly UIButton DeletePrefabSettingsBtn;
+        private readonly UIButton DeleteGlobalSettingsBtn;
+
         private readonly UIButton UnlockSettingsBtn;
         private readonly UIButton LockUnlockChangesBtn;
 
@@ -37,7 +40,7 @@ namespace CampusIndustriesHousingMod.UI
             m_uiMainPanel.opacity = 0.90f;
             m_uiMainPanel.isVisible = HousingConfig.Config.ShowPanel;
             m_uiMainPanel.relativePosition = new Vector3(m_uiMainPanel.parent.width + 1f, 40f);
-            m_uiMainPanel.height = 350f;
+            m_uiMainPanel.height = 400f;
             m_uiMainPanel.width = 510f;
 
             m_settingsCheckBox = UiUtils.CreateCheckBox(uIPanel, "SettingsCheckBox", "settings", HousingConfig.Config.ShowPanel);
@@ -89,17 +92,23 @@ namespace CampusIndustriesHousingMod.UI
             ReturnToDefaultBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 190f, "ReturnToDefault", "Back to default", "Will not delete the record just set a default flag on it - you need to clear settings for this building to get the prefab or global settings");
             ReturnToDefaultBtn.eventClicked += ReturnToDefault;
 
-            ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 240f, "ApplyPrefabSettings", "Apply type settings", "Apply settings for all buildings of the same type as this building - is not cross save!");
+            ApplyPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 240f, "ApplyPrefabSettings", "Apply type settings", "Apply settings for all buildings of the same type as this building - is not cross save!");
             ApplyPrefabSettingsBtn.eventClicked += ApplyPrefabSettings;
 
-            ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 290f, "ApplyGlobalSettings", "Apply global settings", "Apply settings for all buildings of the same type as this building - is cross save!");
+            ApplyGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 240f, "ApplyGlobalSettings", "Apply global settings", "Apply settings for all buildings of the same type as this building - is cross save!");
             ApplyGlobalSettingsBtn.eventClicked += ApplyGlobalSettings;
                 
-            SetPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 240f, "SetPrefabSettings", "Set new type", "This will update all building records of this type to the current number of apartments in this save");
+            SetPrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 290f, "SetPrefabSettings", "Set new type", "This will update all building records of this type to the current number of apartments in this save");
             SetPrefabSettingsBtn.eventClicked += SetPrefabSettings;
 
-            SetGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 290f, "SetGlobalSettings", "Set new global", "This will update all building records of this type to the current number of apartments across all saves");
+            DeletePrefabSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 290f, "DeletePrefabSettings", "Delete existing type", "This will delete all building records of this type and return them back to default in this save");
+            DeletePrefabSettingsBtn.eventClicked += DeletePrefabSettings;
+
+            SetGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 10f, 340f, "SetGlobalSettings", "Set new global", "This will update all building records of this type to the current number of apartments across all saves");
             SetGlobalSettingsBtn.eventClicked += SetGlobalSettings;
+
+            DeleteGlobalSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 260f, 340f, "DeleteGlobalSettings", "Delete existing global", "This will delete all building records of this type and return them back to default across all saves");
+            DeleteGlobalSettingsBtn.eventClicked += DeleteGlobalSettings;
 
             UnlockSettingsBtn = UiUtils.AddButton(m_uiMainPanel, 130f, 55f, "UnlockSettingsBtn", "Unlock Settings", "");
             UnlockSettingsBtn.eventClicked += UnlockSettings;
@@ -238,16 +247,7 @@ namespace CampusIndustriesHousingMod.UI
         public void ReturnToDefault(UIComponent c, UIMouseEventParameter eventParameter)
         {
             ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
-
-            var buildingWorkTimeDefault = HousingManager.CreateBuildingRecord(buildingID);
-
-            var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
-
-            m_apartmentsNumTextfield.text = buildingWorkTimeDefault.NumOfApartments.ToString();
-
-            UpdateBuildingSettings.UpdateBuildingToDefaultSettings(buildingID, buildingWorkTimeDefault);
-
-            RefreshData(buildingID, buildingWorkTimeDefault);
+            BackToDefault(buildingID);
         }
 
         public void SaveBuildingSettings(UIComponent c, UIMouseEventParameter eventParameter)
@@ -338,6 +338,36 @@ namespace CampusIndustriesHousingMod.UI
             });
         }
 
+        public void DeletePrefabSettings(UIComponent c, UIMouseEventParameter eventParameter) 
+        {
+            ConfirmPanel.ShowModal("Delete Type Settings", "This will remove all the buildings work hours of this type back to default settings in this save!", (comp, ret) =>
+            {
+                if (ret != 1)
+                {
+                    return;
+                }
+
+                ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
+                var buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
+
+                if (HousingManager.PrefabExist(buildingInfo.name, buildingInfo.GetAI().GetType().Name))
+                {
+                    foreach (var item in HousingManager.BuildingRecords)
+                    {
+                        var Info = Singleton<BuildingManager>.instance.m_buildings.m_buffer[item.Key].Info;
+                        if (Info.name == buildingInfo.name && Info.GetAI().GetType().Name == Info.GetAI().GetType().Name && !item.Value.IsLocked)
+                        {
+                            BackToDefault(item.Key);
+                        }
+                    }
+
+                    var prefabRecord = HousingManager.GetPrefab(buildingInfo);
+
+                    HousingManager.RemovePrefab(prefabRecord);
+                }
+            });
+        }
+
         public void SetGlobalSettings(UIComponent c, UIMouseEventParameter eventParameter)
         {
             ConfirmPanel.ShowModal("Set Global Settings", "This will update all building records of this type to the current number of apartments across all saves!", (comp, ret) =>
@@ -363,6 +393,48 @@ namespace CampusIndustriesHousingMod.UI
             });
         }
 
+        public void DeleteGlobalSettings(UIComponent c, UIMouseEventParameter eventParameter)
+        {
+            ConfirmPanel.ShowModal("Delete Global Settings", "This will remove all the buildings work hours of this type back to default settings across all saves!", (comp, ret) =>
+            {
+                if (ret != 1)
+                {
+                    return;
+                }
+
+                ushort buildingID = WorldInfoPanel.GetCurrentInstanceID().Building;
+                var buildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
+
+                if (HousingConfig.Config.GlobalSettingsExist(buildingInfo))
+                {
+                    foreach (var item in HousingManager.BuildingRecords)
+                    {
+                        var Info = Singleton<BuildingManager>.instance.m_buildings.m_buffer[item.Key].Info;
+                        if (Info.name == buildingInfo.name && Info.GetAI().GetType().Name == Info.GetAI().GetType().Name && !item.Value.IsLocked)
+                        {
+                            BackToDefault(item.Key);
+                        }
+                    }
+
+                    var globalRecord = HousingConfig.Config.GetGlobalSettings(buildingInfo);
+
+                    HousingConfig.Config.RemoveGlobalSettings(globalRecord);
+                }
+            });
+        }
+
+        private void BackToDefault(ushort buildingID)
+        {
+            var buildingWorkTimeDefault = HousingManager.CreateDefaultBuildingRecord(buildingID);
+
+            var m_apartmentsNumTextfield = ApartmentNumberPanel.Find<UITextField>("ApartmentNumberTextField");
+
+            m_apartmentsNumTextfield.text = buildingWorkTimeDefault.NumOfApartments.ToString();
+
+            UpdateBuildingSettings.UpdateBuildingToDefaultSettings(buildingID, buildingWorkTimeDefault);
+
+            RefreshData(buildingID, buildingWorkTimeDefault);
+        }
     }
 
 }
