@@ -53,7 +53,7 @@ namespace CampusIndustriesHousingMod.UI
             m_settingsCheckBox.eventCheckChanged += (component, value) =>
             {
                 m_uiMainPanel.isVisible = value;
-                m_uiMainPanel.height = 370f;
+                m_uiMainPanel.height = 400f;
                 HousingConfig.Config.ShowPanel = value;
                 if(!value)
                 {
@@ -129,7 +129,9 @@ namespace CampusIndustriesHousingMod.UI
             ApplyPrefabSettingsBtn.Disable();
             ApplyGlobalSettingsBtn.Disable();
             SetPrefabSettingsBtn.Disable();
+            DeletePrefabSettingsBtn.Disable();
             SetGlobalSettingsBtn.Disable();
+            DeleteGlobalSettingsBtn.Disable();
         }
 
         public void UnlockSettings(UIComponent c, UIMouseEventParameter eventParameter)
@@ -143,11 +145,13 @@ namespace CampusIndustriesHousingMod.UI
             if (HousingManager.PrefabExist(building.Info.name, building.Info.GetAI().GetType().Name))
             {
                 ApplyPrefabSettingsBtn.Enable();
+                DeletePrefabSettingsBtn.Enable();
             }
 
             if (HousingConfig.Config.GetGlobalSettings(building.Info) != null)
             {
                 ApplyGlobalSettingsBtn.Enable();
+                DeleteGlobalSettingsBtn.Enable();
             }
 
             SetPrefabSettingsBtn.Enable();
@@ -221,7 +225,7 @@ namespace CampusIndustriesHousingMod.UI
 
             if (m_settingsCheckBox.isChecked)
             {
-                m_uiMainPanel.height = 350f;
+                m_uiMainPanel.height = 400f;
                 m_uiMainPanel.Show();
             }
 			
