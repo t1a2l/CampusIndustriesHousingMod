@@ -34,6 +34,7 @@ namespace CampusIndustriesHousingMod.Managers
         private const int BuildingStepSize = 192;
         private ushort workerCheckStep;
 
+        private readonly int workerCheckFramesInterval = 60;
         private int workerCheckCounter;
 
         public WorkerManager() 
@@ -88,17 +89,22 @@ namespace CampusIndustriesHousingMod.Managers
                 return;
             }
 
-            if (Interlocked.CompareExchange(ref running, 1, 0) == 1)
+            if (Interlocked.CompareExchange(ref running, 1, 0) != 0)
             {
                 return;
             }
 
-            ushort step = workerCheckStep;
-            workerCheckStep = (ushort)((step + 1) & StepMask);
-
-            RefreshWorkers(step);
-
-            running = 0;
+            try
+            {
+                ushort step = workerCheckStep;
+                workerCheckStep = (ushort)((step + 1) & StepMask);
+                workerCheckCounter = workerCheckFramesInterval;
+                RefreshWorkers(step);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref running, 0);
+            }
         }
 
         private void RefreshWorkers(uint step) 
@@ -112,14 +118,25 @@ namespace CampusIndustriesHousingMod.Managers
             for (ushort i = first; i <= last; ++i)
             {
                 var building = buildingManager.m_buildings.m_buffer[i];
-                if(building.Info == null || (building.Info.GetAI() is not ResidentialBuildingAI && building.Info.GetAI() is not BarracksAI))
-                {
-                    continue;
-                }
+
                 if ((building.m_flags & Building.Flags.Created) == 0)
                 {
                     continue;
                 }
+
+                var info = building.Info;
+                if (info == null)
+                {
+                    continue;
+                }
+
+                var ai = info.GetAI();
+                if (ai is not ResidentialBuildingAI && ai is not BarracksAI)
+                {
+                    continue;
+                }
+
+                Singleton<CitizenManager>.instance.m_units.m_buffer.Length;
 
                 uint num = building.m_citizenUnits;
                 int num2 = 0;
@@ -155,19 +172,19 @@ namespace CampusIndustriesHousingMod.Managers
                             }
                             if (!move_in)
                             {
-                                if (IsMovingOutFarming(family))
+                                if (IsMovingOut(family, DistrictPark.ParkType.Farming))
                                 {
                                     farmingBarracksFamilies.Add(num);
                                 }
-                                else if (IsMovingOutForestry(family))
+                                else if (IsMovingOut(family, DistrictPark.ParkType.Forestry))
                                 {
                                     forestryBarracksFamilies.Add(num);
                                 }
-                                else if (IsMovingOutOil(family))
+                                else if (IsMovingOut(family, DistrictPark.ParkType.Oil))
                                 {
                                     oilBarracksFamilies.Add(num);
                                 }
-                                else if (IsMovingOutOre(family))
+                                else if (IsMovingOut(family, DistrictPark.ParkType.Ore))
                                 {
                                     oreBarracksFamilies.Add(num);
                                 }
@@ -175,7 +192,7 @@ namespace CampusIndustriesHousingMod.Managers
                         }
                     }
                     num = nextUnit;
-                    if (++num2 > 524288)
+                    if (++num2 > Singleton<CitizenManager>.instance.m_units.m_size)
                     {
                         CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
                         break;
@@ -481,17 +498,6 @@ namespace CampusIndustriesHousingMod.Managers
             return false;
         }
 
-        private bool ValidateFamily(uint[] family)
-        {
-            // Validate this family is not already being processed
-            if (familiesBeingProcessed.Contains(family)) 
-            {
-                return false; // being processed 
-            }
-
-            return true; // not being processed
-        }
-
         public bool IsIndustryAreaWorker(uint citizenId)
         {
             if (citizenId == 0) 
@@ -506,10 +512,27 @@ namespace CampusIndustriesHousingMod.Managers
             }
 
             ushort workBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_workBuilding;
+
+            // no work place
+            if (workBuildingId == 0)
+            {
+                return false;
+            }
+
             Building workBuilding = buildingManager.m_buildings.m_buffer[workBuildingId];
 
+            if ((workBuilding.m_flags & Building.Flags.Created) == 0)
+            {
+                return false;
+            }
+
+            if (workBuilding.Info == null)
+            {
+                return false;
+            }
+
             // Validate working in an industrial area building
-            if(workBuilding.Info.m_buildingAI is not IndustryBuildingAI && workBuilding.Info.m_buildingAI is AuxiliaryBuildingAI
+            if (workBuilding.Info.m_buildingAI is not IndustryBuildingAI && workBuilding.Info.m_buildingAI is AuxiliaryBuildingAI
                 && workBuilding.Info.m_buildingAI is not ExtractingFacilityAI && workBuilding.Info.m_buildingAI is not ProcessingFacilityAI
                 && workBuilding.Info.m_buildingAI is not MainIndustryBuildingAI && workBuilding.Info.m_buildingAI is not WarehouseAI)
             {
@@ -532,105 +555,87 @@ namespace CampusIndustriesHousingMod.Managers
             return true;
         }
 
+        private bool ValidateFamily(uint[] family)
+        {
+            if (family.Length == 0)
+            {
+                return false;
+            }
+
+            // Validate this family is not already being processed
+            if (familiesBeingProcessed.Contains(family))
+            {
+                return false; // being processed 
+            }
+
+            return true; // not being processed
+        }
+
         private bool IsMovingIn(uint citizenId)
         {
-            ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
-            ushort workBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_workBuilding;
+            // not an industry area worker
+            if (!IsIndustryAreaWorker(citizenId))
+            {
+                return false;
+            }
 
-            // no home or no work
-            if (homeBuildingId == 0 || workBuildingId == 0) 
+            ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
+
+            // no home move into barracks
+            if (homeBuildingId == 0) 
             {
                 return false;
             }
 
             Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
 
+            if ((homeBuilding.m_flags & Building.Flags.Created) == 0)
+            {
+                return true;
+            }
+
+            if (homeBuilding.Info == null)
+            {
+                return true;
+            }
+
             // if already living in a barracks
-            if(homeBuilding.Info.m_buildingAI is BarracksAI)
+            if (homeBuilding.Info.m_buildingAI is BarracksAI)
             {
                 return false;
             } 
 
-            // not an industry area worker
-            if(!IsIndustryAreaWorker(citizenId))
-            {
-                return false;
-            }
-
             return true;
         }
 
-        private bool IsMovingOutFarming(uint[] citizen_family)
+        private bool IsMovingOut(uint[] citizen_family, DistrictPark.ParkType industryType)
         {
             // if this family is living in the barracks there are up to moveout
-            for (int i = 0; i < citizen_family.Length; i++) 
+            for (int i = 0; i < citizen_family.Length; i++)
             {
                 var citizenId = citizen_family[i];
-                if(citizenId != 0)
+                if (citizenId != 0)
                 {
                     ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
-                    Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-                    if(homeBuilding.Info.m_buildingAI is BarracksAI barracksAI && barracksAI.m_industryType == DistrictPark.ParkType.Farming)
+
+                    if (homeBuildingId == 0)
                     {
-                        return true;
+                        return false;
                     }
-                }
-            }
 
-            return false;
-        }
-
-        private bool IsMovingOutForestry(uint[] citizen_family)
-        {
-            // if this family is living in the barracks there are up to moveout
-            for (int i = 0; i < citizen_family.Length; i++) 
-            {
-                var citizenId = citizen_family[i];
-                if(citizenId != 0)
-                {
-                    ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
                     Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-                    if(homeBuilding.Info.m_buildingAI is BarracksAI barracksAI && barracksAI.m_industryType == DistrictPark.ParkType.Forestry)
+
+                    if ((homeBuilding.m_flags & Building.Flags.Created) == 0)
                     {
-                        return true;
+                        return false;
                     }
-                }
-            }
 
-            return false;
-        }
-
-        private bool IsMovingOutOil(uint[] citizen_family)
-        {
-            // if this family is living in the barracks there are up to moveout
-            for (int i = 0; i < citizen_family.Length; i++) 
-            {
-                var citizenId = citizen_family[i];
-                if(citizenId != 0)
-                {
-                    ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
-                    Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-                    if(homeBuilding.Info.m_buildingAI is BarracksAI barracksAI && barracksAI.m_industryType == DistrictPark.ParkType.Oil)
+                    if (homeBuilding.Info == null)
                     {
-                        return true;
+                        return false;
                     }
-                }
-            }
 
-            return false;
-        }
-
-        private bool IsMovingOutOre(uint[] citizen_family)
-        {
-            // if this family is living in the barracks there are up to moveout
-            for (int i = 0; i < citizen_family.Length; i++) 
-            {
-                var citizenId = citizen_family[i];
-                if(citizenId != 0)
-                {
-                    ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
-                    Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-                    if(homeBuilding.Info.m_buildingAI is BarracksAI barracksAI && barracksAI.m_industryType == DistrictPark.ParkType.Ore)
+                    if (homeBuilding.Info.m_buildingAI is BarracksAI barracksAI && barracksAI.m_industryType == industryType)
                     {
                         return true;
                     }

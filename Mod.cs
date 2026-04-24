@@ -180,7 +180,7 @@ namespace CampusIndustriesHousingMod
 
                 num = num2;
                 num2 = instance.m_units.m_buffer[num2].m_nextUnit;
-                if (++num3 > 524288)
+                if (++num3 > Singleton<CitizenManager>.instance.m_units.m_size)
                 {
                     CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
                     break;

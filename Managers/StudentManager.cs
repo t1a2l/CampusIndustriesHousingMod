@@ -33,6 +33,7 @@ namespace CampusIndustriesHousingMod.Managers
         private const int BuildingStepSize = 192;
         private ushort studentCheckStep;
 
+        private readonly int studentCheckFramesInterval = 60;
         private int studentCheckCounter;
 
         public StudentManager() 
@@ -84,17 +85,22 @@ namespace CampusIndustriesHousingMod.Managers
                 return;
             }
 
-            if (Interlocked.CompareExchange(ref running, 1, 0) == 1)
+            if (Interlocked.CompareExchange(ref running, 1, 0) != 0)
             {
                 return;
             }
 
-            ushort step = studentCheckStep;
-            studentCheckStep = (ushort)((step + 1) & StepMask);
-
-            RefreshStudents(step);
-
-            running = 0;
+            try
+            {
+                ushort step = studentCheckStep;
+                studentCheckStep = (ushort)((step + 1) & StepMask);
+                studentCheckCounter = studentCheckFramesInterval;
+                RefreshStudents(step);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref running, 0);
+            }
         }
 
         private void RefreshStudents(uint step) 
@@ -106,11 +112,20 @@ namespace CampusIndustriesHousingMod.Managers
             for (ushort i = first; i <= last; ++i)
             {
                 var building = buildingManager.m_buildings.m_buffer[i];
-                if (building.Info == null || (building.Info.GetAI() is not ResidentialBuildingAI && building.Info.GetAI() is not DormsAI))
+
+                if ((building.m_flags & Building.Flags.Created) == 0)
                 {
                     continue;
                 }
-                if ((building.m_flags & Building.Flags.Created) == 0)
+
+                var info = building.Info;
+                if (info == null)
+                {
+                    continue;
+                }
+
+                var ai = info.GetAI();
+                if (ai is not ResidentialBuildingAI && ai is not DormsAI)
                 {
                     continue;
                 }
@@ -134,17 +149,17 @@ namespace CampusIndustriesHousingMod.Managers
                                     familiesWithStudents.Add(num);
                                     break;
                                 }
-                                else if (IsMovingOutUniversity(citizenId))
+                                else if (IsMovingOut(citizenId, DistrictPark.ParkType.University))
                                 {
                                     studentsMovingOutUniversity.Add(num);
                                     break;
                                 }
-                                else if (IsMovingOutLiberalArts(citizenId))
+                                else if (IsMovingOut(citizenId, DistrictPark.ParkType.LiberalArts))
                                 {
                                     studentsMovingOutLiberalArts.Add(num);
                                     break;
                                 }
-                                else if (IsMovingOutTradeSchool(citizenId))
+                                else if (IsMovingOut(citizenId, DistrictPark.ParkType.TradeSchool))
                                 {
                                     studentsMovingOutTradeSchool.Add(num);
                                     break;
@@ -153,7 +168,7 @@ namespace CampusIndustriesHousingMod.Managers
                         }
                     }
                     num = nextUnit;
-                    if (++num2 > 524288)
+                    if (++num2 > Singleton<CitizenManager>.instance.m_units.m_size)
                     {
                         CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
                         break;
@@ -413,17 +428,6 @@ namespace CampusIndustriesHousingMod.Managers
             return false;
         }
 
-        private bool ValidateStudent(uint studentId) 
-        {
-            // Validate this Student is not already being processed
-            if (studentsBeingProcessed.Contains(studentId)) 
-            {
-                return false; // being processed 
-            }
-
-            return true; // not being processed
-        }
-
         public bool IsCampusAreaStudent(uint citizenId)
         {
             if (citizenId == 0) 
@@ -437,84 +441,121 @@ namespace CampusIndustriesHousingMod.Managers
                 return false;
             }
 
+            // Validate is a student
+            if ((citizenManager.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Student) == 0)
+            {
+                return false;
+            }
+
             ushort studyBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_workBuilding;
+
+            if(studyBuildingId == 0) 
+            {
+                return false;
+            }
+
             Building studyBuilding = buildingManager.m_buildings.m_buffer[studyBuildingId];
 
+            if ((studyBuilding.m_flags & Building.Flags.Created) == 0)
+            {
+                return false;
+            }
+
+            if (studyBuilding.Info == null)
+            {
+                return false;
+            }
+
             // Validate studying in a campus area
-            if(studyBuilding.Info.m_buildingAI is not CampusBuildingAI && studyBuilding.Info.m_buildingAI is not MainCampusBuildingAI)
+            if (studyBuilding.Info.m_buildingAI is not CampusBuildingAI && studyBuilding.Info.m_buildingAI is not MainCampusBuildingAI)
             {
                  return false;
             }
 
-             // Validate is a student
-            if ((citizenManager.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Student) == 0) 
+            return true;
+        }
+
+        private bool ValidateStudent(uint studentId)
+        {
+            if (studentId == 0)
             {
                 return false;
             }
 
-            return true;
+            // Validate this Student is not already being processed
+            if (studentsBeingProcessed.Contains(studentId))
+            {
+                return false; // being processed 
+            }
+
+            return true; // not being processed
         }
 
         private bool IsMovingIn(uint citizenId)
         {
-            ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
-            ushort studyBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_workBuilding;
-
-            // no home or no study
-            if (homeBuildingId == 0 || studyBuildingId == 0) 
+            // not studying in a campus area
+            if (!IsCampusAreaStudent(citizenId))
             {
                 return false;
             }
 
+            ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
+
+            // no home move into dorms
+            if (homeBuildingId == 0) 
+            {
+                return true;
+            }
+
             Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
 
+            if ((homeBuilding.m_flags & Building.Flags.Created) == 0)
+            {
+                return true;
+            }
+
+            if (homeBuilding.Info == null)
+            {
+                return true;
+            }
+
             // if already living in a dorm
-            if(homeBuilding.Info.m_buildingAI is DormsAI)
+            if (homeBuilding.Info.m_buildingAI is DormsAI)
             {
                 return false;
             } 
 
-            // not studying in a campus area
-            if(!IsCampusAreaStudent(citizenId))
+            return true;
+        }
+
+        private bool IsMovingOut(uint citizenId, DistrictPark.ParkType campusType)
+        {
+            if (!IsCampusAreaStudent(citizenId))
             {
                 return false;
             }
 
-            return true;
-        }
-
-        private bool IsMovingOutUniversity(uint citizenId)
-        {
-            // if this student is living in the dorms we should check the entire apartment
+            // if this child is living in an orphanage we should check the entire room
             ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
-            Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-            if(homeBuilding.Info.m_buildingAI is DormsAI dormsAI && dormsAI.m_campusType == DistrictPark.ParkType.University)
+
+            if (homeBuildingId == 0)
             {
-                return true;
+                return false;
             }
 
-            return false;
-        }
-
-        private bool IsMovingOutLiberalArts(uint citizenId)
-        {
-            // if this student is living in the dorms we should check the entire apartment
-            ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
             Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-            if(homeBuilding.Info.m_buildingAI is DormsAI dormsAI && dormsAI.m_campusType == DistrictPark.ParkType.LiberalArts)
+
+            if ((homeBuilding.m_flags & Building.Flags.Created) == 0)
             {
-                return true;
+                return false;
             }
 
-            return false;
-        }
+            if (homeBuilding.Info == null)
+            {
+                return false;
+            }
 
-        private bool IsMovingOutTradeSchool(uint citizenId)
-        {
-            // if this student is living in the dorms we should check the entire apartment
-            ushort homeBuildingId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
-            Building homeBuilding = buildingManager.m_buildings.m_buffer[homeBuildingId];
-            if(homeBuilding.Info.m_buildingAI is DormsAI dormsAI && dormsAI.m_campusType == DistrictPark.ParkType.TradeSchool)
+            if (homeBuilding.Info.m_buildingAI is DormsAI dormsAI && dormsAI.m_campusType == campusType)
             {
                 return true;
             }
