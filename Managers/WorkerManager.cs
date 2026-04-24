@@ -136,8 +136,6 @@ namespace CampusIndustriesHousingMod.Managers
                     continue;
                 }
 
-                Singleton<CitizenManager>.instance.m_units.m_buffer.Length;
-
                 uint num = building.m_citizenUnits;
                 int num2 = 0;
                 while (num != 0)
